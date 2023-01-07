@@ -19,7 +19,7 @@ class Create:
             choices=["Beginner", "Intermediate", "Advanced"],
             default="Beginner",
         )
-        self.lab_time = Prompt.ask("Enter Lab Time", default="5 minutes")
+        self.lab_time = Prompt.ask("Enter Lab Time (minutes)", default="5")
         self.lab_steps = int(Prompt.ask("Enter Number of Steps", default="3"))
         self.lab_image_id = Prompt.ask(
             "Select Image ID",
@@ -88,7 +88,7 @@ class Create:
             "title": self.lab_title,
             "description": "",
             "difficulty": self.lab_diff,
-            "time": self.lab_time,
+            "time": int(self.lab_time),
             "details": {
                 "steps": [],
                 "intro": {"text": "intro.md", "background": "setup.sh"},
