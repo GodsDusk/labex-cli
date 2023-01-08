@@ -2,6 +2,7 @@ import os
 import json
 from rich.prompt import Prompt
 from rich import print
+from .utils.titlecase import titlecase
 
 
 class Create:
@@ -12,7 +13,7 @@ class Create:
         self.lab_type = Prompt.ask(
             "Select Lab Type", choices=["lab", "challenge"], default="lab"
         )
-        self.lab_title = Prompt.ask("Enter Lab Title (e.g. Hello World)").title()
+        self.lab_title = titlecase(Prompt.ask("Enter Lab Title (e.g. Hello World)"))
         self.lab_slug = f'{self.lab_type}-{self.lab_title.lower().replace(" ", "-")}'
         self.lab_diff = Prompt.ask(
             "Select Lab Difficulty",
