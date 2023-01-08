@@ -1,7 +1,6 @@
-import os
 import click
-from rich import markdown, print
 from .commands.create import Create
+from .commands.update import Update
 
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -20,6 +19,27 @@ def create():
 
 
 cli.add_command(create)
+
+# Update Group
+@click.group(context_settings=CONTEXT_SETTINGS)
+def update():
+    """Update lab or challenge metadata
+    """
+    pass
+
+
+cli.add_command(update)
+
+
+@click.command()
+def title():
+    """Update lab title from md files
+    - excute from lab directory
+    """
+    Update().title("./")
+
+
+update.add_command(title)
 
 
 if __name__ == "__main__":
