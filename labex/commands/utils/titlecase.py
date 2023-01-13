@@ -4,7 +4,7 @@
 import re
 
 
-DO_NOT_TITLE = [
+LOWER_TITLE = [
     "a",
     "an",
     "and",
@@ -30,11 +30,18 @@ DO_NOT_TITLE = [
     "with",
 ]
 
+DO_NOT_TITLE = [
+    "JSON",
+    "GitHub",
+]
+
 
 def title_word(chunk):
     """Title-case a given word (or do noting to a non-word chunk)."""
-    if chunk.lower() in DO_NOT_TITLE:
+    if chunk.lower() in LOWER_TITLE:
         return chunk.lower()
+    if chunk in DO_NOT_TITLE:
+        return chunk
     return chunk[0].upper() + chunk[1:].lower()
 
 
