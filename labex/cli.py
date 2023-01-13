@@ -1,6 +1,7 @@
 import click
 from .commands.create import Create
 from .commands.update import Update
+from .commands.utils.version import CheckUpdate
 
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -8,7 +9,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
-    pass
+    CheckUpdate.check_version()
 
 
 @click.command()
