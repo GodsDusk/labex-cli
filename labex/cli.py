@@ -9,13 +9,14 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
-    CheckUpdate.check_version()
+    pass
 
 
 @click.command()
 def create():
     """Create a new lab or challenge
     """
+    CheckUpdate().check_version()
     Create().init_base()
 
 
