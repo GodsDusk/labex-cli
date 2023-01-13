@@ -21,11 +21,19 @@ class Update:
             step_files = [f for f in files if "step" in f and ".md" in f]
             for step_file in sorted(step_files):
                 with open(os.path.join(root, step_file), "r") as f:
-                    first_line = f.readline()
-                    if first_line.startswith("#"):
-                        # remove # and replace ` with ', convert to title case
-                        title = titlecase(first_line[2:].strip().replace("`", ""))
-                        md_step_titles.append(title)
+                    lines = f.readlines()
+                first_line = lines[0]
+                if first_line.startswith("#"):
+                    # remove # and replace ` with ', convert to title case
+                    title = titlecase(first_line[2:].strip().replace("`", ""))
+                    md_step_titles.append(title)
+                    # Update title in md file
+                    lines[0] = f"# {title}\n"
+                    with open(os.path.join(root, step_file), "w") as f:
+                        f.writelines(lines)
+                        print(
+                            f"{step_file}: [blue]{first_line[:-1]}[/blue] -> [green]{lines[0][:-1]}[/green]"
+                        )
         # get steps from index.json
         with open(os.path.join(path, "index.json"), "r") as f:
             index_cofig = json.load(f)
@@ -35,14 +43,8 @@ class Update:
                 print("Error: md step titles and index.json steps do not match")
                 return
             else:
-                # print index steps titles and md step titles
-                for in_step_title, md_step_title in zip(in_step_titles, md_step_titles):
-                    print(
-                        f"[blue]{in_step_title}[/blue] -> [green]{md_step_title}[/green]"
-                    )
-                if click.confirm("Update index.json steps titles?"):
-                    for i, step in enumerate(steps_cofig):
-                        step["title"] = md_step_titles[i]
+                for i, step in enumerate(steps_cofig):
+                    step["title"] = md_step_titles[i]
         # write to index.json
         with open(os.path.join(path, "index.json"), "w") as f:
             json.dump(index_cofig, f, indent=2)
