@@ -57,7 +57,11 @@ cli.add_command(check)
 
 @click.command()
 @click.option(
-    "--schema", type=str, required=True, help="schema file path", metavar="<path>",
+    "--schema",
+    type=str,
+    default="schema.json",
+    help="schema file path",
+    metavar="<path>",
 )
 @click.option(
     "--instance", type=str, help="index.json file path", metavar="<path>",

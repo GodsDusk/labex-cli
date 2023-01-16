@@ -4,6 +4,7 @@ from pathlib import Path
 from rich import print
 from jsonschema import validate
 import jsonschema
+import urllib.request
 
 sys.tracebacklimit = 0
 
@@ -12,11 +13,24 @@ class Check:
     def __init__(self) -> None:
         pass
 
+    def __download_schema(self) -> None:
+        # Download schema from github
+        print("[bold yellow]⚠️ Schema file not found, downloading it from LabEx...[/bold yellow]")
+        urllib.request.urlretrieve(
+            "https://cdn.jsdelivr.net/gh/labex-labs/common-scripts/schema.json",
+            "schema.json",
+        )
+
     def validate_json(self, schema_file: str, json_file: str) -> None:
-        print(f"schema file: {schema_file}")
         print(f"instance file: {json_file}")
-        with open(schema_file, "r") as s:
-            schema = json.load(s)
+        print(f"schema file: {schema_file}")
+        try:
+            with open(schema_file, "r") as s:
+                schema = json.load(s)
+        except FileNotFoundError:
+            self.__download_schema()
+            with open("./schema.json", "r") as s:
+                schema = json.load(s)
         with open(json_file, "r") as j:
             instance = json.load(j)
         try:
