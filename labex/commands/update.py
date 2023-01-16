@@ -18,8 +18,14 @@ class Update:
         # get step title from steps md files
         md_step_titles = []
         for root, dirs, files in os.walk(path):
-            step_files = [f for f in files if "step" in f and ".md" in f]
-            for step_file in sorted(step_files):
+            step_files = [
+                {"name": f, "step": int(f[4:-3])}
+                for f in files
+                if "step" in f and ".md" in f
+            ]
+            step_files_sorted = sorted(step_files, key=lambda d: d["step"])
+            for step_file_ in step_files_sorted:
+                step_file = step_file_["name"]
                 with open(os.path.join(root, step_file), "r") as f:
                     lines = f.readlines()
                 first_line = lines[0]
