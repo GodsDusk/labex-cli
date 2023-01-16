@@ -59,7 +59,7 @@ class Create:
         }
         # create step file
         step_file = open(f"{self.lab_slug}/step{step_index}.md", "w")
-        step_file.write(f"# Step {step_index} Title")
+        step_file.write(f"# Step {step_index} Title\n")
         # create verify file
         verify_file = open(f"{self.lab_slug}/verify{step_index}.sh", "w")
         verify_file.write("#!/bin/zsh")
