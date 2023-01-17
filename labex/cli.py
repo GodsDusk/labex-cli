@@ -2,6 +2,7 @@ import click
 from .commands.create import Create
 from .commands.update import Update
 from .commands.check import Check
+from .commands.export import Export
 from .commands.utils.version import CheckUpdate
 
 
@@ -79,6 +80,26 @@ def json(schema, instance):
 
 
 check.add_command(json)
+
+# Export Group
+@click.group(context_settings=CONTEXT_SETTINGS)
+def export():
+    """Export lab or challenge metadata
+    """
+    pass
+
+
+cli.add_command(export)
+
+
+@click.command()
+def skill():
+    """Export lab skills to csv
+    """
+    Export().export_skills()
+
+
+export.add_command(skill)
 
 
 if __name__ == "__main__":
