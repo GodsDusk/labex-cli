@@ -78,9 +78,9 @@ class Create:
         self.check_if_exists()
         # create basic files
         intro_file = open(f"{self.lab_slug}/intro.md", "w")
-        intro_file.write(f"# {self.lab_title}\n\n## Skills\n\n- ")
+        intro_file.write(f"# {self.lab_title}\n")
         finish_file = open(f"{self.lab_slug}/finish.md", "w")
-        finish_file.write(f"# Summary")
+        finish_file.write(f"# Summary\n")
         setup_file = open(f"{self.lab_slug}/setup.sh", "w")
         setup_file.write("#!/bin/zsh")
         # base index.json config template

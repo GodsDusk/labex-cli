@@ -33,6 +33,7 @@ LOWER_TITLE = [
 DO_NOT_TITLE = [
     "JSON",
     "GitHub",
+    "IPython"
 ]
 
 
