@@ -6,8 +6,7 @@ from .utils.titlecase import titlecase
 
 
 class Create:
-    """Create a new lab or challenge
-    """
+    """Create a new lab or challenge"""
 
     def __init__(self) -> None:
         self.lab_type = Prompt.ask(
@@ -94,6 +93,7 @@ class Create:
                 "steps": [],
                 "intro": {"text": "intro.md", "background": "setup.sh"},
                 "finish": {"text": "finish.md"},
+                "assets": {"host01": [{"file": "", "target": "/tmp"}]},
             },
             "backend": {"imageid": self.lab_image_id},
         }
