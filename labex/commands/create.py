@@ -93,16 +93,12 @@ class Create:
                 "steps": [],
                 "intro": {"text": "intro.md", "background": "setup.sh"},
                 "finish": {"text": "finish.md"},
-                "assets": {"host01": [{"file": "", "target": "/tmp"}]},
             },
             "backend": {"imageid": self.lab_image_id},
         }
         # add steps config
         for step_index in range(1, self.lab_steps + 1):
             base_config["details"]["steps"].append(self.init_step(step_index))
-        # write index.json
-        base_file = open(f"{self.lab_slug}/index.json", "w")
-        base_file.write(json.dumps(base_config, indent=4))
         # if a challenge, create solution file
         if self.lab_type == "challenge":
             solution_folder = f"{self.lab_slug}/solution"
@@ -113,3 +109,9 @@ class Create:
         if self.if_assets == "yes":
             assets_folder = f"{self.lab_slug}/assets"
             os.mkdir(assets_folder)
+            base_config["details"]["assets"] = {
+                "host01": [{"file": "", "target": "/tmp"}]
+            }
+        # write index.json
+        base_file = open(f"{self.lab_slug}/index.json", "w")
+        base_file.write(json.dumps(base_config, indent=4))
