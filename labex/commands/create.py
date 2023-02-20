@@ -23,8 +23,8 @@ class Create:
         self.lab_steps = int(Prompt.ask("Enter Number of Steps", default="3"))
         self.lab_image_id = Prompt.ask(
             "Select Image ID",
-            choices=["vnc-ubuntu:2004", "webide-ubuntu:2004"],
-            default="vnc-ubuntu:2004",
+            choices=["vnc-ubuntu:2204", "webide-ubuntu:2204"],
+            default="vnc-ubuntu:2204",
         )
         self.if_assets = Prompt.ask(
             "Does it contain pictures or other attachments?",
