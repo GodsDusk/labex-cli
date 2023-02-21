@@ -66,7 +66,7 @@ class Create:
 
     def check_if_exists(self):
         if os.path.exists(self.lab_slug):
-            print("[red]✕[/red] Lab Title already exists, please choose another one.")
+            print("[red]Lab Title already exists, please choose another one.[/red]")
             exit(1)
         else:
             os.mkdir(self.lab_slug)
