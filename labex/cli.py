@@ -16,8 +16,7 @@ def cli():
 
 @click.command()
 def create():
-    """Create a new lab or challenge
-    """
+    """Create a new lab or challenge"""
     CheckUpdate().check_version()
     Create().init_base()
 
@@ -27,8 +26,7 @@ cli.add_command(create)
 # Update Group
 @click.group(context_settings=CONTEXT_SETTINGS)
 def update():
-    """Update lab or challenge metadata
-    """
+    """Update lab or challenge metadata"""
     pass
 
 
@@ -48,8 +46,7 @@ update.add_command(title)
 # Check Group
 @click.group(context_settings=CONTEXT_SETTINGS)
 def check():
-    """Check lab or challenge metadata
-    """
+    """Check lab or challenge metadata"""
     pass
 
 
@@ -65,7 +62,10 @@ cli.add_command(check)
     metavar="<path>",
 )
 @click.option(
-    "--instance", type=str, help="index.json file path", metavar="<path>",
+    "--instance",
+    type=str,
+    help="index.json file path",
+    metavar="<path>",
 )
 def json(schema, instance):
     """Check index.json based on schema.json
@@ -84,8 +84,7 @@ check.add_command(json)
 # Export Group
 @click.group(context_settings=CONTEXT_SETTINGS)
 def export():
-    """Export lab or challenge metadata
-    """
+    """Export lab or challenge metadata"""
     pass
 
 
@@ -93,10 +92,19 @@ cli.add_command(export)
 
 
 @click.command()
-def skill():
-    """Export lab skills to csv
-    """
-    Export().export_skills()
+@click.option(
+    "--appid",
+    type=str,
+    help="Feishu App ID",
+)
+@click.option(
+    "--appsecret",
+    type=str,
+    help="Feishu App Secret",
+)
+def skill(appid, appsecret):
+    """Export lab skills to csv"""
+    Export(app_id=appid, app_secret=appsecret).export_skills()
 
 
 export.add_command(skill)
