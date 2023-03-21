@@ -106,7 +106,7 @@ class Create:
             base_config["details"]["steps"].append(self.init_step(step_index))
         # if a challenge, create solution file
         if self.lab_type == "challenge":
-            solution_folder = f"{self.lab_slug}/solution"
+            solution_folder = f"{self.lab_slug}/solutions"
             os.mkdir(solution_folder)
             solution_file = open(f"{solution_folder}/solution.md", "w")
             solution_file.write(f"# Solution")
