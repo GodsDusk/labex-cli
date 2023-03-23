@@ -37,7 +37,7 @@ class Create:
             default="yes",
         )
 
-    def init_step(self, step_index: int):
+    def init_step(self, step_index: int, lab_type: str):
         """Initialize a step
 
         Args:
@@ -46,27 +46,59 @@ class Create:
         Returns:
             _type_: step config
         """
-        # step index.json config template
-        step_config = {
-            "title": "Please replace this text with the title of the step",
-            "text": f"step{step_index}.md",
-            "verify": [
-                {
-                    "name": "Please replace this text with the target of the verify script",
-                    "file": f"verify{step_index}.sh",
-                    "hint": "Please replace this text with the hint of the verify script",
-                    "timeout": 0,
-                    "showstderr": False,
-                }
-            ],
-            "skills": ["Please copy the skill ID from the official skill tree"],
-        }
-        # create step file
-        step_file = open(f"{self.lab_slug}/step{step_index}.md", "w")
-        step_file.write(f"# Step {step_index} Title\n")
-        # create verify file
-        verify_file = open(f"{self.lab_slug}/verify{step_index}.sh", "w")
-        verify_file.write("#!/bin/zsh")
+        if lab_type == "lab":
+            # step index.json config template
+            step_config = {
+                "title": "Please replace this text with the title of the step",
+                "text": f"step{step_index}.md",
+                "verify": [
+                    {
+                        "name": "Please replace this text with the target of the verify script",
+                        "file": f"verify{step_index}.sh",
+                        "hint": "Please replace this text with the hint of the verify script",
+                        "timeout": 0,
+                        "showstderr": False,
+                    }
+                ],
+                "skills": ["Please copy the skill ID from the official skill tree"],
+            }
+            # create step file
+            step_file = open(f"{self.lab_slug}/step{step_index}.md", "w")
+            step_file.write(f"# Step {step_index} Title\n")
+            # create verify file
+            verify_file = open(f"{self.lab_slug}/verify{step_index}.sh", "w")
+            verify_file.write("#!/bin/zsh")
+        else:
+            # step index.json config template
+            step_config = {
+                "title": "Please replace this text with the title of the step",
+                "text": f"step{step_index}.md",
+                "verify": [
+                    {
+                        "name": "Please replace this text with the target of the verify script",
+                        "file": f"verify{step_index}.sh",
+                        "hint": "Please replace this text with the hint of the verify script",
+                        "timeout": 0,
+                        "showstderr": False,
+                    }
+                ],
+                "skills": ["Please copy the skill ID from the official skill tree"],
+                "solutions": [f"step{step_index}-solution.md"],
+            }
+            # create step file
+            step_file = open(f"{self.lab_slug}/step{step_index}.md", "w")
+            step_file.write(f"# Step {step_index} Title\n")
+            # create verify file
+            verify_file = open(f"{self.lab_slug}/verify{step_index}.sh", "w")
+            verify_file.write("#!/bin/zsh")
+            # create solution file
+            solution_folder = f"{self.lab_slug}/solutions"
+            if not os.path.exists(solution_folder):
+                os.mkdir(solution_folder)
+            solution_file = open(
+                f"{self.lab_slug}/solutions/step{step_index}-solution.md", "w"
+            )
+            solution_file.write(f"# Solution\n")
         return step_config
 
     def check_if_exists(self):
@@ -103,13 +135,9 @@ class Create:
         }
         # add steps config
         for step_index in range(1, self.lab_steps + 1):
-            base_config["details"]["steps"].append(self.init_step(step_index))
-        # if a challenge, create solution file
-        if self.lab_type == "challenge":
-            solution_folder = f"{self.lab_slug}/solutions"
-            os.mkdir(solution_folder)
-            solution_file = open(f"{solution_folder}/solution.md", "w")
-            solution_file.write(f"# Solution")
+            base_config["details"]["steps"].append(
+                self.init_step(step_index, self.lab_type)
+            )
         # if assets, create assets folder
         if self.if_assets == "yes":
             assets_folder = f"{self.lab_slug}/assets"
