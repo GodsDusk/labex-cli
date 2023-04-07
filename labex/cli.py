@@ -4,6 +4,7 @@ from .commands.update import Update
 from .commands.check import Check
 from .commands.export import Export
 from .commands.utils.version import CheckUpdate
+from .commands.course import Course
 
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -108,6 +109,44 @@ def skill(appid, appsecret):
 
 
 export.add_command(skill)
+
+
+# Course Group
+@click.group(context_settings=CONTEXT_SETTINGS)
+def course():
+    """Combination Course"""
+    pass
+
+
+cli.add_command(course)
+
+
+@click.command()
+@click.option(
+    "--appid",
+    type=str,
+    help="Feishu App ID",
+)
+@click.option(
+    "--appsecret",
+    type=str,
+    help="Feishu App Secret",
+)
+@click.option(
+    "--skills",
+    type=str,
+    help="skills split by comma",
+)
+def export(appid, appsecret, skills):
+    """Export course to csv"""
+    if skills is not None:
+        skills = skills.split(",")
+        Course(app_id=appid, app_secret=appsecret).export_to_csv(skills)
+    else:
+        print("Please input skills, split by comma.")
+
+
+course.add_command(export)
 
 
 if __name__ == "__main__":
