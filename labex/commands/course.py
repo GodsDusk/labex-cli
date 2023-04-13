@@ -143,5 +143,19 @@ class Course:
                     for r in records:
                         if sg in r["fields"]["SKILLS_GROUP_LIST"]:
                             sg_labs.append(r["fields"])
-                    pd.DataFrame(sg_labs).to_excel(writer, sheet_name=sg[:31])
+                    df = pd.DataFrame(sg_labs)
+                    df = df[
+                        [
+                            "PATH",
+                            "TYPE",
+                            "TITLE",
+                            "DIRECTION",
+                            "SKILLS_NUM",
+                            "DIFFICULTY",
+                            "BACKEND",
+                            "SKILLS_GROUP_LIST",
+                            "SKILLS_ID",
+                        ]
+                    ]
+                    df.to_excel(writer, sheet_name=sg[:31])
             print(f"已经生成 {d}_Labs.xlsx")
