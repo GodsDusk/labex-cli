@@ -10,7 +10,7 @@ class Course:
         self.app_token = "bascnNz4Nqjqgqm1Nm5AYke6xxb"
         self.table_id = "tblW2umsCYJWzzUX"
 
-    def lab_skills_weight(self) -> None:
+    def _lab_skills_weight(self) -> None:
         """计算 lab 的 skills 权重
 
         Returns:
@@ -86,8 +86,8 @@ class Course:
         print(f"已经计算出 {len(lab_skills_dict)} 个 labs 的 skills 权重")
         return lab_skills_dict
 
-    def export_to_csv(self, skills: list) -> None:
-        lab_skills_dict = self.lab_skills_weight()
+    def export_to_csv_by_skills(self, skills: list) -> None:
+        lab_skills_dict = self._lab_skills_weight()
         course_labs = []
         for s in skills:
             for r_name, r in lab_skills_dict.items():
@@ -110,3 +110,38 @@ class Course:
         # 生成 course_labs 的 csv
         course_labs_df.to_csv("course_labs.csv", index=False)
         print("已经生成 course_labs.csv")
+
+    def export_to_excel_by_skills_group(self) -> None:
+        # Get all labs from feishu
+        records = self.feishu.get_bitable_records(
+            self.app_token, self.table_id, params=""
+        )
+        # 处理 Skills Group
+        skills_group = {}
+        for r in records:
+            sg_str = r["fields"]["SKILLS_GROUP_LIST"][0]["text"]
+            sg_list = sg_str.strip("[").strip("]").split(",")
+            r["fields"]["SKILLS_GROUP_LIST"] = sg_list
+            for sg in sg_list:
+                skills_group[sg] = r["fields"]["DIRECTION"]
+        del skills_group["null"]
+        print(skills_group)
+        print(f"已经获取到 {len(skills_group)} 个 skills group")
+        # 将 skills_group 的键值对调
+        new_skills_group = {}
+        for k, v in skills_group.items():
+            new_skills_group[v] = []
+        for k, v in skills_group.items():
+            new_skills_group[v].append(k)
+        print(new_skills_group)
+
+        # 从每个 DIRECTION 的 SKILLS_GROUP 生成 Excel
+        for d, sg_list in new_skills_group.items():
+            with pd.ExcelWriter(f"{d}_Labs.xlsx") as writer:
+                for sg in sg_list:
+                    sg_labs = []
+                    for r in records:
+                        if sg in r["fields"]["SKILLS_GROUP_LIST"]:
+                            sg_labs.append(r["fields"])
+                    pd.DataFrame(sg_labs).to_excel(writer, sheet_name=sg[:31])
+            print(f"已经生成 {d}_Labs.xlsx")

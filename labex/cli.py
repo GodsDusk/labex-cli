@@ -139,11 +139,12 @@ cli.add_command(course)
 )
 def export(appid, appsecret, skills):
     """Export course to csv"""
+    course = Course(app_id=appid, app_secret=appsecret)
     if skills is not None:
         skills = skills.split(",")
-        Course(app_id=appid, app_secret=appsecret).export_to_csv(skills)
+        course.export_to_csv_by_skills(skills)
     else:
-        print("Please input skills, split by comma.")
+        course.export_to_excel_by_skills_group()
 
 
 course.add_command(export)
