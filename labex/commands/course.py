@@ -111,7 +111,12 @@ class Course:
         course_labs_df.to_csv("course_labs.csv", index=False)
         print("已经生成 course_labs.csv")
 
-    def export_to_excel_by_skills_group(self) -> None:
+    def export_to_excel_by_skills_group(self, min: int) -> None:
+        """_summary_
+
+        Args:
+            min (int): The number of labs for the smallest course.
+        """
         # Get all labs from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
@@ -124,8 +129,6 @@ class Course:
             r["fields"]["SKILLS_GROUP_LIST"] = sg_list
             for sg in sg_list:
                 skills_group[sg] = r["fields"]["DIRECTION"]
-        del skills_group["null"]
-        print(skills_group)
         print(f"已经获取到 {len(skills_group)} 个 skills group")
         # 将 skills_group 的键值对调
         new_skills_group = {}
@@ -133,29 +136,50 @@ class Course:
             new_skills_group[v] = []
         for k, v in skills_group.items():
             new_skills_group[v].append(k)
-        print(new_skills_group)
-
         # 从每个 DIRECTION 的 SKILLS_GROUP 生成 Excel
         for d, sg_list in new_skills_group.items():
-            with pd.ExcelWriter(f"{d}_Labs.xlsx") as writer:
+            with pd.ExcelWriter(f"{d}_labs.xlsx") as writer:
                 for sg in sg_list:
                     sg_labs = []
                     for r in records:
                         if sg in r["fields"]["SKILLS_GROUP_LIST"]:
                             sg_labs.append(r["fields"])
-                    df = pd.DataFrame(sg_labs)
-                    df = df[
-                        [
-                            "PATH",
-                            "TYPE",
-                            "TITLE",
-                            "DIRECTION",
-                            "SKILLS_NUM",
-                            "DIFFICULTY",
-                            "BACKEND",
-                            "SKILLS_GROUP_LIST",
-                            "SKILLS_ID",
+                    # 对 sg_labs 进行处理
+                    for lab in sg_labs:
+                        lab["INDEX"] = float(lab.get("INDEX", 0))
+                        lab["path"] = f"{lab['REPO_NAME']}:{lab['PATH']}"
+                    # labs 按 INDEX 排序
+                    sg_labs_sorted = sorted(sg_labs, key=lambda k: k.get("INDEX", 0))
+                    json_saved = []
+                    lab_index = 1
+                    for lab in sg_labs_sorted:
+                        lab["index"] = lab_index
+                        json_saved.append(
+                            {
+                                "path": lab["path"],
+                                "is_finished": True,
+                                "index": lab_index,
+                            }
+                        )
+                        lab_index += 1
+                    # 生成 sg_labs 的 dataframe 保存为 Excel
+                    if len(sg_labs_sorted) > min:
+                        df = pd.DataFrame(sg_labs_sorted)
+                        df = df[
+                            [
+                                "index",
+                                "path",
+                                "TYPE",
+                                "TITLE",
+                                "DIRECTION",
+                                "SKILLS_NUM",
+                                "DIFFICULTY",
+                                "BACKEND",
+                                "SKILLS_GROUP_LIST",
+                                "SKILLS_ID",
+                            ]
                         ]
-                    ]
-                    df.to_excel(writer, sheet_name=sg[:31])
-            print(f"已经生成 {d}_Labs.xlsx")
+                        df.to_excel(writer, sheet_name=sg[:31], index=False)
+                    # 保存 JSON 配置方便导入
+                    with open(f"{sg}.json", "w") as f:
+                        json.dump(json_saved, f, indent=4)

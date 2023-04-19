@@ -137,14 +137,20 @@ cli.add_command(course)
     type=str,
     help="skills split by comma",
 )
-def export(appid, appsecret, skills):
+@click.option(
+    "--min",
+    type=int,
+    default=0,
+    help="The number of labs for the smallest course.",
+)
+def export(appid, appsecret, skills, min):
     """Export course to csv"""
     course = Course(app_id=appid, app_secret=appsecret)
     if skills is not None:
         skills = skills.split(",")
         course.export_to_csv_by_skills(skills)
     else:
-        course.export_to_excel_by_skills_group()
+        course.export_to_excel_by_skills_group(min)
 
 
 course.add_command(export)
