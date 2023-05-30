@@ -148,6 +148,7 @@ class Course:
                     for lab in sg_labs:
                         lab["INDEX"] = float(lab.get("INDEX", 0))
                         lab["path"] = f"{lab['REPO_NAME']}:{lab['PATH']}"
+                        lab["is_finished"] = True
                     # labs 按 INDEX 排序
                     sg_labs_sorted = sorted(sg_labs, key=lambda k: k.get("INDEX", 0))
                     json_saved = []
@@ -169,6 +170,7 @@ class Course:
                             [
                                 "index",
                                 "path",
+                                "is_finished",
                                 "TYPE",
                                 "TITLE",
                                 "DIRECTION",

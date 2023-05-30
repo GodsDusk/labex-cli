@@ -53,11 +53,11 @@ class Create:
                 "text": f"step{step_index}.md",
                 "verify": [
                     {
-                        "name": "Please replace this text with the target of the verify script",
+                        "name": "The Target of the verify script",
                         "file": f"verify{step_index}.sh",
-                        "hint": "Please replace this text with the hint of the verify script",
+                        "hint": "Custom error message.",
                         "timeout": 0,
-                        "showstderr": False,
+                        "showstderr": True,
                     }
                 ],
                 "skills": ["Please copy the skill ID from the official skill tree"],
@@ -75,11 +75,11 @@ class Create:
                 "text": f"step{step_index}.md",
                 "verify": [
                     {
-                        "name": "Please replace this text with the target of the verify script",
+                        "name": "The Target of the verify script",
                         "file": f"verify{step_index}.sh",
-                        "hint": "Please replace this text with the hint of the verify script",
+                        "hint": "Custom error message.",
                         "timeout": 0,
-                        "showstderr": False,
+                        "showstderr": True,
                     }
                 ],
                 "skills": ["Please copy the skill ID from the official skill tree"],
