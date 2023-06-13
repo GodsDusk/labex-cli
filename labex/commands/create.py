@@ -126,6 +126,8 @@ class Create:
             "description": "",
             "difficulty": self.lab_diff,
             "time": int(self.lab_time),
+            "fee_type": "free",
+            "hidden": False,
             "details": {
                 "steps": [],
                 "intro": {"text": "intro.md", "background": "setup.sh"},
