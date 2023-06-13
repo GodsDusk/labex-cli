@@ -126,7 +126,7 @@ class Create:
             "description": "",
             "difficulty": self.lab_diff,
             "time": int(self.lab_time),
-            "fee_type": "free",
+            "fee_type": "pro",
             "hidden": False,
             "details": {
                 "steps": [],
