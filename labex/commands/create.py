@@ -79,7 +79,7 @@ class Create:
                         "file": f"verify{step_index}.sh",
                         "hint": "Custom error message.",
                         "timeout": 0,
-                        "showstderr": True,
+                        "showstderr": False,
                     }
                 ],
                 "skills": ["Please copy the skill ID from the official skill tree"],
