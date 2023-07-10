@@ -15,15 +15,15 @@ class Check:
 
     def __download_schema(self) -> None:
         # Download schema from github
-        print("[bold yellow]⚠️ Schema file not found, downloading it from LabEx...[/bold yellow]")
+        print(
+            "[bold yellow]⚠️ Schema file not found, downloading it from LabEx...[/bold yellow]"
+        )
         urllib.request.urlretrieve(
             "https://cdn.jsdelivr.net/gh/labex-labs/common-scripts/schema.json",
             "schema.json",
         )
 
     def validate_json(self, schema_file: str, json_file: str) -> None:
-        print(f"instance file: {json_file}")
-        print(f"schema file: {schema_file}")
         try:
             with open(schema_file, "r") as s:
                 schema = json.load(s)
@@ -35,19 +35,22 @@ class Check:
             instance = json.load(j)
         try:
             validate(
-                instance=instance, schema=schema,
+                instance=instance,
+                schema=schema,
             )
         except jsonschema.exceptions.ValidationError as e:
+            print(f"instance file: {json_file}")
+            print(f"schema file: {schema_file}")
             print("[bold red]✗ Validation failed[/bold red]")
             print(e)
+            print("\n-----------------------\n")
 
         except jsonschema.exceptions.SchemaError as e:
             print("[bold red]✗ Schema error[/bold red]")
             print(e)
 
-        else:
-            print("[bold green]✓ Validation success[/bold green]")
-        print("\n-----------------------\n")
+        # else:
+        #     print("[bold green]✓ Validation success[/bold green]")
 
     def validate_all_json(self, schema_file, base_dir: str) -> None:
         for path in Path(base_dir).rglob("index.json"):
