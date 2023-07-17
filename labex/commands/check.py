@@ -44,14 +44,20 @@ class Check:
             print("[bold red]✗ Validation failed[/bold red]")
             print(e)
             print("\n-----------------------\n")
+            return 1
 
         except jsonschema.exceptions.SchemaError as e:
             print("[bold red]✗ Schema error[/bold red]")
             print(e)
-
-        # else:
-        #     print("[bold green]✓ Validation success[/bold green]")
+            return 1
+        else:
+            return 0
 
     def validate_all_json(self, schema_file, base_dir: str) -> None:
+        error_counts = 0
+        i = 0
         for path in Path(base_dir).rglob("index.json"):
-            self.validate_json(schema_file, path)
+            count = self.validate_json(schema_file, path)
+            error_counts += count
+            i += 1
+        print(f"Total files validated: {i}, passed: [green]{i - error_counts}[/green], failed: [red]{error_counts}[/red]")
