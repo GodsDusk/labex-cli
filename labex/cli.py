@@ -5,6 +5,7 @@ from .commands.check import Check
 from .commands.export import Export
 from .commands.utils.version import CheckUpdate
 from .commands.course import Course
+from .commands.skilltree_notify import SkillTreeNotify
 
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -23,6 +24,7 @@ def create():
 
 
 cli.add_command(create)
+
 
 # Update Group
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -43,6 +45,7 @@ def title():
 
 
 update.add_command(title)
+
 
 # Check Group
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -81,6 +84,7 @@ def json(schema, instance):
 
 
 check.add_command(json)
+
 
 # Export Group
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -154,6 +158,25 @@ def export(appid, appsecret, skills, min):
 
 
 course.add_command(export)
+
+
+# SkillTree Group
+@click.group(context_settings=CONTEXT_SETTINGS)
+def skilltree():
+    """SkillTree Group"""
+    pass
+
+
+cli.add_command(skilltree)
+
+
+@click.command()
+def notify():
+    """Notify SkillTree"""
+    SkillTreeNotify().labs_from_skilltrees()
+
+
+skilltree.add_command(notify)
 
 
 if __name__ == "__main__":
