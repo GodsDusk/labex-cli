@@ -19,7 +19,7 @@ cd labex-cli
 pip install --editable .
 ```
 
-After installation, the repository can now be removed. The CLI will be available.
+After installation, the repository can not be deleted. The CLI will not work if the repository is deleted.
 
 ## Usage
 
