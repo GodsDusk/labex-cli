@@ -9,7 +9,7 @@ import urllib.request
 sys.tracebacklimit = 0
 
 
-class Check:
+class CheckIndexValidation:
     def __init__(self) -> None:
         pass
 

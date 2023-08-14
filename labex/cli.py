@@ -1,10 +1,11 @@
 import click
-from .commands.create import Create
-from .commands.update import Update
-from .commands.check import Check
-from .commands.export import Export
 from .commands.utils.version import CheckUpdate
-from .commands.course import Course
+
+
+from .commands.lab_create import CreateLab
+from .commands.index_check import CheckIndexValidation
+from .commands.index_update import UpdateIndexJSON
+from .commands.skilltree_export import ExportSkills
 from .commands.skilltree_notify import SkillTreeNotify
 
 
@@ -13,27 +14,45 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 def cli():
+    """LabEx Command Line Interface"""
     pass
+
+
+# =========================
+# LAB COMMANDS GROUP
+# =========================
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def lab():
+    """LAB COMMANDS GROUP"""
+    pass
+
+
+cli.add_command(lab)
 
 
 @click.command()
 def create():
-    """Create a new lab or challenge"""
+    """CREATE NEW LABS"""
     CheckUpdate().check_version()
-    Create().init_base()
+    CreateLab().init_base()
 
 
-cli.add_command(create)
+lab.add_command(create)
+
+# =========================
+# INDEX JSON COMMANDS GROUP
+# =========================
 
 
-# Update Group
 @click.group(context_settings=CONTEXT_SETTINGS)
-def update():
-    """Update lab or challenge metadata"""
+def idx():
+    """INDEX JSON COMMANDS GROUP"""
     pass
 
 
-cli.add_command(update)
+cli.add_command(idx)
 
 
 @click.command()
@@ -41,20 +60,10 @@ def title():
     """Update lab title from md files
     - excute from lab directory
     """
-    Update().title("./")
+    UpdateIndexJSON().title("./")
 
 
-update.add_command(title)
-
-
-# Check Group
-@click.group(context_settings=CONTEXT_SETTINGS)
-def check():
-    """Check lab or challenge metadata"""
-    pass
-
-
-cli.add_command(check)
+idx.add_command(title)
 
 
 @click.command()
@@ -71,29 +80,32 @@ cli.add_command(check)
     help="index.json file path",
     metavar="<path>",
 )
-def json(schema, instance):
+def check(schema, instance):
     """Check index.json based on schema.json
 
     - schema: schema.json file path
     - instance: index.json file path
     """
     if instance is None:
-        Check().validate_all_json(schema, "./")
+        CheckIndexValidation().validate_all_json(schema, "./")
     else:
-        Check().validate_json(schema, instance)
+        CheckIndexValidation().validate_json(schema, instance)
 
 
-check.add_command(json)
+idx.add_command(check)
+
+# =========================
+# SKILL TREE COMMANDS GROUP
+# =========================
 
 
-# Export Group
 @click.group(context_settings=CONTEXT_SETTINGS)
-def export():
-    """Export lab or challenge metadata"""
+def skt():
+    """SKILL TREE COMMANDS GROUP"""
     pass
 
 
-cli.add_command(export)
+cli.add_command(skt)
 
 
 @click.command()
@@ -107,67 +119,12 @@ cli.add_command(export)
     type=str,
     help="Feishu App Secret",
 )
-def skill(appid, appsecret):
+def export(appid, appsecret):
     """Export lab skills to csv"""
-    Export(app_id=appid, app_secret=appsecret).export_skills()
+    ExportSkills(app_id=appid, app_secret=appsecret).export_skills()
 
 
-export.add_command(skill)
-
-
-# Course Group
-@click.group(context_settings=CONTEXT_SETTINGS)
-def course():
-    """Combination Course"""
-    pass
-
-
-cli.add_command(course)
-
-
-@click.command()
-@click.option(
-    "--appid",
-    type=str,
-    help="Feishu App ID",
-)
-@click.option(
-    "--appsecret",
-    type=str,
-    help="Feishu App Secret",
-)
-@click.option(
-    "--skills",
-    type=str,
-    help="skills split by comma",
-)
-@click.option(
-    "--min",
-    type=int,
-    default=0,
-    help="The number of labs for the smallest course.",
-)
-def export(appid, appsecret, skills, min):
-    """Export course to csv"""
-    course = Course(app_id=appid, app_secret=appsecret)
-    if skills is not None:
-        skills = skills.split(",")
-        course.export_to_csv_by_skills(skills)
-    else:
-        course.export_to_excel_by_skills_group(min)
-
-
-course.add_command(export)
-
-
-# SkillTree Group
-@click.group(context_settings=CONTEXT_SETTINGS)
-def skilltree():
-    """SkillTree Group"""
-    pass
-
-
-cli.add_command(skilltree)
+skt.add_command(export)
 
 
 @click.command()
@@ -176,7 +133,7 @@ def notify():
     SkillTreeNotify().labs_from_skilltrees()
 
 
-skilltree.add_command(notify)
+skt.add_command(notify)
 
 
 if __name__ == "__main__":

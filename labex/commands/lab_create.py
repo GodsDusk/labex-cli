@@ -5,7 +5,7 @@ from rich import print
 from .utils.titlecase import titlecase
 
 
-class Create:
+class CreateLab:
     """Create a new lab or challenge"""
 
     def __init__(self) -> None:

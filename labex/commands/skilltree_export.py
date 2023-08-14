@@ -6,7 +6,7 @@ from .utils.feishu import Feishu
 from rich import print
 
 
-class Export:
+class ExportSkills:
     def __init__(self, app_id, app_secret) -> None:
         feishu = Feishu(app_id, app_secret)
         app_token = "bascnNz4Nqjqgqm1Nm5AYke6xxb"

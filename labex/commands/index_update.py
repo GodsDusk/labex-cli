@@ -4,7 +4,7 @@ from rich import print
 from .utils.titlecase import titlecase
 
 
-class Update:
+class UpdateIndexJSON:
     def __init__(self) -> None:
         pass
 
