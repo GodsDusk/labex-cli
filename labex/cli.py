@@ -1,6 +1,6 @@
 import click
 from .commands.utils.version import CheckUpdate
-
+from .commands.utils.auth import LabExLogin
 
 from .commands.lab_create import CreateLab
 from .commands.index_check import CheckIndexValidation
@@ -16,6 +16,27 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 def cli():
     """LabEx Command Line Interface"""
     pass
+
+
+@click.command()
+@click.option("--username", type=str, help="Username")
+@click.option("--password", type=str, help="Password")
+@click.option(
+    "--check",
+    type=bool,
+    default=True,
+    help="Check for version updates, default is True.",
+)
+def login(username, password, check):
+    """Log in to your LabEx account.
+
+    \b
+    Support passing in the username and password as parameters. If they do not exist, prompt for login.
+    """
+    LabExLogin().login_account(un=username, pw=password, check=check)
+
+
+cli.add_command(login)
 
 
 # =========================

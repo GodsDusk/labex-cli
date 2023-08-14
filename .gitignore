@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .DS_Store
+labex/commands/utils/config.json
+labex/commands/utils/github.json
+labex/commands/utils/account.json
+.vscode/settings.json

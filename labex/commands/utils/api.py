@@ -1,19 +1,15 @@
-import os
 import json
 import requests
 from rich import print
 from retrying import retry
-from datetime import datetime
-from rich.progress import Progress
+from .auth import LabExLogin
 
 
 class HTTP:
     def __init__(self, url) -> None:
         self.url = url
         self._timeout = 15
-        self._headers = {
-            "Cookie": os.environ.get("LABEX_COOKIE"),
-        }
+        self._headers = LabExLogin().read_account_cookies()
 
     @retry(stop_max_attempt_number=3)
     def get_data(self) -> dict:
