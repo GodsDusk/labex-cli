@@ -24,3 +24,9 @@ pip install --editable .
 ```bash
 labex --help
 ```
+
+Create a new lab:
+
+```bash
+labex lab create
+```
