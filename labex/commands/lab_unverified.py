@@ -133,7 +133,7 @@ class LabForTesting:
             labels=["unverified", lab_type, lab_derection],
         )
         print(issue)
-        
+
     def main(self):
         all_issues = self.__get_issues_title(state="all")
         print(f"All Issues: {len(all_issues)}")
@@ -149,11 +149,13 @@ class LabForTesting:
                 )
         # close issue for verified labs without assignees
         open_issues = self.repo.get_issues(state="open")
+        verified_labs_path = [lab["path"] for lab in verified_labs]
         close_issue_count = 0
         for issue in open_issues:
             issue_title = issue.title
             issue_assignees = issue.assignees
-            if issue_title in verified_labs and len(issue_assignees) == 0:
+            print(issue_title, issue_assignees)
+            if issue_title in verified_labs_path and len(issue_assignees) == 0:
                 issue.create_comment(
                     "This issue is closed by system, because it is verified."
                 )
