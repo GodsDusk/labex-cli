@@ -98,3 +98,11 @@ class AdminData:
     def get_skilltree_notify_by_id(self, _id: str) -> list:
         url = f"{self.base_url}/skilltree/notify/{_id}"
         return HTTP(url).get_data()
+
+    def get_namespaces(self) -> list:
+        url = f"https://labex.io/api/v2/namespace?only_main=true"
+        return HTTP(url).get_data()["list"]
+
+    def get_namespace_labs(self, namespace: str) -> list:
+        url = f"https://labex.io/api/v2/namespace/{namespace}/labs"
+        return HTTP(url).get_data()["list"]

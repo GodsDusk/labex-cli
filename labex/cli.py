@@ -7,6 +7,7 @@ from .commands.index_check import CheckIndexValidation
 from .commands.index_update import UpdateIndexJSON
 from .commands.skilltree_export import ExportSkills
 from .commands.skilltree_notify import SkillTreeNotify
+from .commands.lab_unverified import LabForTesting
 
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -61,6 +62,15 @@ def create():
 
 
 lab.add_command(create)
+
+
+@click.command()
+def unverified():
+    """CREATE UNVERIFIED LAB ISSUES"""
+    LabForTesting().main()
+
+
+lab.add_command(unverified)
 
 # =========================
 # INDEX JSON COMMANDS GROUP
