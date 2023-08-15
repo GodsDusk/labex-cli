@@ -20,8 +20,8 @@ class LabForTesting:
     def __get_labs(self) -> list:
         namespaces = [
             "33fa8aba-d546-42e9-9692-64968aeaf0cc",
-            # "df87b950-1f37-4316-bc07-6537a1f2c481",
-            # "0537fd91-a50d-4b12-b402-cf6582be4fd4",
+            "df87b950-1f37-4316-bc07-6537a1f2c481",
+            "0537fd91-a50d-4b12-b402-cf6582be4fd4",
         ]
         # get labs
         all_labs = []
