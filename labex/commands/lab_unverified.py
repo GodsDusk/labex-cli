@@ -95,8 +95,8 @@ class LabForTesting:
 ## 测试地址
 
 - 测试地址（右键新标签页面打开，若无法学习请联系我们）：{lab_url}
-"""
-        issue_checklist = f"""# 测试检查单
+
+## 测试检查单
 
 > 请点击复选框，勾选后自动保存。
 
@@ -113,15 +113,14 @@ class LabForTesting:
    - [ ] 我认为此 Lab 的质量不错，建议保留；
    - [ ] 我认为此 Lab 的质量还行，建议修复；
    - [ ] 我认为此 Lab 的质量不佳，建议移除；
-"""
-        issue_report = f"""# 测试报告
 
-> 请点击本评论框右上角 ... 按钮，选择“Edit”按钮，将您测试的问题反馈到本条评论中。
-> 请务必详细描述问题和复现方法，并补充截图（直接粘贴到本评论框）或录屏（可以使用 [芦笋](https://lusun.com) 分享录屏链接）。
+## 测试报告
 
----
+请以评论的方式，将您测试的问题反馈到此 issue 中。
 
-请将问题逐个记录到本段文字的下方，问题记录模板可以参考下方，也可以根据需要自定义格式，确保我们不需要多余的沟通就能看懂即可。
+请务必详细描述问题和复现方法，并补充截图（直接粘贴到本评论框）或录屏（可以使用 [芦笋](https://lusun.com) 分享录屏链接）。
+
+问题记录模板可以参考下方，也可以根据需要自定义格式，确保我们不需要多余的沟通就能看懂即可。
 
 - 问题描述：
 - 复现方法：
@@ -134,10 +133,7 @@ class LabForTesting:
             labels=["unverified", lab_type, lab_derection],
         )
         print(issue)
-        # add comments
-        issue.create_comment(issue_checklist)
-        issue.create_comment(issue_report)
-
+        
     def main(self):
         all_issues = self.__get_issues_title(state="all")
         print(f"All Issues: {len(all_issues)}")
