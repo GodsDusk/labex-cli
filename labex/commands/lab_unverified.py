@@ -140,13 +140,21 @@ class LabForTesting:
         unverified_labs, verified_labs = self.__get_labs()
         # create issue for new unverified labs
         for lab in unverified_labs:
-            lab_title, lab_path, lab_url, lab_derection, lab_type = self.__parse_lab(
-                lab
-            )
-            if lab_path not in all_issues:
-                self.__create_issue(
-                    lab_title, lab_path, lab_url, lab_derection, lab_type
-                )
+            try:
+                (
+                    lab_title,
+                    lab_path,
+                    lab_url,
+                    lab_derection,
+                    lab_type,
+                ) = self.__parse_lab(lab)
+                if lab_path not in all_issues:
+                    self.__create_issue(
+                        lab_title, lab_path, lab_url, lab_derection, lab_type
+                    )
+            except Exception as e:
+                print(e)
+                continue
         # close issue for verified labs without assignees
         open_issues = self.repo.get_issues(state="open")
         verified_labs_path = [lab["path"] for lab in verified_labs]
@@ -154,16 +162,20 @@ class LabForTesting:
         for issue in open_issues:
             issue_title = issue.title
             issue_assignees = issue.assignees
-            print(issue_title, issue_assignees)
             if issue_title in verified_labs_path and len(issue_assignees) == 0:
-                issue.create_comment(
-                    "This issue is closed by system, because it is verified."
-                )
-                issue.delete_labels("unverified")
-                issue.add_to_labels("verified")
-                issue.edit(state="closed")
-                print(f"Close Issue: {issue_title}, because it is verified.")
-                close_issue_count += 1
+                try:
+                    issue.create_comment(
+                        "This issue is closed by system, because it is verified."
+                    )
+                    issue_labels = [label.name for label in issue.labels]
+                    issue_labels.remove("unverified")
+                    issue_labels.extend(["verified", "wontfix", "autoclosed"])
+                    issue.edit(state="closed", labels=issue_labels)
+                    print(f"Close Issue: {issue_title}, because it is verified.")
+                    close_issue_count += 1
+                except Exception as e:
+                    print(e)
+                    continue
         print(
             f"Open Issues: {open_issues.totalCount}, Auto Close Issues: {close_issue_count}"
         )
