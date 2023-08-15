@@ -13,7 +13,7 @@ class LabForTesting:
         self.path_alias = [p["alias"] for p in all_paths["paths"]]
         # for github
         GITHUB_TOKEN = AuthGitHub().read_github_token()
-        repo_name = "labex-labs/labs-verified"
+        repo_name = "labex-labs/labs-validation"
         g = Github(login_or_token=GITHUB_TOKEN, retry=10)
         self.repo = g.get_repo(repo_name)
 
