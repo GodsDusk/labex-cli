@@ -1,5 +1,6 @@
 import os
 import json
+import click
 from rich import print
 from .utils.titlecase import titlecase
 
@@ -53,4 +54,8 @@ class UpdateIndexTitle:
         # write to index.json
         with open(os.path.join(path, "index.json"), "w") as f:
             json.dump(index_cofig, f, indent=2)
+        # run prettier shell command
+        if click.confirm("→ If you want to run prettier, press y"):
+            os.system(f"prettier --write {path}/**/*.json")
 
+        

@@ -1,6 +1,6 @@
 import os
 import json
-import argparse
+import click
 
 
 class SetFeeType:
@@ -29,8 +29,11 @@ class SetFeeType:
             "backend": data["backend"],
             "contributors": data["contributors"] if "contributors" in data else [],
         }
-        if "license" in data:
-            data_sorted["license"] = data["license"]
+        data_keys = list(data.keys())
+        data_sorted_keys = list(data_sorted.keys())
+        for key in data_keys:
+            if key not in data_sorted_keys:
+                data_sorted[key] = data[key]
         return data_sorted
 
     def set(self, path, fee_type):
@@ -45,12 +48,19 @@ class SetFeeType:
             if "fee_type" in idx_json:
                 # save
                 with open(idx, "w") as f:
-                    json.dump(self.__sort_json(idx_json), f, indent=2, ensure_ascii=False)
+                    json.dump(
+                        self.__sort_json(idx_json), f, indent=2, ensure_ascii=False
+                    )
                 print(f"✕ fee_type key exists in {idx}")
             else:
                 # set pro
                 idx_json["fee_type"] = fee_type
                 # save
                 with open(idx, "w") as f:
-                    json.dump(self.__sort_json(idx_json), f, indent=2, ensure_ascii=False)
+                    json.dump(
+                        self.__sort_json(idx_json), f, indent=2, ensure_ascii=False
+                    )
                 print(f"✓ set {fee_type} in {idx}")
+        # run prettier shell command
+        if click.confirm("→ If you want to run prettier, press y"):
+            os.system(f"prettier --write {path}/**/*.json")
