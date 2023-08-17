@@ -6,7 +6,7 @@ This is a command line interface for LabEx. It is used to create and manage labs
 
 Python 3.8 or higher is required.
 
-Clone the repository to some pemranent location:
+Clone the repository to some **pemranent location**:
 
 ```bash
 git clone https://github.com/labex-labs/labex-cli.git
@@ -27,7 +27,7 @@ After installation, the repository can not be deleted. The CLI will not work if 
 labex --help
 ```
 
-Create a new lab:
+Example: Create a new lab
 
 ```bash
 labex lab create
