@@ -42,6 +42,9 @@ class Feishu:
                 )
                 if r.json()["data"]["total"] > 0:
                     records += r.json()["data"]["items"]
+                    print(
+                        f"Get {len(records)} records from bitable, page_token: {page_token}"
+                    )
         return records
 
     def add_bitable_record(self, app_token: str, table_id: str, data: dict) -> None:

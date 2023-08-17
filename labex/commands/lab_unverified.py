@@ -1,5 +1,6 @@
 import json
 from rich import print
+from rich.progress import track
 from .utils.api import AdminData, UserData
 from .utils.auth import AuthGitHub
 from github import Github
@@ -17,21 +18,30 @@ class LabForTesting:
         g = Github(login_or_token=GITHUB_TOKEN, retry=10)
         self.repo = g.get_repo(repo_name)
 
-    def __get_labs(self) -> list:
-        namespaces = [
-            "33fa8aba-d546-42e9-9692-64968aeaf0cc",
-            "df87b950-1f37-4316-bc07-6537a1f2c481",
-            "0537fd91-a50d-4b12-b402-cf6582be4fd4",
-        ]
-        # get labs
+    def __get_all_labs(self, hidden:str, namespace_ids:list, page_size:int ) -> list:
+        print(f"Get Labs from Namespace: {namespace_ids}")
         all_labs = []
-        for namespace in namespaces:
-            labs = self.__admin_data.get_namespace_labs(namespace)
-            print(f"Namespace: {namespace}, Labs: {len(labs)}")
-            all_labs.extend(labs)
+        for namespace_id in namespace_ids:
+            # filter params
+            filters = f"%7B%22Hidden%22%3A%5B{hidden}%5D%2C%22NamespaceID%22%3A%22{namespace_id}%22%7D"
+            first_page = self.__admin_data.get_lab_objects(
+                params=f"?pagination.current=1&pagination.size={page_size}&filters={filters}"
+            )
+            total_pages = first_page["pagination"]["total_pages"]
+            namespace_labs = first_page["objects"]
+            for page in track(
+                range(2, total_pages + 1),
+                description=f"Namespace: {namespace_id}, Total Pages: {total_pages}",
+            ):
+                page_data = self.__admin_data.get_lab_objects(
+                    params=f"?pagination.current={page}&pagination.size={page_size}&filters={filters}"
+                )
+                namespace_labs.extend(page_data["objects"])
+            print(f"Namespace: {namespace_id}, Labs: {len(namespace_labs)}")
+            all_labs.extend(namespace_labs)
         # filter labs
-        unverified_labs = [lab for lab in all_labs if lab["is_unverified"]]
-        verified_labs = [lab for lab in all_labs if not lab["is_unverified"]]
+        unverified_labs = [lab for lab in all_labs]
+        verified_labs = []
         print(
             f"All Labs: {len(all_labs)}, Unverified Labs: {len(unverified_labs)}, Verified Labs: {len(verified_labs)}"
         )
@@ -45,37 +55,16 @@ class LabForTesting:
         return list(set(all_issues))
 
     def __parse_lab(self, lab_data: dict) -> list:
-        """Parse lab data
-
-        Args:
-            lab_data (dict): {
-                                "id": 117029,
-                                "namespace": "33fa8aba-d546-42e9-9692-64968aeaf0cc",
-                                "path": "ansible/challenge-ansible-command-module",
-                                "type": 1,
-                                "title": "Ansible Command Module",
-                                "difficulty": "Beginner",
-                                "time": 15,
-                                "fee_type": 2,
-                                "pass_user_count": 0,
-                                "is_unverified": true
-                            }
-
-        Returns:
-            list: _description_
-        """
+        """Parse lab data"""
         lab_id = lab_data["id"]
-        lab_title = lab_data["title"]
-        lab_path = lab_data["path"]
+        lab_title = lab_data["Title"]
+        lab_path = lab_data["Path"]
         lab_derection = lab_path.split("/")[0]
         if lab_derection in self.path_alias:
             lab_alias = lab_derection
         else:
             lab_alias = "python"
-        if lab_data["type"] == 1:
-            lab_type = "challenge"
-        else:
-            lab_type = "lab"
+        lab_type = lab_data["Type"]
         lab_url = f"https://labex.io/skilltrees/{lab_alias}/labs/{lab_id}"
         return lab_title, lab_path, lab_url, lab_derection, lab_type
 
@@ -137,7 +126,11 @@ class LabForTesting:
     def main(self):
         all_issues = self.__get_issues_title(state="all")
         print(f"All Issues: {len(all_issues)}")
-        unverified_labs, verified_labs = self.__get_labs()
+        # get all labs by below params
+        hidden = "false"
+        page_size = 100
+        namespace_ids = [2, 3, 455]
+        unverified_labs, verified_labs = self.__get_all_labs(hidden, namespace_ids, page_size)
         # create issue for new unverified labs
         for lab in unverified_labs:
             (
@@ -171,3 +164,32 @@ class LabForTesting:
         print(
             f"Open Issues: {open_issues.totalCount}, Auto Close Issues: {close_issue_count}"
         )
+
+    def close_hidden_labs(self) -> None:
+        # get all labs by below params
+        hidden = "true"
+        page_size = 100
+        namespace_ids = [2, 3, 455]
+        unverified_labs, verified_labs = self.__get_all_labs(hidden, namespace_ids, page_size)
+        hidden_labs = []
+        for lab in unverified_labs:
+            (
+                lab_title,
+                lab_path,
+                lab_url,
+                lab_derection,
+                lab_type,
+            ) = self.__parse_lab(lab)
+            hidden_labs.append(lab_path)
+        print(f"Hidden Labs: {len(hidden_labs)}")
+        for issue in self.repo.get_issues(state="open"):
+            issue_title = issue.title
+            if issue_title in hidden_labs:
+                issue.create_comment(
+                    "This issue is closed by system, because it is hidden."
+                )
+                issue_labels = [label.name for label in issue.labels]
+                issue_labels.extend(["autoclosed", "hidden"])
+                issue.edit(state="closed", labels=issue_labels)
+                print(f"Close Issue: {issue_title}, because it is hidden.")
+            

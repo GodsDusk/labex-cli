@@ -11,6 +11,14 @@ class HTTP:
         self._timeout = 15
         self._headers = LabExLogin().read_account_cookies()
 
+    def __status_code(self, r):
+        if r.status_code == 200:
+            return r.json()
+        elif r.status_code == 401:
+            print(f"Unauthorized, type [yellow]labex login[/yellow] to login again.")
+        else:
+            print(r.json())
+
     @retry(stop_max_attempt_number=3)
     def get_data(self) -> dict:
         """HTTP GET"""
@@ -19,12 +27,7 @@ class HTTP:
             headers=self._headers,
             timeout=self._timeout,
         )
-        if r.status_code == 200:
-            return r.json()
-        elif r.status_code == 401:
-            print("Please Set LABEX_COOKIE env using `export LABEX_COOKIE=xxx`")
-        else:
-            print(r.json())
+        return self.__status_code(r)
 
     @retry(stop_max_attempt_number=3)
     def put_data(self, _payloads) -> dict:
@@ -35,7 +38,7 @@ class HTTP:
             data=_payloads,
             timeout=self._timeout,
         )
-        return r.json()
+        return self.__status_code(r)
 
     @retry(stop_max_attempt_number=3)
     def post_data(self, _payloads) -> dict:
@@ -46,7 +49,7 @@ class HTTP:
             data=_payloads,
             timeout=self._timeout,
         )
-        return r.json()
+        return self.__status_code(r)
 
     @retry(stop_max_attempt_number=3)
     def patch_data(self, _payloads) -> dict:
@@ -57,7 +60,7 @@ class HTTP:
             data=_payloads,
             timeout=self._timeout,
         )
-        return r.json()
+        return self.__status_code(r)
 
     @retry(stop_max_attempt_number=3)
     def delete_data(self) -> dict:
@@ -67,7 +70,7 @@ class HTTP:
             headers=self._headers,
             timeout=self._timeout,
         )
-        return r.json()
+        return self.__status_code(r)
 
 
 class UserData:
@@ -99,10 +102,6 @@ class AdminData:
         url = f"{self.base_url}/skilltree/notify/{_id}"
         return HTTP(url).get_data()
 
-    def get_namespaces(self) -> list:
-        url = f"https://labex.io/api/v2/namespace?only_main=true"
-        return HTTP(url).get_data()["list"]
-
-    def get_namespace_labs(self, namespace: str) -> list:
-        url = f"https://labex.io/api/v2/namespace/{namespace}/labs"
-        return HTTP(url).get_data()["list"]
+    def get_lab_objects(self, params: str) -> list:
+        url = f"{self.base_url}/lab_tpl/objects{params}"
+        return HTTP(url).get_data()
