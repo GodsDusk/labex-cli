@@ -45,12 +45,12 @@ class SetFeeType:
             if "fee_type" in idx_json:
                 # save
                 with open(idx, "w") as f:
-                    json.dump(self.__sort_json(idx_json), f, indent=2)
+                    json.dump(self.__sort_json(idx_json), f, indent=2, ensure_ascii=False)
                 print(f"✕ fee_type key exists in {idx}")
             else:
                 # set pro
                 idx_json["fee_type"] = fee_type
                 # save
                 with open(idx, "w") as f:
-                    json.dump(self.__sort_json(idx_json), f, indent=2)
+                    json.dump(self.__sort_json(idx_json), f, indent=2, ensure_ascii=False)
                 print(f"✓ set {fee_type} in {idx}")
