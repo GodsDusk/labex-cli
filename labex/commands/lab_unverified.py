@@ -167,11 +167,11 @@ class LabForTesting:
 
     def close_hidden_labs(self) -> None:
         # get all labs by below params
-        hidden = "true"
+        hidden = "false"
         page_size = 100
         namespace_ids = [2, 3, 455]
         unverified_labs, verified_labs = self.__get_all_labs(hidden, namespace_ids, page_size)
-        hidden_labs = []
+        show_and_unverified_labs = []
         for lab in unverified_labs:
             (
                 lab_title,
@@ -180,16 +180,16 @@ class LabForTesting:
                 lab_derection,
                 lab_type,
             ) = self.__parse_lab(lab)
-            hidden_labs.append(lab_path)
-        print(f"Hidden Labs: {len(hidden_labs)}")
+            show_and_unverified_labs.append(lab_path)
+        print(f"Show and Unverified Labs: {len(show_and_unverified_labs)}")
         for issue in self.repo.get_issues(state="open"):
             issue_title = issue.title
-            if issue_title in hidden_labs:
+            if issue_title not in show_and_unverified_labs:
                 issue.create_comment(
-                    "This issue is closed by system, because it is hidden."
+                    "This issue is closed by system, because it is not show and unverified."
                 )
                 issue_labels = [label.name for label in issue.labels]
                 issue_labels.extend(["autoclosed", "hidden"])
                 issue.edit(state="closed", labels=issue_labels)
-                print(f"Close Issue: {issue_title}, because it is hidden.")
+                print(f"Close Issue: {issue_title}, because it is not show and unverified.")
             
