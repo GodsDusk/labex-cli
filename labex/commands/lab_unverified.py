@@ -146,7 +146,7 @@ class LabForTesting:
                 )
         # close issue for verified labs without assignees
         open_issues = self.repo.get_issues(state="open")
-        verified_labs_path = [lab["path"] for lab in verified_labs]
+        verified_labs_path = [lab["Path"] for lab in verified_labs]
         close_issue_count = 0
         for issue in open_issues:
             issue_title = issue.title
