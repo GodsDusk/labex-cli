@@ -40,8 +40,8 @@ class LabForTesting:
             print(f"Namespace: {namespace_id}, Labs: {len(namespace_labs)}")
             all_labs.extend(namespace_labs)
         # filter labs
-        unverified_labs = [lab for lab in all_labs]
-        verified_labs = []
+        unverified_labs = [lab for lab in all_labs if lab["IsUnverified"] == True]
+        verified_labs = [lab for lab in all_labs if lab["IsUnverified"] == False]
         print(
             f"All Labs: {len(all_labs)}, Unverified Labs: {len(unverified_labs)}, Verified Labs: {len(verified_labs)}"
         )

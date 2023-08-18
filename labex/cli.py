@@ -76,7 +76,7 @@ lab.add_command(create)
 @click.command()
 def unverified():
     """CREATE UNVERIFIED LAB ISSUES"""
-    LabForTesting().close_hidden_labs()
+    LabForTesting().main()
 
 
 lab.add_command(unverified)
