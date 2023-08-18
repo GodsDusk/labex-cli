@@ -76,15 +76,15 @@ lab.add_command(create)
 @click.command()
 @click.option(
     "--mode",
-    type=click.Choice(["createissue", "closehidden"]),
-    default="createissue",
-    help="Set mode to createissue or closehidden",
+    type=click.Choice(["create", "close"]),
+    default="create",
+    help="Set mode to create or close",
 )
 def unverified(mode):
     """CREATE UNVERIFIED LAB ISSUES"""
-    if mode == "createissue":
+    if mode == "create":
         LabForTesting().main()
-    elif mode == "closehidden":
+    elif mode == "close":
         LabForTesting().close_hidden_labs()
 
 
