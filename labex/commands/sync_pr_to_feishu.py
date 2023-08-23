@@ -469,7 +469,7 @@ class SyncPRToFeishu:
                         if "noissue" in pr_labels_list:
                             pass
                         else:
-                            comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue，请你在 PR 描述中按要求添加，如有问题请及时联系 LabEx 的同事。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息，如有疑问可以直接回复本条评论，或者微信联系。"
+                            comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue，请你在 PR 描述中按要求添加，如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue，请在 Labels 中选择 `noissue`，系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息，如有疑问可以直接回复本条评论，或者微信联系。"
                             self.github.comment_pr(repo_name, pr_number, comment)
                             print(
                                 f"→ No issue id found in {pr_number}, comment to {pr_user}"
