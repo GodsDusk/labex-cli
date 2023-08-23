@@ -157,6 +157,6 @@ class StandardName:
                     elif mode == "update":
                         self.update_steps(index_json_path)
                         self.remove_new_prefix(index_json_path)
-                        # run prettier shell command
-                        if click.confirm("→ If you want to run prettier, press y"):
-                            os.system(f"prettier --write {self.path}")
+        # run prettier shell command
+        if click.confirm("→ If you want to run prettier, press y"):
+            os.system(f"prettier --write {self.path}")
