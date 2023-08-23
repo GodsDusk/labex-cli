@@ -159,4 +159,4 @@ class StandardName:
                         self.remove_new_prefix(index_json_path)
         # run prettier shell command
         if click.confirm("→ If you want to run prettier, press y"):
-            os.system(f"prettier --write {self.path}")
+            os.system(f"prettier --write {self.path}/**/*.json")
