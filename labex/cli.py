@@ -9,6 +9,7 @@ from .commands.index_check import CheckIndexValidation
 from .commands.index_update_title import UpdateIndexTitle
 from .commands.index_set_fee_type import SetFeeType
 from .commands.index_add_contributors import AddContributors
+from .commands.index_rename import StandardName
 
 from .commands.skilltree_export import ExportSkills
 from .commands.skilltree_notify import SkillTreeNotify
@@ -187,6 +188,29 @@ def contributors(ghtoken, repo, path):
 
 
 idx.add_command(contributors)
+
+
+@click.command()
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    help="Path to Repo",
+    metavar="<path>",
+)
+@click.option(
+    "--mode",
+    type=click.Choice(["check", "update"]),
+    default="check",
+    help="check first, then update",
+)
+def rename(path, mode):
+    """Standardize the name of the index.json file and the step file.
+    """
+    StandardName(path=path).main(mode=mode)
+
+
+idx.add_command(rename)
 
 
 # =========================
