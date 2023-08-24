@@ -7,18 +7,17 @@ from github import Github
 
 
 class LabForTesting:
-    def __init__(self) -> None:
+    def __init__(self, repo_name:str) -> None:
         # for labex
         self.__admin_data = AdminData()
         all_paths = UserData().get_all_path()
         self.path_alias = [p["alias"] for p in all_paths["paths"]]
         # for github
         GITHUB_TOKEN = AuthGitHub().read_github_token()
-        repo_name = "labex-labs/labs-validation"
         g = Github(login_or_token=GITHUB_TOKEN, retry=10)
         self.repo = g.get_repo(repo_name)
 
-    def __get_all_labs(self, hidden:str, namespace_ids:list, page_size:int ) -> list:
+    def __get_all_labs(self, hidden: str, namespace_ids: list, page_size: int) -> list:
         print(f"Get Labs from Namespace: {namespace_ids}")
         all_labs = []
         for namespace_id in namespace_ids:
@@ -41,11 +40,14 @@ class LabForTesting:
             all_labs.extend(namespace_labs)
         # filter labs
         unverified_labs = [lab for lab in all_labs if lab["IsUnverified"] == True]
+        unverified_labs_learned = [
+            lab for lab in unverified_labs if lab["LearnedUsers"] > 0
+        ]
         verified_labs = [lab for lab in all_labs if lab["IsUnverified"] == False]
         print(
-            f"All Labs: {len(all_labs)}, Unverified Labs: {len(unverified_labs)}, Verified Labs: {len(verified_labs)}"
+            f"All Labs: {len(all_labs)}, Verified Labs: {len(verified_labs)}, Unverified Labs: {len(unverified_labs)}, Unverified Labs Learned: {len(unverified_labs_learned)}"
         )
-        return unverified_labs, verified_labs
+        return verified_labs, unverified_labs, unverified_labs_learned
 
     def __get_issues_title(self, state: str) -> list:
         issues = self.repo.get_issues(state=state)
@@ -128,11 +130,13 @@ class LabForTesting:
         print(f"All Issues: {len(all_issues)}")
         # get all labs by below params
         hidden = "false"
-        page_size = 100
-        namespace_ids = [2, 3, 455]
-        unverified_labs, verified_labs = self.__get_all_labs(hidden, namespace_ids, page_size)
-        # create issue for new unverified labs
-        for lab in unverified_labs:
+        page_size = 10
+        namespace_ids = [2]
+        verified_labs, unverified_labs, unverified_labs_learned = self.__get_all_labs(
+            hidden, namespace_ids, page_size
+        )
+        # create issue for new unverified learned labs
+        for lab in unverified_labs_learned:
             (
                 lab_title,
                 lab_path,
@@ -170,7 +174,9 @@ class LabForTesting:
         hidden = "false"
         page_size = 100
         namespace_ids = [2, 3, 455]
-        unverified_labs, verified_labs = self.__get_all_labs(hidden, namespace_ids, page_size)
+        verified_labs, unverified_labs, unverified_labs_learned = self.__get_all_labs(
+            hidden, namespace_ids, page_size
+        )
         show_and_unverified_labs = []
         for lab in unverified_labs:
             (
@@ -191,5 +197,6 @@ class LabForTesting:
                 issue_labels = [label.name for label in issue.labels]
                 issue_labels.extend(["autoclosed", "hidden"])
                 issue.edit(state="closed", labels=issue_labels)
-                print(f"Close Issue: {issue_title}, because it is not show and unverified.")
-            
+                print(
+                    f"Close Issue: {issue_title}, because it is not show and unverified."
+                )

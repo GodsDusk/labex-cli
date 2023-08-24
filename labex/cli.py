@@ -76,17 +76,22 @@ lab.add_command(create)
 
 @click.command()
 @click.option(
+    "--repo",
+    type=str,
+    help="Repo Name like 'labex-labs/scenarios'",
+)
+@click.option(
     "--mode",
     type=click.Choice(["create", "close"]),
     default="create",
     help="Set mode to create or close",
 )
-def unverified(mode):
+def unverified(mode, repo):
     """CREATE UNVERIFIED LAB ISSUES"""
     if mode == "create":
-        LabForTesting().main()
+        LabForTesting(repo).main()
     elif mode == "close":
-        LabForTesting().close_hidden_labs()
+        LabForTesting(repo).close_hidden_labs()
 
 
 lab.add_command(unverified)
