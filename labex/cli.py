@@ -130,11 +130,17 @@ idx.add_command(title)
     default="pro",
     help="Set pro or free",
 )
-def feetype(path, type):
+@click.option(
+    "--mode",
+    type=str,
+    default="cli",
+    help="cli mode or not",
+)
+def feetype(path, type, mode):
     """Set lab feetype
     - excute from lab directory
     """
-    SetFeeType().set(path, type)
+    SetFeeType().set(path, type, mode)
 
 
 idx.add_command(feetype)

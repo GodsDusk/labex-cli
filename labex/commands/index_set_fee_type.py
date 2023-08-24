@@ -36,7 +36,7 @@ class SetFeeType:
                 data_sorted[key] = data[key]
         return data_sorted
 
-    def set(self, path, fee_type):
+    def set(self, path: str, fee_type: str, mode: str):
         # get all index.json files
         idxs = self.__get_idxs(path)
         print(f"Total {len(idxs)} index.json files in path {path}")
@@ -61,6 +61,9 @@ class SetFeeType:
                         self.__sort_json(idx_json), f, indent=2, ensure_ascii=False
                     )
                 print(f"✓ set {fee_type} in {idx}")
-        # run prettier shell command
-        if click.confirm("→ If you want to run prettier, press y"):
-            os.system(f"prettier --write {path}/**/*.json")
+        if mode == "cli":
+            return
+        else:
+            # run prettier shell command
+            if click.confirm("→ If you want to run prettier, press y"):
+                os.system(f"prettier --write {path}/**/*.json")
