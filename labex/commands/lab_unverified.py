@@ -130,8 +130,8 @@ class LabForTesting:
         print(f"All Issues: {len(all_issues)}")
         # get all labs by below params
         hidden = "false"
-        page_size = 10
-        namespace_ids = [2]
+        page_size = 100
+        namespace_ids = [2, 3, 455]
         verified_labs, unverified_labs, unverified_labs_learned = self.__get_all_labs(
             hidden, namespace_ids, page_size
         )
