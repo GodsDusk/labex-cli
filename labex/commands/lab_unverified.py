@@ -148,6 +148,7 @@ class LabForTesting:
                 self.__create_issue(
                     lab_title, lab_path, lab_url, lab_derection, lab_type
                 )
+                print(f"Create Issue: {lab_path}, it has been learned {lab['LearnedUsers']} times.")
         # close issue for verified labs without assignees
         open_issues = self.repo.get_issues(state="open")
         verified_labs_path = [lab["Path"] for lab in verified_labs]
@@ -168,35 +169,3 @@ class LabForTesting:
         print(
             f"Open Issues: {open_issues.totalCount}, Auto Close Issues: {close_issue_count}"
         )
-
-    def close_hidden_labs(self) -> None:
-        # get all labs by below params
-        hidden = "false"
-        page_size = 100
-        namespace_ids = [2, 3, 455]
-        verified_labs, unverified_labs, unverified_labs_learned = self.__get_all_labs(
-            hidden, namespace_ids, page_size
-        )
-        show_and_unverified_labs = []
-        for lab in unverified_labs:
-            (
-                lab_title,
-                lab_path,
-                lab_url,
-                lab_derection,
-                lab_type,
-            ) = self.__parse_lab(lab)
-            show_and_unverified_labs.append(lab_path)
-        print(f"Show and Unverified Labs: {len(show_and_unverified_labs)}")
-        for issue in self.repo.get_issues(state="open"):
-            issue_title = issue.title
-            if issue_title not in show_and_unverified_labs:
-                issue.create_comment(
-                    "This issue is closed by system, because it is not show and unverified."
-                )
-                issue_labels = [label.name for label in issue.labels]
-                issue_labels.extend(["autoclosed", "hidden"])
-                issue.edit(state="closed", labels=issue_labels)
-                print(
-                    f"Close Issue: {issue_title}, because it is not show and unverified."
-                )

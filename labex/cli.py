@@ -90,8 +90,6 @@ def unverified(mode, repo):
     """CREATE UNVERIFIED LAB ISSUES"""
     if mode == "create":
         LabForTesting(repo).main()
-    elif mode == "close":
-        LabForTesting(repo).close_hidden_labs()
 
 
 lab.add_command(unverified)
