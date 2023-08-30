@@ -13,7 +13,7 @@ from .commands.index_rename import StandardName
 
 from .commands.skilltree_export import ExportSkills
 from .commands.skilltree_notify import SkillTreeNotify
-
+from .commands.skilltree_first_page_labs import FirstPageLabs
 
 from .commands.sync_pr_to_feishu import SyncPRToFeishu
 from .commands.sync_labs_to_feishu import SyncLabsToFeishu
@@ -214,8 +214,7 @@ idx.add_command(contributors)
     help="check first, then update",
 )
 def rename(path, mode):
-    """Standardize the name of the index.json file and the step file.
-    """
+    """Standardize the name of the index.json file and the step file."""
     StandardName(path=path).main(mode=mode)
 
 
@@ -264,6 +263,27 @@ def notify():
 
 
 skt.add_command(notify)
+
+
+@click.command()
+@click.option(
+    "--appid",
+    type=str,
+    required=True,
+    help="Feishu App ID",
+)
+@click.option(
+    "--appsecret",
+    type=str,
+    required=True,
+    help="Feishu App Secret",
+)
+def fplabs(appid, appsecret):
+    """Update SkillTree First Page Labs"""
+    FirstPageLabs(appid, appsecret).main()
+
+
+skt.add_command(fplabs)
 
 # ===========================
 # SYNC SCRIPTS COMMANDS GROUP

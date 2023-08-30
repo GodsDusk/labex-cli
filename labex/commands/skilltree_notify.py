@@ -40,7 +40,7 @@ class SkillTreeNotify:
             list: list of labs
         """
         params = f"?pagination.current={page}&pagination.size={self.page_size}"
-        labs = self.__user_data.get_path_labs(path_alias, params)["labs"]
+        labs = self.__user_data.get_path_labs(path_alias, params)
         return labs
 
     def __get_existed_labs(self) -> list:

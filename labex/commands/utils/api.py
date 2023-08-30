@@ -43,6 +43,7 @@ class HTTP:
     @retry(stop_max_attempt_number=3)
     def post_data(self, _payloads) -> dict:
         """HTTP POST"""
+        self._headers["Content-Type"] = "application/json"
         r = requests.post(
             self.url,
             headers=self._headers,
@@ -53,7 +54,7 @@ class HTTP:
 
     @retry(stop_max_attempt_number=3)
     def patch_data(self, _payloads) -> dict:
-        """HTTP POST"""
+        """HTTP PATCH"""
         r = requests.patch(
             self.url,
             headers=self._headers,
@@ -84,8 +85,19 @@ class UserData:
         return HTTP(url).get_data()
 
     def get_path_labs(self, path_alias: str, params: str) -> list:
-        url = f"{self.base_url}/paths/{path_alias}/labs/{params}"
-        return HTTP(url).get_data()
+        url = f"{self.base_url}/paths/{path_alias}/labs{params}"
+        return HTTP(url).get_data()["labs"]
+
+    def get_course_labs(self, course_alias: str) -> list:
+        url = f"{self.base_url}/courses/{course_alias}/labs"
+        return HTTP(url).get_data()["labs"]
+
+    def set_top_labs(self, path_id: int, labs: list) -> list:
+        url = f"{self.base_url}/paths/{path_id}/top-labs"
+        payloads = {
+            "lab_paths": labs
+        }
+        return HTTP(url).post_data(json.dumps(payloads))
 
 
 class AdminData:
@@ -105,3 +117,7 @@ class AdminData:
     def get_lab_objects(self, params: str) -> list:
         url = f"{self.base_url}/lab_tpl/objects{params}"
         return HTTP(url).get_data()
+
+    def get_show_nomal_paths(self) -> list:
+        url = f"{self.base_url}/path/objects?pagination.current=1&pagination.size=100&filters=%7B%22Type%22%3A%5B0%5D%2C%22IsShow%22%3A%5Btrue%5D%7D&sort.field=id&sort.desc=true"
+        return HTTP(url).get_data()["objects"]
