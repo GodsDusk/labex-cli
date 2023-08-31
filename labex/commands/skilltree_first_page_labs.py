@@ -1,4 +1,3 @@
-import json
 from rich import print
 from .utils.feishu import Feishu
 from .utils.api import UserData, AdminData
@@ -70,15 +69,12 @@ class FirstPageLabs:
             page_size = 50 - len(first_five_labs)
             pro_labs = self.__get_pro_labs(tree_alias, page_size)
             tree_lab_path = first_five_labs + pro_labs
-            print(
-                f"Get {len(tree_lab_path)} labs for {tree_alias}, {len(first_five_labs)} from the first course, {len(pro_labs)} from the pro list."
-            )
             # get real lab path
             real_lab_path = [
                 path_dicts.get(p) for p in tree_lab_path if path_dicts.get(p) != None
             ]
             print(
-                f"Get {len(real_lab_path)} labs will update to first page in skills tree."
+                f"Get {len(tree_lab_path)} labs for [red]{tree_alias}[/red], {len(first_five_labs)} from the first course, {len(pro_labs)} from the pro list. {len(real_lab_path)} labs will update to first page in skills tree."
             )
             if len(real_lab_path) > 0:
                 # update skill tree top labs
