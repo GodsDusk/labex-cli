@@ -78,8 +78,4 @@ class FirstPageLabs:
             )
             if len(real_lab_path) > 0:
                 # update skill tree top labs
-                status_code = self.__user_data.set_top_labs(
-                    path_id=tree_id, labs=real_lab_path
-                )
-                if status_code == 200:
-                    print(f"Update {tree_alias} top labs success.")
+                self.__user_data.set_top_labs(path_id=tree_id, labs=real_lab_path)
