@@ -336,9 +336,15 @@ class SyncPRToFeishu:
                 # 如果 pr_state 为 open
                 if pr_state == "open":
                     # 如果 issue_id 不为 0
-                    if issue_id != 0:
-                        issue = self.github.get_issue(repo_name, issue_id)
-                        issue_user = issue["user"]["login"]
+                    # 或者 pr_labels_list 包含 noissue
+                    if issue_id != 0 or "noissue" in pr_labels_list:
+                        # 如果 issue_id 不为 0
+                        if issue_id != 0:
+                            issue = self.github.get_issue(repo_name, issue_id)
+                            issue_user = issue["user"]["login"]
+                        # 如果 issue_id 为 0
+                        else:
+                            issue_user = "huhuhang"
                         # 判断是否已经测试完成
                         if "Test Completed" in pr_labels_list:
                             # 尝试处理 PR 的 milestone
@@ -466,14 +472,11 @@ class SyncPRToFeishu:
                             print(f"→ PR#{pr_number} is not Test Completed")
                     # 如果 issue_id 为 0
                     else:
-                        if "noissue" in pr_labels_list:
-                            pass
-                        else:
-                            comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue，请你在 PR 描述中按要求添加，如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue，请在 Labels 中选择 `noissue`，系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息，如有疑问可以直接回复本条评论，或者微信联系。"
-                            self.github.comment_pr(repo_name, pr_number, comment)
-                            print(
-                                f"→ No issue id found in {pr_number}, comment to {pr_user}"
-                            )
+                        comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue，请你在 PR 描述中按要求添加，如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue，请在 Labels 中选择 `noissue`，系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息，如有疑问可以直接回复本条评论，或者微信联系。"
+                        self.github.comment_pr(repo_name, pr_number, comment)
+                        print(
+                            f"→ No issue id found in {pr_number}, comment to {pr_user}"
+                        )
                 else:
                     print(
                         f"→ Skipping add Reviewer to PR#{pr_number}, because it's closed."
