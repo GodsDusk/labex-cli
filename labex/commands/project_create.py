@@ -41,7 +41,7 @@ class CreateProject:
             engine = "gpt-35-turbo-16k"
         elif gpt_model == "4":
             engine = "gpt-4"
-        print(f"[yellow]➜ CHATGPT:[/yellow] {engine}")
+        print(f"[yellow]➜ MODEL:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
             deployment_id=engine,
             model=engine,
@@ -104,7 +104,7 @@ class CreateProject:
             engine = "gpt-35-turbo-16k"
         elif gpt_model == "4":
             engine = "gpt-4"
-        print(f"[yellow]➜ CHATGPT:[/yellow] {engine}")
+        print(f"[yellow]➜ MODEL:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
             engine=engine,
             messages=messages,
