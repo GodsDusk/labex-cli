@@ -3,7 +3,6 @@ import json
 import click
 import openai
 from rich import print
-from retrying import retry
 from titlecase import titlecase
 
 
@@ -24,7 +23,6 @@ class CreateProject:
             )
             exit(1)
 
-    @retry(stop_max_attempt_number=2)
     def __chat_gpt(self, prompts: str, gpt_model: str) -> str:
         """ChatGPT API
 
@@ -60,7 +58,6 @@ class CreateProject:
         )
         return response["choices"][0]["message"]["content"]
 
-    @retry(stop_max_attempt_number=2)
     def __chat_gpt_fc(self, prompts: str, gpt_model: str, techstack: str) -> str:
         """ChatGPT Function Call API
 
@@ -113,9 +110,6 @@ class CreateProject:
             messages=messages,
             functions=functions,
             function_call="auto",  # auto is default, but we'll be explicit
-        )
-        print(
-            f"[green]✓ DONE:[/green] {response['model']}-{response['usage']['total_tokens']} tokens used."
         )
         response_message = response["choices"][0]["message"]
         if response_message.get("function_call"):
