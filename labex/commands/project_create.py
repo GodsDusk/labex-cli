@@ -114,6 +114,9 @@ class CreateProject:
             functions=functions,
             function_call="auto",  # auto is default, but we'll be explicit
         )
+        print(
+            f"[green]✓ DONE:[/green] {response['model']}-{response['usage']['total_tokens']} tokens used."
+        )
         response_message = response["choices"][0]["message"]
         if response_message.get("function_call"):
             function_args = json.loads(response_message["function_call"]["arguments"])
