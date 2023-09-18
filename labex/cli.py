@@ -38,7 +38,8 @@ def cli():
     "--check",
     type=bool,
     default=True,
-    help="Check for version updates, default is True.",
+    show_default=True,
+    help="Check for version updates.",
 )
 def login(username, password, check):
     """LOG IN TO LABEX
@@ -86,6 +87,7 @@ lab.add_command(create)
     "--mode",
     type=click.Choice(["create", "close"]),
     default="create",
+    show_default=True,
     help="Set mode to create or close",
 )
 def unverified(mode, repo):
@@ -126,6 +128,7 @@ idx.add_command(title)
     "--path",
     type=str,
     default="./",
+    show_default=True,
     help="Path to index.json files",
     metavar="<path>",
 )
@@ -133,12 +136,14 @@ idx.add_command(title)
     "--type",
     type=click.Choice(["pro", "free"]),
     default="pro",
+    show_default=True,
     help="Set pro or free",
 )
 @click.option(
     "--mode",
     type=str,
     default="cli",
+    show_default=True,
     help="cli mode or not",
 )
 def feetype(path, type, mode):
@@ -190,6 +195,7 @@ idx.add_command(check)
     "--path",
     type=str,
     default="./",
+    show_default=True,
     help="Path to Repo",
     metavar="<path>",
 )
@@ -206,6 +212,7 @@ idx.add_command(contributors)
     "--path",
     type=str,
     default="./",
+    show_default=True,
     help="Path to Repo",
     metavar="<path>",
 )
@@ -213,6 +220,7 @@ idx.add_command(contributors)
     "--mode",
     type=click.Choice(["check", "update"]),
     default="check",
+    show_default=True,
     help="check first, then update",
 )
 def rename(path, mode):
@@ -293,12 +301,21 @@ skt.add_command(fplabs)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-def sync():
+def syc():
     """SYNC SCRIPTS COMMANDS GROUP"""
     pass
 
 
-cli.add_command(sync)
+cli.add_command(syc)
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def feishu():
+    """FEISHU SYNC COMMANDS GROUP"""
+    pass
+
+
+syc.add_command(feishu)
 
 
 @click.command()
@@ -326,14 +343,14 @@ cli.add_command(sync)
     required=True,
     help="Github Repo Name",
 )
-def prtofeishu(appid, appsecret, ghtoken, repo):
+def pr(appid, appsecret, ghtoken, repo):
     """Sync Repo PR to Feishu"""
     SyncPRToFeishu(app_id=appid, app_secret=appsecret, ghtoken=ghtoken).sync_pr(
         repo_name=repo
     )
 
 
-sync.add_command(prtofeishu)
+feishu.add_command(pr)
 
 
 @click.command()
@@ -359,14 +376,15 @@ sync.add_command(prtofeishu)
     "--skip",
     type=bool,
     default=False,
-    help="Skip the labs that have been synced, default is False.",
+    show_default=True,
+    help="Skip the labs that have been synced.",
 )
-def labtofeishu(appid, appsecret, repo, skip):
+def lab(appid, appsecret, repo, skip):
     """Sync Repo labs to Feishu"""
     SyncLabsToFeishu(app_id=appid, app_secret=appsecret, repo=repo).sync_labs(skip=skip)
 
 
-sync.add_command(labtofeishu)
+feishu.add_command(lab)
 
 
 @click.command()
@@ -394,14 +412,14 @@ sync.add_command(labtofeishu)
     required=True,
     help="Github Repo Name",
 )
-def issuetofeishu(appid, appsecret, ghtoken, repo):
+def issue(appid, appsecret, ghtoken, repo):
     """Sync Repo Issues to Feishu"""
     SyncIssuesToFeishu(app_id=appid, app_secret=appsecret, ghtoken=ghtoken).sync_issues(
         repo_name=repo
     )
 
 
-sync.add_command(issuetofeishu)
+feishu.add_command(issue)
 
 # ======================
 # PROJECT COMMANDS GROUP
@@ -409,12 +427,12 @@ sync.add_command(issuetofeishu)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-def project():
+def pro():
     """PROJECT COMMANDS GROUP"""
     pass
 
 
-cli.add_command(project)
+cli.add_command(pro)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
@@ -423,7 +441,7 @@ def create():
     pass
 
 
-project.add_command(create)
+pro.add_command(create)
 
 
 @click.command()
@@ -443,11 +461,13 @@ project.add_command(create)
     "--path",
     type=str,
     default=".",
-    help="path to save the project, default is current path",
+    show_default=True,
+    help="path to save the project.",
 )
 @click.option(
     "--gpt",
     default="35",
+    show_default=True,
     type=click.Choice(["35", "4"]),
     help="gpt model, select from gpt-35-turbo-16k and gpt-4",
 )
@@ -459,8 +479,9 @@ project.add_command(create)
 @click.option(
     "--mode",
     default="fc",
+    show_default=True,
     type=click.Choice(["fc", "md"]),
-    help="how to generate the project using gpt, fc: function call, md: markdown, default is fc",
+    help="how to generate the project using gpt, fc: function call, md: markdown.",
 )
 def code(name, desc, path, gpt, techstack, mode):
     """STEP1: CREATE CODE OF A PROJECT"""
@@ -486,6 +507,7 @@ create.add_command(code)
 @click.option(
     "--gpt",
     default="35",
+    show_default=True,
     type=click.Choice(["35", "4"]),
     help="gpt model, select from gpt-35-turbo-16k and gpt-4",
 )
