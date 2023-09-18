@@ -31,7 +31,7 @@ def cli():
     pass
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option("--username", type=str, help="Username")
 @click.option("--password", type=str, help="Password")
 @click.option(
@@ -77,7 +77,7 @@ def create():
 lab.add_command(create)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--repo",
     type=str,
@@ -123,7 +123,7 @@ def title():
 idx.add_command(title)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--path",
     type=str,
@@ -156,7 +156,7 @@ def feetype(path, type, mode):
 idx.add_command(feetype)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--instance",
     type=str,
@@ -178,7 +178,7 @@ def check(instance):
 idx.add_command(check)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--ghtoken",
     type=str,
@@ -207,7 +207,7 @@ def contributors(ghtoken, repo, path):
 idx.add_command(contributors)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--path",
     type=str,
@@ -245,7 +245,7 @@ def skt():
 cli.add_command(skt)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--appid",
     type=str,
@@ -275,7 +275,7 @@ def notify():
 skt.add_command(notify)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--appid",
     type=str,
@@ -318,7 +318,7 @@ def feishu():
 syc.add_command(feishu)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--appid",
     type=str,
@@ -353,7 +353,7 @@ def pr(appid, appsecret, ghtoken, repo):
 feishu.add_command(pr)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--appid",
     type=str,
@@ -387,7 +387,7 @@ def lab(appid, appsecret, repo, skip):
 feishu.add_command(lab)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--appid",
     type=str,
@@ -444,7 +444,7 @@ def create():
 pro.add_command(create)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--name",
     type=str,
@@ -498,7 +498,7 @@ def code(name, desc, path, gpt, techstack, mode):
 create.add_command(code)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--path",
     type=str,
@@ -519,7 +519,7 @@ def md(path, gpt):
 create.add_command(md)
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.option(
     "--path",
     type=str,
