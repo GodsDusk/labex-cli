@@ -298,7 +298,7 @@ class CreateProject:
         else:
             try:
                 print(f"[yellow]➜ PROJECT:[/yellow] {project_name}")
-                lab_content_prompt = f"Please help me to develop a project using {techstack}: {project_description} It should contain the file name and full codes. The project code must be ensured to be executable."
+                lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description} It should contain the file name and full codes. The project code must be ensured to be executable."
                 print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
                 if mode == "fc":
                     lab_content = self.__chat_gpt_fc(
