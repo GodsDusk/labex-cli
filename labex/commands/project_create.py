@@ -43,7 +43,7 @@ class CreateProject:
             engine = "gpt-35-turbo-16k"
         elif gpt_model == "4":
             engine = "gpt-4"
-        print(f"[yellow]➜ MODEL:[/yellow] {engine}")
+        print(f"[yellow]➜ CHATGPT:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
             deployment_id=engine,
             model=engine,
@@ -107,7 +107,7 @@ class CreateProject:
             engine = "gpt-35-turbo-16k"
         elif gpt_model == "4":
             engine = "gpt-4"
-        print(f"[yellow]➜[/yellow] using {engine}")
+        print(f"[yellow]➜ CHATGPT:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
             engine=engine,
             messages=messages,
@@ -326,9 +326,9 @@ class CreateProject:
                         # save the json
                         with open(f"{path_name}/data.md", "w") as f:
                             f.write(lab_content)
-                        print(f"[green]✓ DONE:[/green] {path_name}")
-            except:
-                print(f"[red]✗ ERROR:[/red] {project_name} failed.")
+                        print(f"[green]✓ SAVE:[/green] {path_name}")
+            except Exception as e:
+                print(f"[red]✗ ERROR:[/red] {project_name} failed, {e}")
                 pass
 
     def create_project_md(self, path: str, gpt_model: str) -> None:
@@ -356,7 +356,7 @@ class CreateProject:
         lab_content = self.__chat_gpt(lab_content_prompt, gpt_model)
         with open(step_raw_path, "w") as f:
             f.write(lab_content)
-            print(f"[green]✓ DONE:[/green] {step_raw_path}")
+            print(f"[green]✓ SAVE:[/green] {step_raw_path}")
 
     def create_project_lab(self, path: str) -> None:
         """STEP3: Create Project Lab
