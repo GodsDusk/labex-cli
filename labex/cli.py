@@ -19,6 +19,8 @@ from .commands.sync_pr_to_feishu import SyncPRToFeishu
 from .commands.sync_labs_to_feishu import SyncLabsToFeishu
 from .commands.sync_issues_to_feishu import SyncIssuesToFeishu
 
+from .commands.project_create import CreateProject
+
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -39,7 +41,7 @@ def cli():
     help="Check for version updates, default is True.",
 )
 def login(username, password, check):
-    """Log in to your LabEx account.
+    """LOG IN TO LABEX
 
     \b
     Support passing in the username and password as parameters. If they do not exist, prompt for login.
@@ -400,6 +402,113 @@ def issuetofeishu(appid, appsecret, ghtoken, repo):
 
 
 sync.add_command(issuetofeishu)
+
+# ======================
+# PROJECT COMMANDS GROUP
+# ======================
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def project():
+    """PROJECT COMMANDS GROUP"""
+    pass
+
+
+cli.add_command(project)
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def create():
+    """CREATE COMMANDS GROUP"""
+    pass
+
+
+project.add_command(create)
+
+
+@click.command()
+@click.option(
+    "--name",
+    type=str,
+    required=True,
+    help="project name",
+)
+@click.option(
+    "--desc",
+    type=str,
+    required=True,
+    help="project description, end with a period.",
+)
+@click.option(
+    "--path",
+    type=str,
+    default=".",
+    help="path to save the project, default is current path",
+)
+@click.option(
+    "--gpt",
+    default="35",
+    type=click.Choice(["35", "4"]),
+    help="gpt model, select from gpt-35-turbo-16k and gpt-4",
+)
+@click.option(
+    "--techstack",
+    type=str,
+    help="it will use in prompt 'develop a project using xxx'",
+)
+@click.option(
+    "--mode",
+    default="fc",
+    type=click.Choice(["fc", "md"]),
+    help="how to generate the project using gpt, fc: function call, md: markdown, default is fc",
+)
+def code(name, desc, path, gpt, techstack, mode):
+    """STEP1: CREATE CODE OF A PROJECT"""
+    CreateProject().create_project_code(
+        path=path,
+        project_name=name,
+        project_description=desc,
+        gpt_model=gpt,
+        techstack=techstack,
+        mode=mode,
+    )
+
+
+create.add_command(code)
+
+
+@click.command()
+@click.option(
+    "--path",
+    type=str,
+    help="path of the project",
+)
+@click.option(
+    "--gpt",
+    default="35",
+    type=click.Choice(["35", "4"]),
+    help="gpt model, select from gpt-35-turbo-16k and gpt-4",
+)
+def md(path, gpt):
+    """STEP2: CREATE PROJECT MARKDOWN BASED ON CODE"""
+    CreateProject().create_project_md(path=path, gpt_model=gpt)
+
+
+create.add_command(md)
+
+
+@click.command()
+@click.option(
+    "--path",
+    type=str,
+    help="path of the project",
+)
+def lab(path):
+    """STEP3: CREATE PROJECT LAB BASED ON MARKDOWN"""
+    CreateProject().create_project_lab(path=path)
+
+
+create.add_command(lab)
 
 if __name__ == "__main__":
     cli()
