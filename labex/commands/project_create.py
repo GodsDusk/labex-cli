@@ -226,7 +226,7 @@ class CreateProject:
             "difficulty": "Beginner",
             "time": step_count * 5,
             "hidden": False,
-            "fee_type": "free",
+            "fee_type": "pro",
             "details": {
                 "steps": steps_config,
                 "intro": {"text": "intro.md", "background": "setup.sh"},
