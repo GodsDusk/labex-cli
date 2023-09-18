@@ -24,7 +24,7 @@ class CreateProject:
             )
             exit(1)
 
-    @retry(stop_max_attempt_number=3)
+    @retry(stop_max_attempt_number=2)
     def __chat_gpt(self, prompts: str, gpt_model: str) -> str:
         """ChatGPT API
 
@@ -60,7 +60,7 @@ class CreateProject:
         )
         return response["choices"][0]["message"]["content"]
 
-    @retry(stop_max_attempt_number=3)
+    @retry(stop_max_attempt_number=2)
     def __chat_gpt_fc(self, prompts: str, gpt_model: str, techstack: str) -> str:
         """ChatGPT Function Call API
 
