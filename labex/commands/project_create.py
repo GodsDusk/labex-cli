@@ -13,6 +13,16 @@ class CreateProject:
         self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
         self.openai_version = "2023-07-01-preview"
+        if self.openai_key is None:
+            print(
+                "[red]✗ ERROR:[/red] AZURE_OPENAI_API_KEY environment variable not set."
+            )
+            exit(1)
+        if self.openai_base is None:
+            print(
+                "[red]✗ ERROR:[/red] AZURE_OPENAI_API_BASE environment variable not set."
+            )
+            exit(1)
 
     @retry(stop_max_attempt_number=3)
     def __chat_gpt(self, prompts: str, gpt_model: str) -> str:
