@@ -183,7 +183,7 @@ class CreateProject:
         # create setup.sh
         setup_path = os.path.join(path, "setup.sh")
         setup_file = open(setup_path, "w")
-        setup_file.write("#!/bin/zsh\nsudo apt-get install python3-tk -y\n")
+        setup_file.write("#!/bin/zsh\n")
         # create stepx.md from lab_steps list
         steps_config = []
         step_count = 0
