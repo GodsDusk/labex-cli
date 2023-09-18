@@ -10,7 +10,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     python_requires=">3.8.0",
-    install_requires=["Click", "rich", "PyGithub", "GitPython", "jsonschema", "pandas", "retrying"],
+    install_requires=["Click", "rich", "PyGithub", "GitPython", "jsonschema", "pandas", "retrying", "openai"],
     entry_points="""
         [console_scripts]
         labex=labex.cli:cli
