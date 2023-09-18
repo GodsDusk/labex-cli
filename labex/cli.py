@@ -483,7 +483,7 @@ pro.add_command(create)
     type=click.Choice(["fc", "md"]),
     help="how to generate the project using gpt, fc: function call, md: markdown.",
 )
-def code(name, desc, path, gpt, techstack, mode):
+def s1(name, desc, path, gpt, techstack, mode):
     """STEP1: CREATE CODE OF A PROJECT"""
     CreateProject().create_project_code(
         path=path,
@@ -495,7 +495,7 @@ def code(name, desc, path, gpt, techstack, mode):
     )
 
 
-create.add_command(code)
+create.add_command(s1)
 
 
 @click.command(no_args_is_help=True)
@@ -511,12 +511,12 @@ create.add_command(code)
     type=click.Choice(["35", "4"]),
     help="gpt model, select from gpt-35-turbo-16k and gpt-4",
 )
-def md(path, gpt):
+def s2(path, gpt):
     """STEP2: CREATE PROJECT MARKDOWN BASED ON CODE"""
     CreateProject().create_project_md(path=path, gpt_model=gpt)
 
 
-create.add_command(md)
+create.add_command(s2)
 
 
 @click.command(no_args_is_help=True)
@@ -525,12 +525,12 @@ create.add_command(md)
     type=str,
     help="path of the project",
 )
-def lab(path):
+def s3(path):
     """STEP3: CREATE PROJECT LAB BASED ON MARKDOWN"""
     CreateProject().create_project_lab(path=path)
 
 
-create.add_command(lab)
+create.add_command(s3)
 
 if __name__ == "__main__":
     cli()
