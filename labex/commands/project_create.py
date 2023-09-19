@@ -184,6 +184,10 @@ class CreateProject:
         setup_path = os.path.join(path, "setup.sh")
         setup_file = open(setup_path, "w")
         setup_file.write("#!/bin/zsh\n")
+        # create solutions folder
+        solutions_folder = os.path.join(path, "solutions")
+        if not os.path.exists(solutions_folder):
+            os.makedirs(solutions_folder)
         # create stepx.md from lab_steps list
         steps_config = []
         step_count = 0
