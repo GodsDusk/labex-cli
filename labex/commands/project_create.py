@@ -41,7 +41,7 @@ class CreateProject:
             engine = "gpt-35-turbo-16k"
         elif gpt_model == "4":
             engine = "gpt-4"
-        print(f"[yellow]➜ MODEL:[/yellow] {engine}")
+        print(f"[yellow]➜ ENGINE:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
             deployment_id=engine,
             model=engine,
@@ -104,7 +104,7 @@ class CreateProject:
             engine = "gpt-35-turbo-16k"
         elif gpt_model == "4":
             engine = "gpt-4"
-        print(f"[yellow]➜ MODEL:[/yellow] {engine}")
+        print(f"[yellow]➜ ENGINE:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
             engine=engine,
             messages=messages,
@@ -302,6 +302,7 @@ class CreateProject:
                 lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description}It should contain the file name and full codes.The project code must be ensured to be executable.The user interface is beautiful and modern."
                 print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
                 if mode == "fc":
+                    print(f"[red]➜ MODE:[/red] Using function call mode.")
                     lab_content = self.__chat_gpt_fc(
                         lab_content_prompt, gpt_model=gpt_model, techstack=techstack
                     )
@@ -316,8 +317,21 @@ class CreateProject:
                         # create code file
                         with open(f"{path_name}/{code_file_name}", "w") as f:
                             f.write(full_codes)
-                        print(f"[green]✓ DONE:[/green] {path_name}")
+                        print(f"[green]✓ SAVE:[/green] {path_name}")
+                    else:
+                        print(f"[red]➜ MODE:[/red] Change to markdown mode.")
+                        lab_content = self.__chat_gpt(
+                            lab_content_prompt, gpt_model=gpt_model
+                        )
+                        if lab_content is not None:
+                            # create the folder
+                            os.mkdir(path_name)
+                            # save the json
+                            with open(f"{path_name}/data.md", "w") as f:
+                                f.write(lab_content)
+                            print(f"[green]✓ SAVE:[/green] {path_name}")
                 elif mode == "md":
+                    print(f"[red]➜ MODE:[/red] Using markdown mode.")
                     lab_content = self.__chat_gpt(
                         lab_content_prompt, gpt_model=gpt_model
                     )
