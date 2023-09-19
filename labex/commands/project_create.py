@@ -352,7 +352,7 @@ class CreateProject:
         """STEP2: Create Project MD
 
         Args:
-            path (str): data.md or data.json path
+            path (str): project folder path
             gpt_model (str): gpt_model
         """
         json_path = os.path.join(path, "data.json")
@@ -379,7 +379,7 @@ class CreateProject:
         """STEP3: Create Project Lab
 
         Args:
-            path (str): step_raw.md path
+            path (str): project folder path
         """
         step_raw_path = os.path.join(path, "step_raw.md")
         if os.path.exists(step_raw_path):
@@ -402,3 +402,61 @@ class CreateProject:
                 os.rename(path, lab_title_lower)
         else:
             print(f"[red]✗ ERROR:[/red] {step_raw_path} not found.")
+
+    def create_course(self, path: str) -> None:
+        """STEP4: Create Course Config
+
+        Args:
+            path (str): project folder path
+        """
+        index_path = os.path.join(path, "index.json")
+        full_index_path = os.path.abspath(index_path)
+        lab_path = full_index_path.split("/projects/")[-1].replace("/index.json", "")
+        print(lab_path)
+        if os.path.exists(index_path):
+            # read index.json
+            with open(index_path, "r") as f:
+                index_content = json.load(f)
+            title = titlecase(index_content["title"])
+            description = index_content["description"]
+            alias = lab_path.split("/")[-1]
+            feetype = index_content["fee_type"]
+            difficulty = index_content["difficulty"]
+            skills = []
+            for step in index_content["details"]["steps"]:
+                for skill in step["skills"]:
+                    skills.append(titlecase(skill.split("/")[0]))
+            skills = list(set(skills))
+            course_config = {
+                "name": title,
+                "description": description,
+                "meta": {
+                    "title": title,
+                    "description": description,
+                },
+                "cover": f"./{alias}.png",
+                "level": difficulty,
+                "alias": [alias],
+                "tags": skills,
+                "priority": 0,
+                "type": "normal",
+                "fee_type": feetype,
+                "lab_coins": 0,
+                "is_orderly": False,
+                "hidden": False,
+                "labs": [
+                    {
+                        "index": 10,
+                        "path": f"labex-labs/project:{lab_path}",
+                        "is_finished": True,
+                    }
+                ],
+            }
+            print(course_config)
+            course_config_path = os.path.join(path, "course.json")
+            with open(course_config_path, "w") as f:
+                json.dump(course_config, f, indent=2, ensure_ascii=False)
+            print(f"[green]✓ DONE:[/green] {course_config_path} created successfully.")
+
+        else:
+            print(f"[red]✗ ERROR:[/red] {index_path} not found.")

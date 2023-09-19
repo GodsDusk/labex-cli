@@ -532,5 +532,19 @@ def s3(path):
 
 create.add_command(s3)
 
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    help="path of the project",
+)
+def s4(path):
+    """STEP4: CREATE COURSE CONFIG BASED ON LAB"""
+    CreateProject().create_course(path=path)
+
+
+create.add_command(s4)
+
 if __name__ == "__main__":
     cli()
