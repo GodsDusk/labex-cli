@@ -172,6 +172,9 @@ class CreateProject:
         for file in os.listdir(path):
             if file != "assets":
                 os.rename(os.path.join(path, file), os.path.join(assets_folder, file))
+                # rm step_raw.md data.json data.md
+                if file in ["step_raw.md", "data.json", "data.md"]:
+                    os.remove(os.path.join(assets_folder, file))
         # create intro.md
         intro_path = os.path.join(path, "intro.md")
         intro_file = open(intro_path, "w")
