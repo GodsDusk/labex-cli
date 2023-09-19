@@ -266,7 +266,9 @@ class CreateProject:
             content = json.load(f)
         title = content["title"]
         code_file_name = content["code_file_name"]
-        full_codes = content["full_codes"]
+        # read the code file
+        with open(f"{os.path.dirname(json_path)}/{code_file_name}", "r") as f:
+            full_codes = f.read()
         lab_content_prompt = f"# {title}\n\nIn this tutorial, you need to create a file named {code_file_name} and write the following code in it:\n\n```\n{full_codes}\n```"
         return lab_content_prompt
 
