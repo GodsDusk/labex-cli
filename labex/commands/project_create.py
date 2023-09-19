@@ -302,7 +302,7 @@ class CreateProject:
                 lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description}It should contain the file name and full codes.The project code must be ensured to be executable.The user interface is beautiful and modern."
                 print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
                 if mode == "fc":
-                    print(f"[yellow]➜ MODE:[/yellow] Using function call mode.")
+                    print(f"[yellow]➜ MODE:[/yellow] Function Call")
                     lab_content = self.__chat_gpt_fc(
                         lab_content_prompt, gpt_model=gpt_model, techstack=techstack
                     )
@@ -331,7 +331,7 @@ class CreateProject:
                                 f.write(lab_content)
                             print(f"[green]✓ SAVE:[/green] {path_name}")
                 elif mode == "md":
-                    print(f"[yellow]➜ MODE:[/yellow] Using markdown mode.")
+                    print(f"[yellow]➜ MODE:[/yellow] Markdown")
                     lab_content = self.__chat_gpt(
                         lab_content_prompt, gpt_model=gpt_model
                     )
