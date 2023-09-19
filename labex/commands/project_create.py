@@ -372,5 +372,13 @@ class CreateProject:
             print(f"[yellow]➜ SUMMA:[/yellow] {lab_summary}")
             if click.confirm(f"➜ Create this lab?"):
                 self.__new_lab(path, lab_title, lab_intro, lab_steps, lab_summary)
+                lab_title_lower = (
+                    lab_title.lower()
+                    .replace(" ", "-")
+                    .replace("/", "-")
+                    .replace(":", "-")
+                )
+                # rename folder to lab_title_lower
+                os.rename(path, os.path.join(path, lab_title_lower))
         else:
             print(f"[red]✗ ERROR:[/red] {step_raw_path} not found.")
