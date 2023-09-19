@@ -89,7 +89,7 @@ class CreateProject:
                         },
                         "full_codes": {
                             "type": "string",
-                            "description": "The full codes of the project.The project code must be ensured to be executable.",
+                            "description": "The full codes of the project. The project code must be ensured to be executable.",
                         },
                     },
                     "required": ["title", "code_file_name", "full_codes"],
@@ -144,7 +144,7 @@ class CreateProject:
         try:
             lab_summary = md_content.split("## Summary")[1].strip()
         except:
-            lab_summary = f"# Summary\n\nCongratulations! You have completed the {lab_title} lab.You can practice more labs in LabEx to improve your skills.\n"
+            lab_summary = f"# Summary\n\nCongratulations! You have completed the {lab_title} lab. You can practice more labs in LabEx to improve your skills.\n"
         return lab_title, lab_intro, lab_steps, lab_summary
 
     def __new_lab(
@@ -299,7 +299,7 @@ class CreateProject:
         else:
             try:
                 print(f"[yellow]➜ PROJECT:[/yellow] {project_name}")
-                lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description}It should contain the file name and full codes.The project code must be ensured to be executable.The user interface is beautiful and modern."
+                lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description} It should contain the file name and full codes. The project code must be ensured to be executable. The user interface is beautiful and modern."
                 print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
                 if mode == "fc":
                     print(f"[yellow]➜ MODE:[/yellow] Function Call")
@@ -365,7 +365,7 @@ class CreateProject:
         else:
             print(f"[red]✗[/red] data.json or data.md not found.")
             exit(1)
-        lab_content_prompt = f'Please revise the following content to a step-by-step tutorial as required.The tutorial only contains the Title, Introduction, Steps, and Summary.The title should begin with "# <Title>", and use Title Case.Introduction, Steps, Summary should begin with "## Introduction", "## Steps", and "## Summary".The complete code needs to be split into multiple steps.Each step should begin with "### Step X: <Step Title>", and the step title should be concise and clear.Each step should contain code blocks, and the code blocks must have code comments and language identifier.Ensure the code is correct and can be executed.Each step should be explained in detail.The first step is to create the project files.The final step is how to run this project.Ensure the authenticity of the content and avoid fabrication.Be sure to include any necessary background information and avoid using technical jargon.Use markdown syntax to output the modified content.This tutorial needs to be completed so that students can complete it step by step.\n\n---\n\n{lab_content}'
+        lab_content_prompt = f'Please revise the following content to a step-by-step tutorial as required. The tutorial only contains the Title, Introduction, Steps, and Summary. The title should begin with "# <Title>", and use Title Case. Introduction, Steps, Summary should begin with "## Introduction", "## Steps", and "## Summary". The complete code needs to be split into multiple steps. Each step should begin with "### Step X: <Step Title>", and the step title should be concise and clear. Each step should contain code blocks, and the code blocks must have code comments and language identifier. Ensure the code is correct and can be executed. Each step should be explained in detail. The first step is to create the project files. The final step is how to run this project. Ensure the authenticity of the content and avoid fabrication. Be sure to include any necessary background information and avoid using technical jargon. Use markdown syntax to output the modified content. This tutorial needs to be completed so that students can complete it step by step.\n\n---\n\n{lab_content}'
         print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
         step_raw_path = os.path.join(path, "step_raw.md")
         lab_content = self.__chat_gpt(lab_content_prompt, gpt_model)
