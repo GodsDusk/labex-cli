@@ -204,7 +204,7 @@ class CreateProject:
             step_title = step_content.split("\n\n")[0].strip()[3:]
             # step index.json config
             step_config = {
-                "title": f"{step_title}",
+                "title": f"{step_title.strip()}",
                 "text": f"step{i+1}.md",
                 "verify": [
                     {
