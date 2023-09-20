@@ -420,7 +420,6 @@ class CreateProject:
             title = titlecase(index_content["title"])
             description = index_content["description"]
             alias = lab_path.split("/")[-1]
-            feetype = index_content["fee_type"]
             difficulty = index_content["difficulty"]
             skills = []
             for step in index_content["details"]["steps"]:
@@ -440,14 +439,14 @@ class CreateProject:
                 "tags": skills,
                 "priority": 0,
                 "type": "normal",
-                "fee_type": feetype,
+                "fee_type": "free",
                 "lab_coins": 0,
                 "is_orderly": False,
                 "hidden": False,
                 "labs": [
                     {
                         "index": 10,
-                        "path": f"labex-labs/project:{lab_path}",
+                        "path": f"labex-labs/projects:{lab_path}",
                         "is_finished": True,
                     }
                 ],
