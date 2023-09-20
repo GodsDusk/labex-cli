@@ -433,7 +433,7 @@ class CreateProject:
                     "title": title,
                     "description": description,
                 },
-                "cover": f"./{alias}.png",
+                "cover": f"./assets/{alias}.png",
                 "level": difficulty,
                 "alias": [alias],
                 "tags": skills,
@@ -451,7 +451,6 @@ class CreateProject:
                     }
                 ],
             }
-            print(course_config)
             course_config_path = os.path.join(path, "course.json")
             with open(course_config_path, "w") as f:
                 json.dump(course_config, f, indent=2, ensure_ascii=False)
