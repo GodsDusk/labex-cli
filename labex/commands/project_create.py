@@ -426,7 +426,6 @@ class CreateProject:
                 for skill in step["skills"]:
                     skills.append(titlecase(skill.split("/")[0]))
             skills = list(set(skills))
-            skills.append("Project")
             course_config = {
                 "name": title,
                 "description": description,
