@@ -303,25 +303,38 @@ class CreateProject:
                 print(f"[yellow]➜ PROJECT:[/yellow] {project_name}")
                 lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description} It should contain the file name and full codes. The project code must be ensured to be executable. The user interface is beautiful and modern."
                 print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
-                if mode == "fc":
-                    print(f"[yellow]➜ MODE:[/yellow] Function Call")
-                    lab_content = self.__chat_gpt_fc(
-                        lab_content_prompt, gpt_model=gpt_model, techstack=techstack
-                    )
-                    if lab_content is not None:
-                        # create the folder
-                        os.mkdir(path_name)
-                        # save the json
-                        with open(f"{path_name}/data.json", "w") as f:
-                            json.dump(lab_content, f, indent=2, ensure_ascii=False)
-                        code_file_name = lab_content["code_file_name"]
-                        full_codes = lab_content["full_codes"]
-                        # create code file
-                        with open(f"{path_name}/{code_file_name}", "w") as f:
-                            f.write(full_codes)
-                        print(f"[green]✓ SAVE:[/green] {path_name}")
-                    else:
-                        print(f"[red]➜ MODE:[/red] Change to markdown mode.")
+                if click.confirm(f"➜ Generate this project using ChatGPT?"):
+                    if mode == "fc":
+                        print(f"[yellow]➜ MODE:[/yellow] Function Call")
+                        lab_content = self.__chat_gpt_fc(
+                            lab_content_prompt, gpt_model=gpt_model, techstack=techstack
+                        )
+                        if lab_content is not None:
+                            # create the folder
+                            os.mkdir(path_name)
+                            # save the json
+                            with open(f"{path_name}/data.json", "w") as f:
+                                json.dump(lab_content, f, indent=2, ensure_ascii=False)
+                            code_file_name = lab_content["code_file_name"]
+                            full_codes = lab_content["full_codes"]
+                            # create code file
+                            with open(f"{path_name}/{code_file_name}", "w") as f:
+                                f.write(full_codes)
+                            print(f"[green]✓ SAVE:[/green] {path_name}")
+                        else:
+                            print(f"[red]➜ MODE:[/red] Change to markdown mode.")
+                            lab_content = self.__chat_gpt(
+                                lab_content_prompt, gpt_model=gpt_model
+                            )
+                            if lab_content is not None:
+                                # create the folder
+                                os.mkdir(path_name)
+                                # save the json
+                                with open(f"{path_name}/data.md", "w") as f:
+                                    f.write(lab_content)
+                                print(f"[green]✓ SAVE:[/green] {path_name}")
+                    elif mode == "md":
+                        print(f"[yellow]➜ MODE:[/yellow] Markdown")
                         lab_content = self.__chat_gpt(
                             lab_content_prompt, gpt_model=gpt_model
                         )
@@ -332,18 +345,6 @@ class CreateProject:
                             with open(f"{path_name}/data.md", "w") as f:
                                 f.write(lab_content)
                             print(f"[green]✓ SAVE:[/green] {path_name}")
-                elif mode == "md":
-                    print(f"[yellow]➜ MODE:[/yellow] Markdown")
-                    lab_content = self.__chat_gpt(
-                        lab_content_prompt, gpt_model=gpt_model
-                    )
-                    if lab_content is not None:
-                        # create the folder
-                        os.mkdir(path_name)
-                        # save the json
-                        with open(f"{path_name}/data.md", "w") as f:
-                            f.write(lab_content)
-                        print(f"[green]✓ SAVE:[/green] {path_name}")
             except Exception as e:
                 print(f"[red]✗ ERROR:[/red] {project_name} failed, {e}")
                 pass
