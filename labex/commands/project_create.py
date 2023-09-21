@@ -448,8 +448,7 @@ class CreateProject:
                 "labs": [
                     {
                         "index": 10,
-                        "path": f"labex-labs/projects:{lab_path}",
-                        "is_finished": True,
+                        "path": f"labex-labs/projects:{lab_path}"
                     }
                 ],
             }
