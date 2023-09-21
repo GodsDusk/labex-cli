@@ -216,6 +216,7 @@ class CreateProject:
                     }
                 ],
                 "skills": [],
+                "solutions": [],
             }
             steps_config.append(step_config)
             step_count += 1
