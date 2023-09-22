@@ -303,6 +303,10 @@ class CreateProject:
             try:
                 print(f"[yellow]➜ PROJECT:[/yellow] {project_name}")
                 lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description} It should contain the file name and full codes. The project code must be ensured to be executable. The user interface is beautiful and modern."
+                # save lab_content_prompt to prompts.md
+                prompts_path = os.path.join(path, "prompts.md")
+                with open(prompts_path, "w") as f:
+                    f.write(lab_content_prompt)
                 print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
                 if click.confirm(f"➜ Generate this project using ChatGPT?"):
                     if mode == "fc":
@@ -370,12 +374,17 @@ class CreateProject:
             print(f"[red]✗[/red] data.json or data.md not found.")
             exit(1)
         lab_content_prompt = f'Please revise the following content to a step-by-step tutorial as required. The tutorial only contains the Title, Introduction, Steps, and Summary. The title should begin with "# <Tutorial Title>", and use Title Case. Introduction, Steps, Summary should begin with "## Introduction", "## Steps", and "## Summary". The complete code needs to be split into multiple steps. Each step should begin with "### Step X: <Step Title>", and the step title should be concise and clear. Each step should contain code blocks, and the code blocks must have code comments and language identifier. Ensure the code is correct and can be executed. Each step requires a detailed explanation of the meaning of the code. The first step is to create the project files. The final step is how to run this project. Ensure the authenticity of the content and avoid fabrication. Be sure to include any necessary background information and avoid using technical jargon. Use markdown syntax to output the modified content. This tutorial needs to be completed so that students can complete it step by step.\n\n---\n\n{lab_content}'
+        # save lab_content_prompt to prompts.md
+        prompts_path = os.path.join(path, "prompts.md")
+        with open(prompts_path, "w") as f:
+            f.write(lab_content_prompt)
         print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
-        step_raw_path = os.path.join(path, "step_raw.md")
-        lab_content = self.__chat_gpt(lab_content_prompt, gpt_model)
-        with open(step_raw_path, "w") as f:
-            f.write(lab_content)
-            print(f"[green]✓ SAVE:[/green] {step_raw_path}")
+        if click.confirm(f"➜ Generate step_raw.md using ChatGPT?"):
+            step_raw_path = os.path.join(path, "step_raw.md")
+            lab_content = self.__chat_gpt(lab_content_prompt, gpt_model)
+            with open(step_raw_path, "w") as f:
+                f.write(lab_content)
+                print(f"[green]✓ SAVE:[/green] {step_raw_path}")
 
     def create_project_lab(self, path: str) -> None:
         """STEP3: Create Project Lab
@@ -445,12 +454,7 @@ class CreateProject:
                 "lab_coins": 0,
                 "is_orderly": False,
                 "hidden": False,
-                "labs": [
-                    {
-                        "index": 10,
-                        "path": f"labex-labs/projects:{lab_path}"
-                    }
-                ],
+                "labs": [{"index": 10, "path": f"labex-labs/projects:{lab_path}"}],
             }
             course_config_path = os.path.join(path, "course.json")
             with open(course_config_path, "w") as f:
