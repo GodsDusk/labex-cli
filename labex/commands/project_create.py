@@ -409,8 +409,12 @@ class CreateProject:
                     .replace("/", "-")
                     .replace(":", "-")
                 )
+                if lab_title_lower.startswith("project-"):
+                    lab_folder_name = lab_title_lower
+                else:
+                    lab_folder_name = f"project-{lab_title_lower}"
                 # rename folder to lab_title_lower
-                os.rename(path, lab_title_lower)
+                os.rename(path, lab_folder_name)
         else:
             print(f"[red]✗ ERROR:[/red] {step_raw_path} not found.")
 
