@@ -225,7 +225,7 @@ class CreateProject:
         index_file = open(index_path, "w")
         # index.json config template
         index_config = {
-            "type": "lab",
+            "type": "project",
             "title": lab_title,
             "description": lab_intro,
             "difficulty": "Beginner",
