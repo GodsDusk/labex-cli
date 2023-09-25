@@ -541,10 +541,31 @@ create.add_command(s3)
 )
 def s4(path):
     """STEP4: CREATE COURSE CONFIG BASED ON LAB"""
-    CreateProject().create_course(path=path)
+    CreateProject().create_course_json(path=path)
 
 
 create.add_command(s4)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    help="path of the project",
+)
+@click.option(
+    "--gpt",
+    default="35",
+    show_default=True,
+    type=click.Choice(["35", "4"]),
+    help="gpt model, select from gpt-35-turbo-16k and gpt-4",
+)
+def s5(path, gpt):
+    """STEP4: CREATE COURSE INTRUDUCTION BASED ON LAB"""
+    CreateProject().create_course_intro(path=path, gpt_model=gpt)
+
+
+create.add_command(s5)
 
 if __name__ == "__main__":
     cli()

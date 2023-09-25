@@ -273,6 +273,41 @@ class CreateProject:
         lab_content_prompt = f"# {title}\n\nIn this tutorial, you need to create a file named {code_file_name} and write the following code in it:\n\n```\n{full_codes}\n```"
         return lab_content_prompt
 
+    def __count_step_file(self, path: str) -> int:
+        """Count the number of step files
+
+        Args:
+            path (str): project folder path
+
+        Returns:
+            int: number of step files
+        """
+        count = 0
+        for file in os.listdir(path):
+            if file.startswith("step") and file.endswith(".md"):
+                count += 1
+        return count
+
+    def __combine_step_file(self, path: str) -> str:
+        """Combine all step files into one file
+
+        Args:
+            path (str): project folder path
+
+        Returns:
+            str: combined step file content
+        """
+        step_file_count = self.__count_step_file(path)
+        for i in range(1, step_file_count + 1):
+            step_file_path = f"{path}/step{i}.md"
+            with open(step_file_path, "r") as f:
+                step_file_content = f.read()
+            if i == 1:
+                combined_step_file_content = step_file_content
+            else:
+                combined_step_file_content += f"\n\n#{step_file_content}"
+        return combined_step_file_content
+
     def create_project_code(
         self,
         path: str,
@@ -418,7 +453,7 @@ class CreateProject:
         else:
             print(f"[red]✗ ERROR:[/red] {step_raw_path} not found.")
 
-    def create_course(self, path: str) -> None:
+    def create_course_json(self, path: str) -> None:
         """STEP4: Create Course Config
 
         Args:
@@ -467,3 +502,59 @@ class CreateProject:
 
         else:
             print(f"[red]✗ ERROR:[/red] {index_path} not found.")
+
+    def create_course_intro(self, path: str, gpt_model: str) -> None:
+        index_path = f"{path}/index.json"
+        # read index.json
+        with open(index_path, "r") as f:
+            index_content = json.load(f)
+        lab_title = index_content["title"]
+        lab_intro_path = f"{path}/intro.md"
+        # read intro.md
+        with open(lab_intro_path, "r") as f:
+            lab_intro = f.read()
+        step_file_content = self.__combine_step_file(path)
+        lab_intro_prompt = f"""\
+There is a programming tutorial named {lab_title}
+
+---
+
+# {lab_title}
+
+#{step_file_content}
+
+---
+
+Please complete the introduction.md below:
+
+```markdown
+{lab_intro}
+
+## Tasks
+
+In this project, you will learn to:
+
+- 
+
+## Skills
+
+In this project, you will learn:
+
+- 
+
+```
+"""
+        # save lab_intro_prompt to prompts.md
+        prompts_path = os.path.join(path, "prompts.md")
+        with open(prompts_path, "w") as f:
+            f.write(lab_intro_prompt)
+        print(f"[yellow]➜ PROMPTS:[/yellow] {lab_intro_prompt}")
+        if click.confirm(f"➜ Generate new intro.md using ChatGPT?"):
+            new_lab_intro = self.__chat_gpt(lab_intro_prompt, gpt_model)
+            print(f"[yellow]➜ NEW INTRO:[/yellow] \n\n{new_lab_intro}")
+            if click.confirm(f"➜ Replace intro.md?"):
+                with open(lab_intro_path, "w") as f:
+                    f.write(new_lab_intro)
+                    print(
+                        f"[green]✓ DONE:[/green] {lab_intro_path} replaced successfully."
+                    )
