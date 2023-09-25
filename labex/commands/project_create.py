@@ -504,12 +504,12 @@ class CreateProject:
             print(f"[red]✗ ERROR:[/red] {index_path} not found.")
 
     def create_course_intro(self, path: str, gpt_model: str) -> None:
-        index_path = f"{path}/index.json"
+        index_path = os.path.join(path, "index.json")
         # read index.json
         with open(index_path, "r") as f:
             index_content = json.load(f)
         lab_title = index_content["title"]
-        lab_intro_path = f"{path}/intro.md"
+        lab_intro_path = os.path.join(path, "intro.md")
         # read intro.md
         with open(lab_intro_path, "r") as f:
             lab_intro = f.read()
