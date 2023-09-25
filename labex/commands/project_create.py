@@ -483,6 +483,7 @@ class CreateProject:
                     "title": title,
                     "description": description,
                 },
+                "intro": "intro.md",
                 "cover": f"./assets/{alias}.png",
                 "level": difficulty,
                 "alias": [alias],
@@ -540,7 +541,7 @@ In this project, you will learn to:
 
 In this project, you will learn:
 
-- 
+- How to
 
 ```
 """
