@@ -453,7 +453,7 @@ class CreateProject:
                 "alias": [alias],
                 "tags": skills,
                 "priority": 0,
-                "type": "normal",
+                "type": "project",
                 "fee_type": "free",
                 "lab_coins": 0,
                 "is_orderly": False,
