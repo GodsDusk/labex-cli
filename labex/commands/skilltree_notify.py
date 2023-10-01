@@ -32,6 +32,7 @@ class SkillTreeNotify:
         skill_trees = [st for st in skill_trees if st["alias"] != "alibabacloud"]
         # delete labs_count < 20
         skill_trees = [st for st in skill_trees if st["labs_count"] >= 20]
+        print(f"[bold green]→[/bold green] Found {len(skill_trees)} existed skilltrees after filter")
         return skill_trees
 
     def __random_labs(self, path_alias: str, page: int) -> list:
