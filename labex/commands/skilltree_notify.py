@@ -28,6 +28,10 @@ class SkillTreeNotify:
                     "labs_count": path["labs_count"] + path["challenges_count"],
                 }
             )
+        # delete alibabacloud
+        skill_trees = [st for st in skill_trees if st["alias"] != "alibabacloud"]
+        # delete labs_count < 20
+        skill_trees = [st for st in skill_trees if st["labs_count"] >= 20]
         return skill_trees
 
     def __random_labs(self, path_alias: str, page: int) -> list:
