@@ -358,6 +358,7 @@ class SyncPRToFeishu:
                             "PR_NUM": pr_number,
                             "PR_STATE": pr_state.upper(),
                             "PR_LABELS": pr_labels_list,
+                            "REPO_NAME": repo_name,
                             "ASSIGNEES": assignees_list,
                             "MILESTONE": milestone,
                             "CHANGES_REQUESTED": changes_requested_by,

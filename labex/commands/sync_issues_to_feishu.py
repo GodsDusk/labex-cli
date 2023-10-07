@@ -164,6 +164,7 @@ class SyncIssuesToFeishu:
                             "text": "OPEN IN GITHUB",
                         },
                         "ASSIGNEES": assignees,
+                        "REPO_NAME": repo_name,
                         "ISSUE_LABELS": issues_labels,
                         "SCENARIO_SKILLS": skills_record_ids,
                         "SKILLS": skills,
