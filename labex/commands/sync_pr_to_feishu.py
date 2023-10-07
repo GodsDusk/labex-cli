@@ -294,7 +294,7 @@ class SyncPRToFeishu:
         feishu_not_closed_pr_nums = [
             str(r["fields"]["PR_NUM"])
             for r in records
-            if r["fields"]["PR_STATE"] == "OPEN"
+            if r["fields"]["PR_STATE"] == "OPEN" and r["fields"]["REPO_NAME"] == repo_name
         ]
         print(f"[green]→[/green] Found {len(feishu_not_closed_pr_nums)} OPEN PR in Feishu.")
         # 忽略已经关闭的 PR

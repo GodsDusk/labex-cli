@@ -92,7 +92,7 @@ class SyncIssuesToFeishu:
         feishu_not_closed_issue_nums = [
             str(r["fields"]["ISSUE_NUM"])
             for r in records
-            if r["fields"]["ISSUE_STATE"] == "OPEN"
+            if r["fields"]["ISSUE_STATE"] == "OPEN" and r["fields"]["REPO_NAME"] == repo_name
         ]
         print(f"Found {len(feishu_not_closed_issue_nums)} OPEN ISSUE in Feishu.")
         # 忽略已经关闭的 ISSUE
