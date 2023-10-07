@@ -3,6 +3,7 @@ import json
 import requests
 from datetime import datetime, timedelta
 from .utils.feishu import Feishu
+from rich import print
 
 
 class GitHub:
@@ -69,7 +70,7 @@ class GitHub:
 
         while True:
             params["page"] = page
-            print(f"Fetching page {page} of pulls...")
+            print(f"→ Fetching page {page} of pulls...")
             response = requests.get(url, headers=headers, params=params)
             if response.status_code != 200:
                 raise Exception(
@@ -273,7 +274,7 @@ class SyncPRToFeishu:
 
     def sync_pr(self, repo_name: str) -> None:
         print(f"Syncing PR to Feishu...")
-        print(f"→ Repo: {repo_name}")
+        print(f"[green]→[/green] Repo: {repo_name}")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
@@ -282,20 +283,20 @@ class SyncPRToFeishu:
         num_id_dicts = {r["fields"]["PR_NUM"]: r["record_id"] for r in records}
         # Get all pr from github
         pr_list = self.github.get_pr_list(repo_name)
-        print(f"Found {len(pr_list)} PR in GitHub.")
+        print(f"[green]→[/green] Found {len(pr_list)} PR in GitHub.")
         # Get all milestone from github
         milestones = self.github.list_milestone(repo_name)
-        print(f"Found {len(milestones)} milestone in GitHub.")
+        print(f"[green]→[/green] Found {len(milestones)} milestone in GitHub.")
         # List all collaborators
         collaborators = self.github.list_collaborators(repo_name)
-        print(f"Found {len(collaborators)} collaborators in {repo_name}.")
+        print(f"[green]→[/green] Found {len(collaborators)} collaborators in {repo_name}.")
         # Feishu 未关闭的 PR
         feishu_not_closed_pr_nums = [
             str(r["fields"]["PR_NUM"])
             for r in records
             if r["fields"]["PR_STATE"] == "OPEN"
         ]
-        print(f"Found {len(feishu_not_closed_pr_nums)} OPEN PR in Feishu.")
+        print(f"[green]→[/green] Found {len(feishu_not_closed_pr_nums)} OPEN PR in Feishu.")
         # 忽略已经关闭的 PR
         pr_list = [
             pr
@@ -304,7 +305,7 @@ class SyncPRToFeishu:
         ]
         # 忽略 locked 的 PR
         pr_list = [pr for pr in pr_list if pr["locked"] == False]
-        print(f"Processing {len(pr_list)} OPEN PR...")
+        print(f"→ Processing {len(pr_list)} OPEN PR...")
         for pr in pr_list:
             try:
                 # Parse and Update index.json
@@ -323,7 +324,7 @@ class SyncPRToFeishu:
                     pr_labels_list = []
                 else:
                     pr_labels_list = [l["name"] for l in pr_labels]
-                print(f"Processing PR#{pr_number}...")
+                print(f"[green]→[/green] Processing PR#{pr_number}...")
                 print(f"→ https://github.com/{repo_name}/pull/{pr_number}")
                 index_json, lab_path = self.pr_index_json(repo_name, pr_number)
                 if index_json != None:
