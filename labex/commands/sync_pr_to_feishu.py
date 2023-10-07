@@ -126,12 +126,14 @@ class GitHub:
                 {
                     "title": title,
                     "state": "open",
-                    "description": None,
                     "due_on": due_on,
                 }
             ),
         )
-        print(f"→ Creating milestone {title}, due_on {due_on}")
+        if r.status_code == 201:
+            print(f"→ Creating milestone {title}, due_on {due_on}, SUCCESS.")
+        else:
+            print(f"→ Creating milestone {title}, due_on {due_on}, FAILED.")
         return r.json()
 
     def list_collaborators(self, repo_name: str) -> list:
@@ -270,6 +272,8 @@ class SyncPRToFeishu:
         return issue_id
 
     def sync_pr(self, repo_name: str) -> None:
+        print(f"Syncing PR to Feishu...")
+        print(f"→ Repo: {repo_name}")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
@@ -320,6 +324,7 @@ class SyncPRToFeishu:
                 else:
                     pr_labels_list = [l["name"] for l in pr_labels]
                 print(f"Processing PR#{pr_number}...")
+                print(f"→ https://github.com/{repo_name}/pull/{pr_number}")
                 index_json, lab_path = self.pr_index_json(repo_name, pr_number)
                 if index_json != None:
                     lab_title = index_json.get("title")
@@ -412,9 +417,8 @@ class SyncPRToFeishu:
                                 pr_milestone_number = milestones.get(
                                     date_milestone_str, None
                                 )
-                                # 如果 milestone 不存在, 则创建, 最多尝试 3 次
-                                create_times = 0
-                                while pr_milestone_number == None and create_times < 3:
+                                # 如果 milestone 不存在, 则创建
+                                if pr_milestone_number == None:
                                     # 获取周日日期
                                     due_on = self.sunday_of_date(pr["updated_at"])
                                     # 创建 milestone
@@ -426,7 +430,6 @@ class SyncPRToFeishu:
                                     pr_milestone_number = milestones.get(
                                         date_milestone_str, None
                                     )
-                                    create_times += 1
                             # 测试完成, 如果 issue user 不等于 pr_user
                             # 且 issue user 在 collaborators 里
                             if issue_user != pr_user:
