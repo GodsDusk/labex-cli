@@ -476,6 +476,10 @@ class CreateProject:
                 for skill in step["skills"]:
                     skills.append(titlecase(skill.split("/")[0]))
             skills = list(set(skills))
+            # parse skills
+            if "Js" in skills:
+                skills.remove("Js")
+                skills.append("JavaScript")
             course_config = {
                 "name": title,
                 "description": description,
