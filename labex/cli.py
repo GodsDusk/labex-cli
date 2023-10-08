@@ -4,6 +4,7 @@ from .commands.utils.auth import LabExLogin
 
 from .commands.lab_create import CreateLab
 from .commands.lab_unverified import LabForTesting
+from .commands.lab_translate import LabTranslator
 
 from .commands.index_check import CheckIndexValidation
 from .commands.index_update_title import UpdateIndexTitle
@@ -97,6 +98,28 @@ def unverified(mode, repo):
 
 
 lab.add_command(unverified)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    help="Path to lab files",
+    metavar="<path>",
+)
+@click.option(
+    "--gpt",
+    default="35",
+    show_default=True,
+    type=click.Choice(["35", "4"]),
+    help="gpt model, select from gpt-35-turbo-16k and gpt-4",
+)
+def translate(path, gpt):
+    """TRANSLATE LAB FILES"""
+    LabTranslator().translate(file_path=path, gpt_model=gpt)
+
+
+lab.add_command(translate)
 
 # =========================
 # INDEX JSON COMMANDS GROUP

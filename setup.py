@@ -20,6 +20,8 @@ setup(
         "retrying",
         "openai",
         "titlecase",
+        "langchain",
+        "tiktoken",
     ],
     entry_points="""
         [console_scripts]
