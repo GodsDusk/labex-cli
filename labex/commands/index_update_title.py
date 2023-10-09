@@ -2,7 +2,7 @@ import os
 import json
 import click
 from rich import print
-from .utils.titlecase import titlecase
+from titlecase import titlecase
 
 
 class UpdateIndexTitle:

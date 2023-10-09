@@ -343,38 +343,27 @@ class CreateProject:
                 with open(prompts_path, "w") as f:
                     f.write(lab_content_prompt)
                 print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
-                if click.confirm(f"➜ Generate this project using ChatGPT?"):
-                    if mode == "fc":
-                        print(f"[yellow]➜ MODE:[/yellow] Function Call")
-                        lab_content = self.__chat_gpt_fc(
-                            lab_content_prompt, gpt_model=gpt_model, techstack=techstack
-                        )
-                        if lab_content is not None:
-                            # create the folder
-                            os.mkdir(path_name)
-                            # save the json
-                            with open(f"{path_name}/data.json", "w") as f:
-                                json.dump(lab_content, f, indent=2, ensure_ascii=False)
-                            code_file_name = lab_content["code_file_name"]
-                            full_codes = lab_content["full_codes"]
-                            # create code file
-                            with open(f"{path_name}/{code_file_name}", "w") as f:
-                                f.write(full_codes)
-                            print(f"[green]✓ SAVE:[/green] {path_name}")
-                        else:
-                            print(f"[red]➜ MODE:[/red] Change to markdown mode.")
-                            lab_content = self.__chat_gpt(
-                                lab_content_prompt, gpt_model=gpt_model
-                            )
-                            if lab_content is not None:
-                                # create the folder
-                                os.mkdir(path_name)
-                                # save the json
-                                with open(f"{path_name}/data.md", "w") as f:
-                                    f.write(lab_content)
-                                print(f"[green]✓ SAVE:[/green] {path_name}")
-                    elif mode == "md":
-                        print(f"[yellow]➜ MODE:[/yellow] Markdown")
+                if not click.confirm(f"➜ Generate this project using ChatGPT?"):
+                    return
+                if mode == "fc":
+                    print(f"[yellow]➜ MODE:[/yellow] Function Call")
+                    lab_content = self.__chat_gpt_fc(
+                        lab_content_prompt, gpt_model=gpt_model, techstack=techstack
+                    )
+                    if lab_content is not None:
+                        # create the folder
+                        os.mkdir(path_name)
+                        # save the json
+                        with open(f"{path_name}/data.json", "w") as f:
+                            json.dump(lab_content, f, indent=2, ensure_ascii=False)
+                        code_file_name = lab_content["code_file_name"]
+                        full_codes = lab_content["full_codes"]
+                        # create code file
+                        with open(f"{path_name}/{code_file_name}", "w") as f:
+                            f.write(full_codes)
+                        print(f"[green]✓ SAVE:[/green] {path_name}")
+                    else:
+                        print(f"[red]➜ MODE:[/red] Change to markdown mode.")
                         lab_content = self.__chat_gpt(
                             lab_content_prompt, gpt_model=gpt_model
                         )
@@ -385,6 +374,18 @@ class CreateProject:
                             with open(f"{path_name}/data.md", "w") as f:
                                 f.write(lab_content)
                             print(f"[green]✓ SAVE:[/green] {path_name}")
+                elif mode == "md":
+                    print(f"[yellow]➜ MODE:[/yellow] Markdown")
+                    lab_content = self.__chat_gpt(
+                        lab_content_prompt, gpt_model=gpt_model
+                    )
+                    if lab_content is not None:
+                        # create the folder
+                        os.mkdir(path_name)
+                        # save the json
+                        with open(f"{path_name}/data.md", "w") as f:
+                            f.write(lab_content)
+                        print(f"[green]✓ SAVE:[/green] {path_name}")
             except Exception as e:
                 print(f"[red]✗ ERROR:[/red] {project_name} failed, {e}")
                 pass
@@ -414,12 +415,13 @@ class CreateProject:
         with open(prompts_path, "w") as f:
             f.write(lab_content_prompt)
         print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
-        if click.confirm(f"➜ Generate step_raw.md using ChatGPT?"):
-            step_raw_path = os.path.join(path, "step_raw.md")
-            lab_content = self.__chat_gpt(lab_content_prompt, gpt_model)
-            with open(step_raw_path, "w") as f:
-                f.write(lab_content)
-                print(f"[green]✓ SAVE:[/green] {step_raw_path}")
+        if not click.confirm(f"➜ Generate step_raw.md using ChatGPT?"):
+            return
+        step_raw_path = os.path.join(path, "step_raw.md")
+        lab_content = self.__chat_gpt(lab_content_prompt, gpt_model)
+        with open(step_raw_path, "w") as f:
+            f.write(lab_content)
+            print(f"[green]✓ SAVE:[/green] {step_raw_path}")
 
     def create_project_lab(self, path: str) -> None:
         """STEP3: Create Project Lab
@@ -436,20 +438,21 @@ class CreateProject:
             print(f"[yellow]➜ INTRO:[/yellow] {lab_intro}")
             print(f"[yellow]➜ STEPS:[/yellow] {len(lab_steps)} steps")
             print(f"[yellow]➜ SUMMA:[/yellow] {lab_summary}")
-            if click.confirm(f"➜ Create this lab?"):
-                self.__new_lab(path, lab_title, lab_intro, lab_steps, lab_summary)
-                lab_title_lower = (
-                    lab_title.lower()
-                    .replace(" ", "-")
-                    .replace("/", "-")
-                    .replace(":", "-")
-                )
-                if lab_title_lower.startswith("project-"):
-                    lab_folder_name = lab_title_lower
-                else:
-                    lab_folder_name = f"project-{lab_title_lower}"
-                # rename folder to lab_title_lower
-                os.rename(path, lab_folder_name)
+            if not click.confirm(f"➜ Create this lab?"):
+                return
+            self.__new_lab(path, lab_title, lab_intro, lab_steps, lab_summary)
+            lab_title_lower = (
+                lab_title.lower()
+                .replace(" ", "-")
+                .replace("/", "-")
+                .replace(":", "-")
+            )
+            if lab_title_lower.startswith("project-"):
+                lab_folder_name = lab_title_lower
+            else:
+                lab_folder_name = f"project-{lab_title_lower}"
+            # rename folder to lab_title_lower
+            os.rename(path, lab_folder_name)
         else:
             print(f"[red]✗ ERROR:[/red] {step_raw_path} not found.")
 

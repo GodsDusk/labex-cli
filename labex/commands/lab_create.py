@@ -2,7 +2,7 @@ import os
 import json
 from rich.prompt import Prompt
 from rich import print
-from .utils.titlecase import titlecase
+from titlecase import titlecase
 
 
 class CreateLab:

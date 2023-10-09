@@ -7,7 +7,7 @@ from rich.progress import track
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-class LabTranslator:
+class MDTranslator:
     def __init__(self):
         # split text into chunks
         self.tokenizer = tiktoken.get_encoding("cl100k_base")

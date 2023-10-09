@@ -4,7 +4,9 @@ from .commands.utils.auth import LabExLogin
 
 from .commands.lab_create import CreateLab
 from .commands.lab_unverified import LabForTesting
-from .commands.lab_translate import LabTranslator
+
+from .commands.md_translate import MDTranslator
+from .commands.md_split import MDSplitter
 
 from .commands.index_check import CheckIndexValidation
 from .commands.index_update_title import UpdateIndexTitle
@@ -100,11 +102,25 @@ def unverified(mode, repo):
 lab.add_command(unverified)
 
 
+# ==================
+# MD COMMANDS GROUP
+# ==================
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def md():
+    """MD COMMANDS GROUP"""
+    pass
+
+
+cli.add_command(md)
+
+
 @click.command(no_args_is_help=True)
 @click.option(
     "--path",
     type=str,
-    help="Path to lab files",
+    help="Path to md file",
     metavar="<path>",
 )
 @click.option(
@@ -115,11 +131,26 @@ lab.add_command(unverified)
     help="gpt model, select from gpt-35-turbo-16k and gpt-4",
 )
 def translate(path, gpt):
-    """TRANSLATE LAB FILES"""
-    LabTranslator().translate(file_path=path, gpt_model=gpt)
+    """TRANSLATE MD FILE"""
+    MDTranslator().translate(file_path=path, gpt_model=gpt)
 
 
-lab.add_command(translate)
+md.add_command(translate)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    help="Path to md file",
+    metavar="<path>",
+)
+def split(path):
+    """SPLITE MD FILE"""
+    MDSplitter().new_lab(md_path=path)
+
+
+md.add_command(split)
 
 # =========================
 # INDEX JSON COMMANDS GROUP
