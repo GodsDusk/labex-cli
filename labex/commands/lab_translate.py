@@ -3,6 +3,7 @@ import click
 import openai
 import tiktoken
 from rich import print
+from rich.progress import track
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -76,6 +77,8 @@ class LabTranslator:
         Returns:
             chunks: chunks
         """
+        tokens = self.tokenizer.encode(text, disallowed_special=())
+        print(f"[yellow]➜ TOKENS:[/yellow] {len(tokens)}")
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunk_size,
             chunk_overlap=5,
@@ -98,8 +101,7 @@ class LabTranslator:
         print(f"[yellow]➜ CHUNKS:[/yellow] {len(chunks)}")
         text_translated = ""
         if click.confirm("Start translating?"):
-            print("[yellow]➜ TRANSLATING...[/yellow]")
-            for chunk in chunks:
+            for chunk in track(chunks, description="➜ Translating"):
                 text_translated += self.__chat_gpt(chunk, gpt_model)
         return text_translated
 
@@ -119,7 +121,10 @@ class LabTranslator:
             text = f.read()
         text_translated = self.__translate_text(text, gpt_model)
         # save translated text
-        file_path_translated = file_path + ".translated"
+        file_name = os.path.basename(file_path)
+        file_suffix = os.path.splitext(file_name)[-1]
+        new_file_name = file_name.replace(file_suffix, f".en{file_suffix}")
+        file_path_translated = os.path.join(os.path.dirname(file_path), new_file_name)
         with open(file_path_translated, "w", encoding="utf-8") as f:
             f.write(text_translated)
         print(f"[green]✓ DONE:[/green] {file_path_translated}")
