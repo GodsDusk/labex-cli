@@ -170,13 +170,15 @@ class MDSplitter:
         # create solutions folder
         solution_folder = f"{lab_slug}/solutions"
         os.mkdir(solution_folder)
+        # convert lab_intro to one line string and select first sentence as description
+        lab_description = lab_intro.replace("\n", " ").split(".")[0]
         # create index.json
         base_file = open(f"{lab_slug}/index.json", "w")
         # index.json config template
         base_config = {
             "type": "lab",
             "title": lab_title,
-            "description": "",
+            "description": lab_description,
             "difficulty": "Beginner",
             "time": step_count * 5,
             "hidden": False,
