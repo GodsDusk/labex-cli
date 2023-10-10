@@ -1,3 +1,4 @@
+import os
 import click
 from .commands.utils.version import CheckUpdate
 from .commands.utils.auth import LabExLogin
@@ -132,7 +133,11 @@ cli.add_command(md)
 )
 def translate(path, gpt):
     """TRANSLATE MD FILE"""
-    MDTranslator().translate(file_path=path, gpt_model=gpt)
+    translator = MDTranslator(gpt_model=gpt)
+    if os.path.isfile(path):
+        translator.translate_md(path)
+    elif os.path.isdir(path):
+        translator.translate_lab(path)
 
 
 md.add_command(translate)
@@ -539,11 +544,10 @@ pro.add_command(create)
 )
 def s1(name, desc, path, gpt, techstack, mode):
     """STEP1: CREATE CODE OF A PROJECT"""
-    CreateProject().create_project_code(
+    CreateProject(gpt_model=gpt).create_project_code(
         path=path,
         project_name=name,
         project_description=desc,
-        gpt_model=gpt,
         techstack=techstack,
         mode=mode,
     )
@@ -567,7 +571,7 @@ create.add_command(s1)
 )
 def s2(path, gpt):
     """STEP2: CREATE PROJECT MARKDOWN BASED ON CODE"""
-    CreateProject().create_project_md(path=path, gpt_model=gpt)
+    CreateProject(gpt_model=gpt).create_project_md(path=path)
 
 
 create.add_command(s2)
@@ -616,7 +620,7 @@ create.add_command(s4)
 )
 def s5(path, gpt):
     """STEP4: CREATE COURSE INTRUDUCTION BASED ON LAB"""
-    CreateProject().create_course_intro(path=path, gpt_model=gpt)
+    CreateProject(gpt_model=gpt).create_course_intro(path=path)
 
 
 create.add_command(s5)

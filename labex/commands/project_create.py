@@ -7,7 +7,7 @@ from titlecase import titlecase
 
 
 class CreateProject:
-    def __init__(self):
+    def __init__(self, gpt_model: str):
         self.openai_type = "azure"
         self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
@@ -22,13 +22,18 @@ class CreateProject:
                 "[red]✗ ERROR:[/red] AZURE_OPENAI_API_BASE environment variable not set."
             )
             exit(1)
+        # gpt model
+        if gpt_model == "35":
+            self.engine = "gpt-35-turbo-16k"
+        elif gpt_model == "4":
+            self.engine = "gpt-4"
 
-    def __chat_gpt(self, prompts: str, gpt_model: str) -> str:
+    def __chat_gpt(self, prompts: str) -> str:
         """ChatGPT API
 
         Args:
             prompts (str): prompts
-            gpt_model (str): gpt_model
+
 
         Returns:
             str: response
@@ -37,14 +42,9 @@ class CreateProject:
         openai.api_key = self.openai_key
         openai.api_base = self.openai_base
         openai.api_version = self.openai_version
-        if gpt_model == "35":
-            engine = "gpt-35-turbo-16k"
-        elif gpt_model == "4":
-            engine = "gpt-4"
-        print(f"[yellow]➜ ENGINE:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
-            deployment_id=engine,
-            model=engine,
+            deployment_id=self.engine,
+            model=self.engine,
             messages=[
                 {
                     "role": "system",
@@ -54,16 +54,15 @@ class CreateProject:
             ],
         )
         print(
-            f"[green]✓ DONE:[/green] {response['model']}-{response['usage']['total_tokens']} tokens used."
+            f"[green]✓ {response['model'].upper()}:[/green] {response['usage']['total_tokens']} TOKENS."
         )
         return response["choices"][0]["message"]["content"]
 
-    def __chat_gpt_fc(self, prompts: str, gpt_model: str, techstack: str) -> str:
+    def __chat_gpt_fc(self, prompts: str, techstack: str) -> str:
         """ChatGPT Function Call API
 
         Args:
             prompts (str): prompts
-            gpt_model (str): gpt_model
             techstack (str): techstack for prompts
 
         Returns:
@@ -100,13 +99,8 @@ class CreateProject:
         openai.api_key = self.openai_key
         openai.api_base = self.openai_base
         openai.api_version = self.openai_version
-        if gpt_model == "35":
-            engine = "gpt-35-turbo-16k"
-        elif gpt_model == "4":
-            engine = "gpt-4"
-        print(f"[yellow]➜ ENGINE:[/yellow] {engine}")
         response = openai.ChatCompletion.create(
-            engine=engine,
+            engine=self.engine,
             messages=messages,
             functions=functions,
             function_call="auto",  # auto is default, but we'll be explicit
@@ -313,7 +307,6 @@ class CreateProject:
         path: str,
         project_name: str,
         project_description: str,
-        gpt_model: str,
         techstack: str,
         mode: str,
     ) -> None:
@@ -323,7 +316,6 @@ class CreateProject:
             path (str): save path
             project_name (str): project name
             project_description (str): project description
-            gpt_model (str): gpt_model
             techstack (str): techstack
             mode (str): mode
         """
@@ -348,7 +340,7 @@ class CreateProject:
                 if mode == "fc":
                     print(f"[yellow]➜ MODE:[/yellow] Function Call")
                     lab_content = self.__chat_gpt_fc(
-                        lab_content_prompt, gpt_model=gpt_model, techstack=techstack
+                        lab_content_prompt, techstack=techstack
                     )
                     if lab_content is not None:
                         # create the folder
@@ -365,7 +357,7 @@ class CreateProject:
                     else:
                         print(f"[red]➜ MODE:[/red] Change to markdown mode.")
                         lab_content = self.__chat_gpt(
-                            lab_content_prompt, gpt_model=gpt_model
+                            lab_content_prompt,
                         )
                         if lab_content is not None:
                             # create the folder
@@ -377,7 +369,7 @@ class CreateProject:
                 elif mode == "md":
                     print(f"[yellow]➜ MODE:[/yellow] Markdown")
                     lab_content = self.__chat_gpt(
-                        lab_content_prompt, gpt_model=gpt_model
+                        lab_content_prompt,
                     )
                     if lab_content is not None:
                         # create the folder
@@ -390,12 +382,12 @@ class CreateProject:
                 print(f"[red]✗ ERROR:[/red] {project_name} failed, {e}")
                 pass
 
-    def create_project_md(self, path: str, gpt_model: str) -> None:
+    def create_project_md(self, path: str) -> None:
         """STEP2: Create Project MD
 
         Args:
             path (str): project folder path
-            gpt_model (str): gpt_model
+
         """
         json_path = os.path.join(path, "data.json")
         md_path = os.path.join(path, "data.md")
@@ -418,7 +410,7 @@ class CreateProject:
         if not click.confirm(f"➜ Generate step_raw.md using ChatGPT?"):
             return
         step_raw_path = os.path.join(path, "step_raw.md")
-        lab_content = self.__chat_gpt(lab_content_prompt, gpt_model)
+        lab_content = self.__chat_gpt(lab_content_prompt)
         with open(step_raw_path, "w") as f:
             f.write(lab_content)
             print(f"[green]✓ SAVE:[/green] {step_raw_path}")
@@ -442,10 +434,7 @@ class CreateProject:
                 return
             self.__new_lab(path, lab_title, lab_intro, lab_steps, lab_summary)
             lab_title_lower = (
-                lab_title.lower()
-                .replace(" ", "-")
-                .replace("/", "-")
-                .replace(":", "-")
+                lab_title.lower().replace(" ", "-").replace("/", "-").replace(":", "-")
             )
             if lab_title_lower.startswith("project-"):
                 lab_folder_name = lab_title_lower
@@ -511,7 +500,7 @@ class CreateProject:
         else:
             print(f"[red]✗ ERROR:[/red] {index_path} not found.")
 
-    def create_course_intro(self, path: str, gpt_model: str) -> None:
+    def create_course_intro(self, path: str) -> None:
         index_path = os.path.join(path, "index.json")
         # read index.json
         with open(index_path, "r") as f:
@@ -558,7 +547,7 @@ In this project, you will learn:
             f.write(lab_intro_prompt)
         print(f"[yellow]➜ PROMPTS:[/yellow] {lab_intro_prompt}")
         if click.confirm(f"➜ Generate new intro.md using ChatGPT?"):
-            new_lab_intro = self.__chat_gpt(lab_intro_prompt, gpt_model)
+            new_lab_intro = self.__chat_gpt(lab_intro_prompt)
             print(f"[yellow]➜ NEW INTRO:[/yellow] \n\n{new_lab_intro}")
             if click.confirm(f"➜ Replace intro.md?"):
                 with open(lab_intro_path, "w") as f:
