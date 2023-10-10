@@ -198,7 +198,7 @@ class MDTranslator:
         if self.__in_chinese(title):
             title = self.__chat_gpt(self.trans_prompts, title)
             index["title"] = title
-        for step in track(steps, description="➜ Translating"):
+        for step in track(steps, description="➜ TRANSLATING STEPS"):
             # translate step text
             step_text_path = os.path.join(lab_path, step["text"])
             with open(step_text_path, "r", encoding="utf-8") as f:
