@@ -189,15 +189,15 @@ class MDTranslator:
             index = json.load(f)
         # translate index.json
         title = index["title"]
-        if self.__in_chinese(title):
-            title = self.__chat_gpt(self.trans_prompts, title)
-            index["title"] = title
-        print(f"[yellow]➜ TITLE:[/yellow] {title} → {title}")
+        print(f"[yellow]➜ TITLE:[/yellow] {title}")
         # translate steps
         steps = index["details"]["steps"]
         print(f"[yellow]➜ STEPS:[/yellow] {len(steps)}")
         if not click.confirm("Start translating?"):
             return
+        if self.__in_chinese(title):
+            title = self.__chat_gpt(self.trans_prompts, title)
+            index["title"] = title
         for step in track(steps, description="➜ Translating"):
             # translate step text
             step_text_path = os.path.join(lab_path, step["text"])
