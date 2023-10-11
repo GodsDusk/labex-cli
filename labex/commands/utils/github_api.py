@@ -155,7 +155,7 @@ class GitHub:
         url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/files"
         headers = {
             "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {self.ghtoken}",
+            "Authorization": f"Bearer {self.token}",
             "X-GitHub-Api-Version": "2022-11-28",
         }
         response = requests.get(url, headers=headers)
@@ -189,7 +189,7 @@ class GitHub:
         url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/reviews"
         headers = {
             "Accept": "application/vnd.github+json",
-            "Authorization": "token " + self.ghtoken,
+            "Authorization": "token " + self.token,
         }
         response = requests.get(url, headers=headers)
         approved_by = []

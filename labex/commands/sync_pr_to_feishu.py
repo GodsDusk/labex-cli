@@ -7,7 +7,6 @@ from .utils.github_api import GitHub
 
 class SyncPRToFeishu:
     def __init__(self, app_id: str, app_secret: str, ghtoken: str) -> None:
-        self.ghtoken = ghtoken
         self.github = GitHub(token=ghtoken)
         self.feishu = Feishu(app_id, app_secret)
         self.app_token = "bascnNz4Nqjqgqm1Nm5AYke6xxb"
