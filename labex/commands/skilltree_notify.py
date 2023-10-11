@@ -2,7 +2,7 @@ import json
 import random
 from rich import print
 import pandas as pd
-from .utils.api import UserData, AdminData
+from .utils.labex_api import UserData, AdminData
 
 
 class SkillTreeNotify:
@@ -32,7 +32,9 @@ class SkillTreeNotify:
         skill_trees = [st for st in skill_trees if st["alias"] != "alibabacloud"]
         # delete labs_count < 20
         skill_trees = [st for st in skill_trees if st["labs_count"] >= 20]
-        print(f"[bold green]→[/bold green] Found {len(skill_trees)} existed skilltrees after filter")
+        print(
+            f"[bold green]→[/bold green] Found {len(skill_trees)} existed skilltrees after filter"
+        )
         return skill_trees
 
     def __random_labs(self, path_alias: str, page: int) -> list:
@@ -90,7 +92,7 @@ class SkillTreeNotify:
                 # Get random labs
                 labs = self.__random_labs(st_alias, random_page)
                 print(
-                    f"[bold green]✓[/bold green] Get {len(labs)} labs in page {random_page} of {st_alias}"
+                    f"[bold green]✔[/bold green] Get {len(labs)} labs in page {random_page} of {st_alias}"
                 )
                 labs_id = [l["id"] for l in labs]
                 if get_random_count < 5:
@@ -104,7 +106,7 @@ class SkillTreeNotify:
                         labs_without_existed, self.min_labs
                     )
                     print(
-                        f"[bold green]✓[/bold green] Pick {len(keep_random_min_labs)} randoms labs in {st_alias}"
+                        f"[bold green]✔[/bold green] Pick {len(keep_random_min_labs)} randoms labs in {st_alias}"
                     )
                     st_config["labs"] = keep_random_min_labs
                     get_random_labs = False
@@ -143,11 +145,11 @@ class SkillTreeNotify:
         with open("notify_config.json", "w") as f:
             json.dump(notify_config, f, indent=4)
             print(
-                f"[bold green]✓[/bold green] Save notify config to notify_config.json"
+                f"[bold green]✔[/bold green] Save notify config to notify_config.json"
             )
         df = pd.DataFrame(labs_for_testing)
         print(df)
         df.to_csv("labs_for_testing.csv", index=False)
         print(
-            f"[bold green]✓[/bold green] Save labs for testing to labs_for_testing.csv"
+            f"[bold green]✔[/bold green] Save labs for testing to labs_for_testing.csv"
         )

@@ -54,7 +54,7 @@ class CreateProject:
             ],
         )
         print(
-            f"[green]✓ {response['model'].upper()}:[/green] {response['usage']['total_tokens']} TOKENS."
+            f"[green]✔ {response['model'].upper()}:[/green] {response['usage']['total_tokens']} TOKENS."
         )
         return response["choices"][0]["message"]["content"]
 
@@ -246,7 +246,7 @@ class CreateProject:
             "contributors": [],
         }
         index_file.write(json.dumps(index_config, indent=2, ensure_ascii=False))
-        print(f"[green]✓ DONE:[/green] {lab_title} created successfully.")
+        print(f"[green]✔ DONE:[/green] {lab_title} created successfully.")
 
     def __parse_json_content(self, json_path: str) -> str:
         """Parse JSON Content from data.json
@@ -353,7 +353,7 @@ class CreateProject:
                         # create code file
                         with open(f"{path_name}/{code_file_name}", "w") as f:
                             f.write(full_codes)
-                        print(f"[green]✓ SAVE:[/green] {path_name}")
+                        print(f"[green]✔ SAVE:[/green] {path_name}")
                     else:
                         print(f"[red]➜ MODE:[/red] Change to markdown mode.")
                         lab_content = self.__chat_gpt(
@@ -365,7 +365,7 @@ class CreateProject:
                             # save the json
                             with open(f"{path_name}/data.md", "w") as f:
                                 f.write(lab_content)
-                            print(f"[green]✓ SAVE:[/green] {path_name}")
+                            print(f"[green]✔ SAVE:[/green] {path_name}")
                 elif mode == "md":
                     print(f"[yellow]➜ MODE:[/yellow] Markdown")
                     lab_content = self.__chat_gpt(
@@ -377,7 +377,7 @@ class CreateProject:
                         # save the json
                         with open(f"{path_name}/data.md", "w") as f:
                             f.write(lab_content)
-                        print(f"[green]✓ SAVE:[/green] {path_name}")
+                        print(f"[green]✔ SAVE:[/green] {path_name}")
             except Exception as e:
                 print(f"[red]✗ ERROR:[/red] {project_name} failed, {e}")
                 pass
@@ -413,7 +413,7 @@ class CreateProject:
         lab_content = self.__chat_gpt(lab_content_prompt)
         with open(step_raw_path, "w") as f:
             f.write(lab_content)
-            print(f"[green]✓ SAVE:[/green] {step_raw_path}")
+            print(f"[green]✔ SAVE:[/green] {step_raw_path}")
 
     def create_project_lab(self, path: str) -> None:
         """STEP3: Create Project Lab
@@ -495,7 +495,7 @@ class CreateProject:
             course_config_path = os.path.join(path, "course.json")
             with open(course_config_path, "w") as f:
                 json.dump(course_config, f, indent=2, ensure_ascii=False)
-            print(f"[green]✓ DONE:[/green] {course_config_path} created successfully.")
+            print(f"[green]✔ DONE:[/green] {course_config_path} created successfully.")
 
         else:
             print(f"[red]✗ ERROR:[/red] {index_path} not found.")
@@ -553,5 +553,5 @@ In this project, you will learn:
                 with open(lab_intro_path, "w") as f:
                     f.write(new_lab_intro)
                     print(
-                        f"[green]✓ DONE:[/green] {lab_intro_path} replaced successfully."
+                        f"[green]✔ DONE:[/green] {lab_intro_path} replaced successfully."
                     )

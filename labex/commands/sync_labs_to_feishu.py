@@ -2,7 +2,7 @@ import re
 import os
 import json
 from jsonschema import validate
-from .utils.feishu import Feishu
+from .utils.feishu_api import Feishu
 
 
 class Schema:

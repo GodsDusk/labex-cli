@@ -107,7 +107,7 @@ class CreateLab:
             exit(1)
         else:
             os.mkdir(self.lab_slug)
-            print(f"[green]✓[/green] {self.lab_slug} is created.")
+            print(f"[green]✔[/green] {self.lab_slug} is created.")
 
     def init_base(self):
         # create folder

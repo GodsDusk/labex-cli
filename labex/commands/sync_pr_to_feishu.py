@@ -1,155 +1,8 @@
 import re
-import json
-import requests
-from datetime import datetime, timedelta
-from .utils.feishu import Feishu
 from rich import print
-
-
-class GitHub:
-    """GitHub 相关 API"""
-
-    def __init__(self, token: str) -> None:
-        self.token = token
-
-    def get_issue(self, repo_name: str, issue_number: int) -> str:
-        url = f"https://api.github.com/repos/{repo_name}/issues/{issue_number}"
-        headers = {
-            "Authorization": "token " + self.token,
-            "Accept": "application/vnd.github+json",
-        }
-        r = requests.get(url, headers=headers)
-        return r.json()
-
-    def patch_pr(self, repo_name: str, pr_number: int, payloads: dict) -> dict:
-        url = f"https://api.github.com/repos/{repo_name}/issues/{pr_number}"
-        r = requests.patch(
-            url=url,
-            headers={
-                "Authorization": "token " + self.token,
-                "Accept": "application/vnd.github+json",
-            },
-            data=json.dumps(payloads),
-        )
-        return r.json()
-
-    def comment_pr(self, repo_name: str, pr_number: int, comment_text: str) -> dict:
-        url = f"https://api.github.com/repos/{repo_name}/issues/{pr_number}/comments"
-        r = requests.post(
-            url=url,
-            headers={
-                "Authorization": "token " + self.token,
-                "Accept": "application/vnd.github+json",
-            },
-            data=json.dumps(
-                {
-                    "body": comment_text,
-                }
-            ),
-        )
-        return r.json()
-
-    def get_pr_list(self, repo_name: str) -> list:
-        """获取 pr 列表
-
-        Args:
-            repo_name (str): 仓库名称
-        """
-        url = f"https://api.github.com/repos/{repo_name}/pulls"
-        headers = {
-            "Authorization": "token " + self.token,
-            "Accept": "application/vnd.github+json",
-        }
-        params = {
-            "state": "all",
-            "per_page": 100,
-        }
-
-        all_pulls = []
-        page = 1
-
-        while True:
-            params["page"] = page
-            print(f"→ Fetching page {page} of pulls...")
-            response = requests.get(url, headers=headers, params=params)
-            if response.status_code != 200:
-                raise Exception(
-                    f"Error retrieving pulls: {response.status_code}, {response.text}"
-                )
-
-            pulls = response.json()
-            if not pulls:
-                break
-
-            all_pulls.extend(pulls)
-            page += 1
-
-        # 仅保留 open 和 merged 状态的 PR
-        # only_pulls = [
-        #     pull
-        #     for pull in all_pulls
-        #     if pull["state"] == "open" or pull.get("merged_at") is not None
-        # ]
-        return all_pulls
-
-    def list_milestone(self, repo_name: str) -> list:
-        """获取 milestone 列表"""
-        url = f"https://api.github.com/repos/{repo_name}/milestones"
-        headers = {
-            "Authorization": "token " + self.token,
-            "Accept": "application/vnd.github+json",
-        }
-        r = requests.get(url, headers=headers)
-        # 获取 title 和 number 的字典
-        title_nums = {m["title"]: m["number"] for m in r.json()}
-        return title_nums
-
-    def create_milestone(self, repo_name: str, title: str, due_on: str) -> dict:
-        """创建 milestone
-
-        Args:
-            repo_name (str): labex-labs/scenarios
-            title (str): 2023W16
-            due_on (str): 2023-04-21T07:06:13Z
-
-        Returns:
-            dict: milestone
-        """
-        url = f"https://api.github.com/repos/{repo_name}/milestones"
-        headers = {
-            "Authorization": "token " + self.token,
-            "Accept": "application/vnd.github+json",
-        }
-        r = requests.post(
-            url=url,
-            headers=headers,
-            data=json.dumps(
-                {
-                    "title": title,
-                    "state": "open",
-                    "due_on": due_on,
-                }
-            ),
-        )
-        if r.status_code == 201:
-            print(f"→ Creating milestone {title}, due_on {due_on}, SUCCESS.")
-        else:
-            print(f"→ Creating milestone {title}, due_on {due_on}, FAILED.")
-        return r.json()
-
-    def list_collaborators(self, repo_name: str) -> list:
-        """获取仓库的协作者列表"""
-        url = f"https://api.github.com/repos/{repo_name}/collaborators"
-        headers = {
-            "Authorization": "token " + self.token,
-            "Accept": "application/vnd.github+json",
-        }
-        params = {
-            "per_page": 100,
-        }
-        r = requests.get(url, headers=headers, params=params)
-        names = [c["login"] for c in r.json()]
-        return names
+from datetime import datetime, timedelta
+from .utils.feishu_api import Feishu
+from .utils.github_api import GitHub
 
 
 class SyncPRToFeishu:
@@ -160,56 +13,7 @@ class SyncPRToFeishu:
         self.app_token = "bascnNz4Nqjqgqm1Nm5AYke6xxb"
         self.table_id = "tblExqBjw46rHCre"
 
-    def pr_index_json(self, repo_name: str, pr_number: int) -> list:
-        url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/files"
-        headers = {
-            "Accept": "application/vnd.github+json",
-            "Authorization": f"Bearer {self.ghtoken}",
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
-        response = requests.get(url, headers=headers)
-        content_urls = []
-        for file in response.json():
-            if "index.json" in file["filename"]:
-                content_url = file["contents_url"]
-                filename = file["filename"]
-                content_urls.append(
-                    {
-                        "content_url": content_url,
-                        "filename": filename,
-                    }
-                )
-        if len(content_urls) == 1:
-            print(f"→ Found {len(content_urls)} index.json in PR#{pr_number}.")
-            index_json_content_url = content_urls[0]["content_url"]
-            # get download_url first
-            index_json_download_url = requests.get(
-                index_json_content_url, headers=headers
-            ).json()["download_url"]
-            # get index.json content
-            index_json = requests.get(index_json_download_url, headers=headers).json()
-            lab_path = content_urls[0]["filename"].removesuffix("/index.json")
-            return index_json, lab_path
-        else:
-            return None, None
-
-    def pr_reviews(self, repo_name: str, pr_number: int) -> list:
-        url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/reviews"
-        headers = {
-            "Accept": "application/vnd.github+json",
-            "Authorization": "token " + self.ghtoken,
-        }
-        response = requests.get(url, headers=headers)
-        approved_by = []
-        changes_requested_by = []
-        for review in response.json():
-            if review["state"] == "APPROVED":
-                approved_by.append(review["user"]["login"])
-            elif review["state"] == "CHANGES_REQUESTED":
-                changes_requested_by.append(review["user"]["login"])
-        return list(set(approved_by)), list(set(changes_requested_by))
-
-    def unix_ms_timestamp(self, time_str: str) -> int:
+    def __unix_ms_timestamp(self, time_str: str) -> int:
         if time_str != None:
             date_obj = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ") + timedelta(
                 hours=8
@@ -219,7 +23,7 @@ class SyncPRToFeishu:
             unix_ms_timestamp = 946656000000
         return unix_ms_timestamp
 
-    def date_milestone(self, date_str: str) -> int:
+    def __date_milestone(self, date_str: str) -> int:
         """获取日期所在周数组成 milestone
 
         Args:
@@ -234,7 +38,7 @@ class SyncPRToFeishu:
         milestone = f"{year}W{week_num}"
         return milestone
 
-    def sunday_of_date(self, date_str: str) -> str:
+    def __sunday_of_date(self, date_str: str) -> str:
         """根据日期推算出当周的周日
 
         Args:
@@ -257,7 +61,7 @@ class SyncPRToFeishu:
         result_date_string = next_sunday.strftime("%Y-%m-%dT%H:%M:%SZ")
         return result_date_string
 
-    def get_pr_assign_issue_id(self, pr_body: str) -> int:
+    def __get_pr_assign_issue_id(self, pr_body: str) -> int:
         issue_id_str_1 = re.findall(r"- fix #(\d+)", pr_body)
         issue_id_str_2 = re.findall(
             r"- fix https:\/\/github\.com\/labex-labs\/scenarios\/issues\/(\d+)",
@@ -273,30 +77,33 @@ class SyncPRToFeishu:
         return issue_id
 
     def sync_pr(self, repo_name: str) -> None:
-        print(f"Syncing PR to Feishu...")
-        print(f"[green]→[/green] Repo: {repo_name}")
+        print(f"[yellow]➜ TASKS:[/yellow] Sync PR to Feishu")
+        print(f"[yellow]➜ TASK1:[/yellow] Get data from Feishu")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
         )
         # Make a dict of PR_NUMBER and record_id
         num_id_dicts = {r["fields"]["PR_NUM"]: r["record_id"] for r in records}
+        print(f"[yellow]➜ TASK2:[/yellow] Get data from GitHub")
+        print(f"[yellow]➜ REPO:[/yellow] {repo_name}")
         # Get all pr from github
-        pr_list = self.github.get_pr_list(repo_name)
-        print(f"[green]→[/green] Found {len(pr_list)} PR in GitHub.")
+        pr_list = self.github.__get_pr_list(repo_name)
+        print(f"[green]✔ PRs:[/green] {len(pr_list)}")
         # Get all milestone from github
-        milestones = self.github.list_milestone(repo_name)
-        print(f"[green]→[/green] Found {len(milestones)} milestone in GitHub.")
+        milestones = self.github.__list_milestone(repo_name)
+        print(f"[green]✔ MILESTONE:[/green] {len(milestones)}")
         # List all collaborators
-        collaborators = self.github.list_collaborators(repo_name)
-        print(f"[green]→[/green] Found {len(collaborators)} collaborators in {repo_name}.")
+        collaborators = self.github.__list_collaborators(repo_name)
+        print(f"[green]✔ COLLABORATORS:[/green] {len(collaborators)}")
+        print(f"[yellow]➜ TASK3:[/yellow] Processing data")
         # Feishu 未关闭的 PR
         feishu_not_closed_pr_nums = [
             str(r["fields"]["PR_NUM"])
             for r in records
-            if r["fields"]["PR_STATE"] == "OPEN" and r["fields"]["REPO_NAME"] == repo_name
+            if r["fields"]["PR_STATE"] == "OPEN"
+            and r["fields"]["REPO_NAME"] == repo_name
         ]
-        print(f"[green]→[/green] Found {len(feishu_not_closed_pr_nums)} OPEN PR in Feishu.")
         # 忽略已经关闭的 PR
         pr_list = [
             pr
@@ -305,10 +112,15 @@ class SyncPRToFeishu:
         ]
         # 忽略 locked 的 PR
         pr_list = [pr for pr in pr_list if pr["locked"] == False]
-        print(f"→ Processing {len(pr_list)} OPEN PR...")
+        print(f"[green]✔ OPEN PRs:[/green] {len(pr_list)}")
+        print(f"[yellow]➜ TASK4:[/yellow] Loop all PRs")
+        # Loop all PRs
         for pr in pr_list:
             try:
-                # Parse and Update index.json
+                ###################
+                # STEP1 解析 PR 数据
+                ###################
+
                 pr_number = pr["number"]
                 pr_user = pr["user"]["login"]
                 pr_state = pr["state"]
@@ -324,237 +136,172 @@ class SyncPRToFeishu:
                     pr_labels_list = []
                 else:
                     pr_labels_list = [l["name"] for l in pr_labels]
-                print(f"[green]→[/green] Processing PR#{pr_number}...")
-                print(f"→ https://github.com/{repo_name}/pull/{pr_number}")
-                index_json, lab_path = self.pr_index_json(repo_name, pr_number)
-                if index_json != None:
-                    lab_title = index_json.get("title")
-                    lab_type = index_json.get("type")
-                    lab_steps = index_json.get("details").get("steps")
-                    pr_title = pr["title"]
-                    pr_html_url = pr["html_url"]
-                    # milestone
-                    milestone = pr.get("milestone")
-                    if milestone != None:
-                        milestone = pr.get("milestone").get("title")
-                    # pr_reviews
-                    approved_by, changes_requested_by = self.pr_reviews(
-                        repo_name, pr_number
+                print(f"\n[yellow]➜ PR NUM:[/yellow] {pr_number}")
+                print(
+                    f"[yellow]➜ PR URL:[/yellow] https://github.com/{repo_name}/pull/{pr_number}"
+                )
+                # 从 PR 中获取 index.json
+                index_json, lab_path = self.github.__pr_index_json(repo_name, pr_number)
+                # 如果 index.json 不存在
+                if index_json == None:
+                    print(f"[red]➜ SKIPPED:[/red] No index.json found.")
+                    return
+
+                ###################
+                # STEP2 更新 PR 状态
+                ###################
+
+                # 判断 PR 是否已经合并或关闭
+                if pr_state != "open":
+                    print(f"[red]➜ SKIPPED:[/red] PR is not open.")
+                    return
+                # 判断 PR 是否已经测试完成
+                if "Test Completed" not in pr_labels_list:
+                    print(f"[red]➜ SKIPPED:[/red] PR is not tested completed.")
+                    return
+                # 判断 PR 是否正确关联了 issue 或者选择了 noissue
+                if issue_id == 0 and "noissue" not in pr_labels_list:
+                    comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue, 无法分配 Reviewer。请你在 PR 描述中按要求添加, 如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue, 请在 Labels 中选择 `noissue`, 系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
+                    self.github.__comment_pr(repo_name, pr_number, comment)
+                    print(f"→ No issue id found in {pr_number}, comment to {pr_user}")
+                    return
+                # 如果检查通过, 则更新 PR 状态
+
+                # STEP1 更新 Milestone
+                # 获取已经存在的 milestone
+                pr_milestone = pr.get("milestone")
+                # 如果 PR 原本存在 milestone
+                if pr_milestone != None:
+                    print(f"[red]➜ SKIPPED:[/red] PR already has a milestone.")
+                    return
+                # 如果 PR 原本不存在 milestone
+                # 使用更新日期所在的周作为 milestone
+                date_milestone_str = self.__date_milestone(pr["updated_at"])
+                pr_milestone_number = milestones.get(date_milestone_str, None)
+                # 如果 pr_milestone_number 不存在, 则创建 milestone
+                if pr_milestone_number == None:
+                    # 获取周日日期
+                    due_on = self.__sunday_of_date(pr["updated_at"])
+                    # 创建 milestone
+                    self.github.__create_milestone(
+                        repo_name, date_milestone_str, due_on
                     )
-                    # created at
-                    created_at = self.unix_ms_timestamp(pr["created_at"])
-                    updated_at = self.unix_ms_timestamp(pr["updated_at"])
-                    merged_at = self.unix_ms_timestamp(pr["merged_at"])
-                    # payloads
-                    payloads = {
-                        "fields": {
-                            "SCENARIO_TITLE": lab_title,
-                            "SCENARIO_PATH": lab_path,
-                            "SCENARIO_SLUG": lab_path.split("/")[-1],
-                            "SCENARIO_TYPE": lab_type,
-                            "SCENARIO_STEP": len(lab_steps),
-                            "PR_TITLE": pr_title,
-                            "PR_USER": pr_user,
-                            "PR_NUM": pr_number,
-                            "PR_STATE": pr_state.upper(),
-                            "PR_LABELS": pr_labels_list,
-                            "REPO_NAME": repo_name,
-                            "ASSIGNEES": assignees_list,
-                            "MILESTONE": milestone,
-                            "CHANGES_REQUESTED": changes_requested_by,
-                            "APPROVED": approved_by,
-                            "CREATED_AT": created_at,
-                            "UPDATED_AT": updated_at,
-                            "MERGED_AT": merged_at,
-                            "HTML_URL": {
-                                "link": pr_html_url,
-                                "text": "OPEN IN GITHUB",
-                            },
-                        }
-                    }
-                    # Update record
-                    if str(pr_number) in num_id_dicts.keys():
-                        r = self.feishu.update_bitable_record(
-                            self.app_token,
-                            self.table_id,
-                            num_id_dicts[str(pr_number)],
-                            payloads,
-                        )
-                        print(f"→ Updating {lab_path} {r['msg'].upper()}")
-                    else:
-                        # Add record
-                        r = self.feishu.add_bitable_record(
-                            self.app_token, self.table_id, payloads
-                        )
-                        print(f"↑ Adding {lab_path} {r['msg'].upper()}")
-                else:
-                    print(f"→ Skipping {pr_number} because no index.json found.")
-                # List all collaborators
-                collaborators = self.github.list_collaborators(repo_name)
-                # Assign issue user to PR
+                    # 重新获取 pr_milestone_number
+                    milestones = self.github.__list_milestone(repo_name)
+                    pr_milestone_number = milestones.get(date_milestone_str, None)
+                # 如果 pr_milestone_number 依然不存在, 则跳过
+                if pr_milestone_number == None:
+                    print(f"[red]➜ SKIPPED:[/red] PR milestone still not found.")
+                    return
+                # 如果 pr_milestone_number 存在, 则更新 milestone
+                payloads = {"milestone": pr_milestone_number}
+                self.github.__patch_pr(
+                    repo_name,
+                    pr_number,
+                    payloads,
+                )
+                print(
+                    f"[green]➜ UPDATED:[/green] PR milestone to {date_milestone_str}, {pr_milestone_number}"
+                )
+                # STEP2 为 PR 添加 Reviewer
+                # 从 PR 描述中获取 issue id
                 pr_body = pr["body"]
-                issue_id = self.get_pr_assign_issue_id(pr_body)
-                # 如果 pr_state 为 open
-                if pr_state == "open":
-                    # 如果 issue_id 不为 0
-                    # 或者 pr_labels_list 包含 noissue
-                    if issue_id != 0 or "noissue" in pr_labels_list:
-                        # 如果 issue_id 不为 0
-                        if issue_id != 0:
-                            issue = self.github.get_issue(repo_name, issue_id)
-                            issue_user = issue["user"]["login"]
-                        # 如果 issue_id 为 0
-                        else:
-                            issue_user = "huhuhang"
-                        # 判断是否已经测试完成
-                        if "Test Completed" in pr_labels_list:
-                            # 尝试处理 PR 的 milestone
-                            pr_milestone = pr.get("milestone")
-                            # 如果 PR 原本不存在 milestone
-                            if pr_milestone == None:
-                                # 使用更新日期所在的周作为 milestone
-                                date_milestone_str = self.date_milestone(
-                                    pr["updated_at"]
-                                )
-                                pr_milestone_number = milestones.get(
-                                    date_milestone_str, None
-                                )
-                                # 如果 milestone 不存在, 则创建
-                                if pr_milestone_number == None:
-                                    # 获取周日日期
-                                    due_on = self.sunday_of_date(pr["updated_at"])
-                                    # 创建 milestone
-                                    self.github.create_milestone(
-                                        repo_name, date_milestone_str, due_on
-                                    )
-                                    # 重新获取 milestone
-                                    milestones = self.github.list_milestone(repo_name)
-                                    pr_milestone_number = milestones.get(
-                                        date_milestone_str, None
-                                    )
-                            # 测试完成, 如果 issue user 不等于 pr_user
-                            # 且 issue user 在 collaborators 里
-                            if issue_user != pr_user:
-                                # 且 issue user 不在 assignees 里, 准备添加
-                                if (
-                                    issue_user not in assignees_list
-                                    and issue_user in collaborators
-                                ):
-                                    # 添加 issue user
-                                    assignees_list.append(issue_user)
-                                    payloads = {"assignees": assignees_list}
-                                    # 如果 pr_milestone 为 None, 即 milestone 不存在, 需要添加
-                                    if pr_milestone == None:
-                                        payloads["milestone"] = pr_milestone_number
-                                        print(
-                                            f"→ Setting milestone to {date_milestone_str}, {pr_milestone_number}"
-                                        )
-                                    self.github.patch_pr(
-                                        repo_name,
-                                        pr_number,
-                                        payloads,
-                                    )
-                                    # 添加评论
-                                    comment = f"Hi, @{issue_user} \n\n由于该 PR 关联了由你创建的 Issue, 系统已将你自动分配为 Reviewer, 请你及时完成 Review, 并和作者进行沟通。确认无误后, 可以执行 `Approve` 操作, LabEx 会二次确认后再合并。请勿自行合并 PR。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
-                                    self.github.comment_pr(
-                                        repo_name, pr_number, comment
-                                    )
-                                    print(
-                                        f"→ Adding {issue_user} as a reviewer to PR#{pr_number}."
-                                    )
-                                # 且 issue user 不在 collaborators 里, 准备添加 huhuhang
-                                elif (
-                                    issue_user not in assignees_list
-                                    and issue_user not in collaborators
-                                ):
-                                    # 添加 huhuhang
-                                    assignees_list.append("huhuhang")
-                                    payloads = {"assignees": assignees_list}
-                                    # 如果 pr_milestone 为 None, 即 milestone 不存在需要添加
-                                    if pr_milestone == None:
-                                        payloads["milestone"] = pr_milestone_number
-                                        print(
-                                            f"→ Setting milestone to {date_milestone_str}, {pr_milestone_number}"
-                                        )
-                                    self.github.patch_pr(
-                                        repo_name,
-                                        pr_number,
-                                        payloads,
-                                    )
-                                    # 添加评论
-                                    comment = f"Hi, @huhuhang \n\n系统已将你自动分配为 Reviewer, 请你及时完成 Review, 并和作者进行沟通。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
-                                    self.github.comment_pr(
-                                        repo_name, pr_number, comment
-                                    )
-                                    print(
-                                        f"→ Adding huhuhang as a reviewer to PR#{pr_number}."
-                                    )
-                                elif issue_user in assignees_list:
-                                    print(f"→ {issue_user} is already a reviewer.")
-                                    # 如果 pr_milestone 为 None, 即 milestone 不存在需要添加
-                                    if pr_milestone == None:
-                                        payloads = {"milestone": pr_milestone_number}
-                                        self.github.patch_pr(
-                                            repo_name,
-                                            pr_number,
-                                            payloads,
-                                        )
-                                        print(
-                                            f"→ Setting milestone to {date_milestone_str}, {pr_milestone_number}"
-                                        )
-                            # 测试完成, 如果 issue user 等于 pr_user
-                            else:
-                                # 且 huhuhang 不在 assignees 里, 准备添加
-                                if "huhuhang" not in assignees_list:
-                                    # 添加 huhuhang
-                                    assignees_list.append("huhuhang")
-                                    payloads = {"assignees": assignees_list}
-                                    # 如果 pr_milestone 为 None, 即 milestone 不存在需要添加
-                                    if pr_milestone == None:
-                                        payloads["milestone"] = pr_milestone_number
-                                        print(
-                                            f"→ Setting milestone to {date_milestone_str}, {pr_milestone_number}"
-                                        )
-                                    self.github.patch_pr(
-                                        repo_name,
-                                        pr_number,
-                                        payloads,
-                                    )
-                                    # 添加评论
-                                    comment = f"Hi, @huhuhang \n\n系统已将你自动分配为 Reviewer, 请你及时完成 Review, 并和作者进行沟通。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
-                                    self.github.comment_pr(
-                                        repo_name, pr_number, comment
-                                    )
-                                    print(
-                                        f"→ Adding huhuhang as a reviewer to PR#{pr_number}."
-                                    )
-                                else:
-                                    print(f"→ huhuhang is already a reviewer.")
-                                    # 如果 pr_milestone 为 None, 即 milestone 不存在需要添加
-                                    if pr_milestone == None:
-                                        payloads = {"milestone": pr_milestone_number}
-                                        self.github.patch_pr(
-                                            repo_name,
-                                            pr_number,
-                                            payloads,
-                                        )
-                                        print(
-                                            f"→ Setting milestone to {date_milestone_str}, {pr_milestone_number}"
-                                        )
-                        else:
-                            # 未测完
-                            print(f"→ PR#{pr_number} is not Test Completed")
-                    # 如果 issue_id 为 0
-                    else:
-                        comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue, 请你在 PR 描述中按要求添加, 如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue, 请在 Labels 中选择 `noissue`, 系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
-                        self.github.comment_pr(repo_name, pr_number, comment)
-                        print(
-                            f"→ No issue id found in {pr_number}, comment to {pr_user}"
-                        )
+                issue_id = self.__get_pr_assign_issue_id(pr_body)
+                # 如果 issue_id 不为 0, 则获取 issue user
+                if issue_id != 0:
+                    issue = self.github.__get_issue(repo_name, issue_id)
+                    issue_user = issue["user"]["login"]
+                # 如果 issue_id 为 0, 则将 issue_user 设置为 huhuhang
                 else:
-                    print(
-                        f"→ Skipping add Reviewer to PR#{pr_number}, because it's closed."
+                    issue_user = "huhuhang"
+
+                # 选择设置 reviewer
+                # 一般情况下, 如果 issue user 为 reviewer
+                reviewer = issue_user
+                # 如果 issue user 不在 collaborators 里, 则设置 reviewer 为 huhuhang
+                if issue_user not in collaborators:
+                    reviewer = "huhuhang"
+                # 检查 issue user 是否和 pr user 相同，则添加 huhuhang 为 reviewer
+                if issue_user == pr_user:
+                    reviewer = "huhuhang"
+                # 准备更新 assignees
+                # 如果 reviewer 已经是 assignees, 则跳过添加
+                if reviewer in assignees_list:
+                    print(f"[green]➜ SKIPPED:[/green] {reviewer} already in assignees.")
+                    return
+                # 如果 reviewer 不在 assignees 里, 则添加 reviewer
+                assignees_list.append(reviewer)
+                payloads = {"assignees": assignees_list}
+                self.github.__patch_pr(
+                    repo_name,
+                    pr_number,
+                    payloads,
+                )
+                # 添加评论通知 reviewer
+                comment = f"Hi, @{pr_user} \n\n系统已将 @{reviewer} 自动分配为 Reviewer。一般情况下，@{reviewer} 会在 2 个工作日内完成 Review, 并与你沟通。如果一直没有进展，请及时通过评论或微信群与 @{reviewer} 联系确认。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
+                self.github.__comment_pr(repo_name, pr_number, comment)
+                print(f"[green]➜ UPDATED:[/green] {reviewer} added as a reviewer.")
+
+                #######################
+                # STEP3 更新 Feishu 记录
+                #######################
+
+                # 解析 index.json
+                lab_title = index_json.get("title")
+                lab_type = index_json.get("type")
+                lab_steps = index_json.get("details").get("steps")
+                pr_title = pr["title"]
+                pr_html_url = pr["html_url"]
+                approved_by, changes_requested_by = self.github.__pr_reviews(
+                    repo_name, pr_number
+                )
+                # created at
+                created_at = self.__unix_ms_timestamp(pr["created_at"])
+                updated_at = self.__unix_ms_timestamp(pr["updated_at"])
+                merged_at = self.__unix_ms_timestamp(pr["merged_at"])
+                # payloads
+                payloads = {
+                    "fields": {
+                        "SCENARIO_TITLE": lab_title,
+                        "SCENARIO_PATH": lab_path,
+                        "SCENARIO_SLUG": lab_path.split("/")[-1],
+                        "SCENARIO_TYPE": lab_type,
+                        "SCENARIO_STEP": len(lab_steps),
+                        "PR_TITLE": pr_title,
+                        "PR_USER": pr_user,
+                        "PR_NUM": pr_number,
+                        "PR_STATE": pr_state.upper(),
+                        "PR_LABELS": pr_labels_list,
+                        "REPO_NAME": repo_name,
+                        "ASSIGNEES": assignees_list,
+                        "MILESTONE": date_milestone_str,
+                        "CHANGES_REQUESTED": changes_requested_by,
+                        "APPROVED": approved_by,
+                        "CREATED_AT": created_at,
+                        "UPDATED_AT": updated_at,
+                        "MERGED_AT": merged_at,
+                        "HTML_URL": {
+                            "link": pr_html_url,
+                            "text": "OPEN IN GITHUB",
+                        },
+                    }
+                }
+                # Update record
+                if str(pr_number) in num_id_dicts.keys():
+                    r = self.feishu.update_bitable_record(
+                        self.app_token,
+                        self.table_id,
+                        num_id_dicts[str(pr_number)],
+                        payloads,
                     )
+                    print(f"[green]➜ UPDATED:[/green] {lab_path} {r['msg'].upper()}")
+                else:
+                    # Add record
+                    r = self.feishu.add_bitable_record(
+                        self.app_token, self.table_id, payloads
+                    )
+                    print(f"[green]➜ ADDED:[/green] {lab_path} {r['msg'].upper()}")
+
             except Exception as e:
                 print(f"Exception: {e}")
                 continue

@@ -19,7 +19,7 @@ class HTTP:
         else:
             print(r.json())
 
-    @retry(stop_max_attempt_number=3)
+    @retry(stop_max_attempt_number=2)
     def get_data(self) -> dict:
         """HTTP GET"""
         r = requests.get(
@@ -29,7 +29,7 @@ class HTTP:
         )
         return self.__status_code(r)
 
-    @retry(stop_max_attempt_number=3)
+    @retry(stop_max_attempt_number=2)
     def put_data(self, _payloads) -> dict:
         """HTTP PUT"""
         r = requests.put(
@@ -40,7 +40,7 @@ class HTTP:
         )
         return self.__status_code(r)
 
-    @retry(stop_max_attempt_number=3)
+    @retry(stop_max_attempt_number=2)
     def post_data(self, _payloads) -> dict:
         """HTTP POST"""
         self._headers["Content-Type"] = "application/json"
@@ -52,7 +52,7 @@ class HTTP:
         )
         return self.__status_code(r)
 
-    @retry(stop_max_attempt_number=3)
+    @retry(stop_max_attempt_number=2)
     def patch_data(self, _payloads) -> dict:
         """HTTP PATCH"""
         r = requests.patch(
@@ -63,7 +63,7 @@ class HTTP:
         )
         return self.__status_code(r)
 
-    @retry(stop_max_attempt_number=3)
+    @retry(stop_max_attempt_number=2)
     def delete_data(self) -> dict:
         """HTTP DELETE"""
         r = requests.delete(
@@ -94,9 +94,7 @@ class UserData:
 
     def set_top_labs(self, path_id: int, labs: list) -> list:
         url = f"{self.base_url}/paths/{path_id}/top-labs"
-        payloads = {
-            "lab_paths": labs
-        }
+        payloads = {"lab_paths": labs}
         return HTTP(url).post_data(json.dumps(payloads))
 
 

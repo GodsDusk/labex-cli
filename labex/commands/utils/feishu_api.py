@@ -43,7 +43,9 @@ class Feishu:
                 if r.json()["data"]["total"] > 0:
                     records += r.json()["data"]["items"]
                     print(
-                        f"Get {len(records)} records from bitable, page_token: {page_token}"
+                        print(
+                            f"[green]✔ RECORDS:[/green] {len(records)}, page_token: {page_token}"
+                        )
                     )
         return records
 

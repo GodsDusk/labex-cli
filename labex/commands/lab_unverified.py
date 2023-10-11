@@ -1,13 +1,13 @@
 import json
 from rich import print
 from rich.progress import track
-from .utils.api import AdminData, UserData
+from .utils.labex_api import AdminData, UserData
 from .utils.auth import AuthGitHub
 from github import Github
 
 
 class LabForTesting:
-    def __init__(self, repo_name:str) -> None:
+    def __init__(self, repo_name: str) -> None:
         # for labex
         self.__admin_data = AdminData()
         all_paths = UserData().get_all_path()
@@ -148,7 +148,9 @@ class LabForTesting:
                 self.__create_issue(
                     lab_title, lab_path, lab_url, lab_derection, lab_type
                 )
-                print(f"Create Issue: {lab_path}, it has been learned {lab['LearnedUsers']} times.")
+                print(
+                    f"Create Issue: {lab_path}, it has been learned {lab['LearnedUsers']} times."
+                )
         # close issue for verified labs without assignees
         open_issues = self.repo.get_issues(state="open")
         verified_labs_path = [lab["Path"] for lab in verified_labs]

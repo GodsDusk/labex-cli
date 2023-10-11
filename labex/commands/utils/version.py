@@ -21,7 +21,7 @@ class CheckUpdate:
         if online_commit.sha != local_commit.hexsha:
             print("[yellow]→[/] LabEx CLI is updating...")
             print(git.Git(self.git_path).pull("origin", "master"))
-            print("[green]✓[/] LabEx CLI has been updated.")
+            print("[green]✔[/] LabEx CLI has been updated.")
             print(
                 "[yellow]→[/] Please cd to the labex-cli directory and run [bold]pip install -e .[/bold]"
             )

@@ -57,5 +57,3 @@ class UpdateIndexTitle:
         # run prettier shell command
         if click.confirm("→ If you want to run prettier, press y"):
             os.system(f"prettier --write {path}/**/*.json")
-
-        

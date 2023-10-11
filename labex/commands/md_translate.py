@@ -62,7 +62,7 @@ class MDTranslator:
             ],
         )
         print(
-            f"[green]✓ {response['model'].upper()}:[/green] {response['usage']['total_tokens']} TOKENS."
+            f"[green]✔ {response['model'].upper()}:[/green] {response['usage']['total_tokens']} TOKENS."
         )
         return response["choices"][0]["message"]["content"]
 
@@ -163,7 +163,7 @@ class MDTranslator:
         file_path_translated = os.path.join(os.path.dirname(file_path), new_file_name)
         with open(file_path_translated, "w", encoding="utf-8") as f:
             f.write(text_translated)
-        print(f"[green]✓ DONE:[/green] {file_path_translated}")
+        print(f"[green]✔ DONE:[/green] {file_path_translated}")
 
     def translate_lab(self, lab_path: str) -> str:
         """Translate Lab Folder
@@ -254,11 +254,11 @@ class MDTranslator:
         # save index.json
         with open(index_path, "w", encoding="utf-8") as f:
             json.dump(index, f, indent=2, ensure_ascii=False)
-        print(f"[green]✓ DONE:[/green] {index_path}")
+        print(f"[green]✔ DONE:[/green] {index_path}")
         # rename lab folder
         if not click.confirm("Rename lab folder?"):
             return
         lab_name = os.path.dirname(lab_path)
         lab_name_en = f"{index['type']}-{self.__title_slugify(title)}"
         os.rename(lab_name, lab_name_en)
-        print(f"[green]✓ DONE:[/green] {lab_name} → {lab_name_en}")
+        print(f"[green]✔ DONE:[/green] {lab_name} → {lab_name_en}")

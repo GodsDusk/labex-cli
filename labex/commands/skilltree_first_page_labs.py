@@ -1,6 +1,6 @@
 from rich import print
-from .utils.feishu import Feishu
-from .utils.api import UserData, AdminData
+from .utils.feishu_api import Feishu
+from .utils.labex_api import UserData, AdminData
 
 
 class FirstPageLabs:

@@ -22,7 +22,7 @@ class LabExLogin:
                 config = json.load(f)
             return config
         except:
-            print("[red]✕[/] No configuration file detected, please log in first.")
+            print("[red]✗[/] No configuration file detected, please log in first.")
 
     def write_account_cookies(self, cookies: str) -> None:
         """Save account Cookies information
@@ -76,7 +76,7 @@ class LabExLogin:
         try:
             # Attempt to retrieve local account information.
             username, password = self.read_account_info()
-            print("[green]✓ Automatic login[/]")
+            print("[green]✔ Automatic login[/]")
         except:
             # No local account information, login required.
             print(
@@ -91,13 +91,13 @@ class LabExLogin:
             data=json.dumps({"username": username, "password": password}),
         )
         if r.status_code == 200:
-            print(f"[green]✓[/] Login successful: {username}")
+            print(f"[green]✔[/] Login successful: {username}")
             # Cache the token locally for future use.
             self.write_account_cookies(r.headers["Set-Cookie"])
             if check:
                 CheckUpdate().check_version()  # Check for version updates.
         else:
-            print(f"[red]✕[/] Login failed: {r.json()['message']}")
+            print(f"[red]✗[/] Login failed: {r.json()['message']}")
             self.write_account_info()
 
 

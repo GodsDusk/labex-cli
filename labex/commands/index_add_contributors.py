@@ -1,39 +1,6 @@
 import os
 import json
-import requests
-
-
-class GitHub:
-    """GitHub 相关 API"""
-
-    def __init__(self, token: str) -> None:
-        self.token = token
-
-    def get_contributors(self, repo_name: str, file_path: str) -> str:
-        # Set the API URL
-        url = f"https://api.github.com/repos/{repo_name}/commits"
-        # Set the headers for authentication
-        headers = {
-            "Authorization": f"token {self.token}",
-            "Accept": "application/vnd.github+json",
-        }
-
-        # Set the parameters to filter commits by file path
-        params = {"path": file_path}
-
-        # Send the request
-        r = requests.get(url, headers=headers, params=params)
-        # Check if the request was successful
-        try:
-            commits = r.json()
-            contributors = set()
-            # Iterate through the commits and extract the author's login
-            for commit in commits:
-                author = commit["author"]["login"]
-                contributors.add(author)
-            return list(contributors)
-        except:
-            return []
+from .utils.github_api import GitHub
 
 
 class AddContributors:
@@ -53,7 +20,9 @@ class AddContributors:
         idx = self.get_index_json(path=path)
         i = 1
         for file in idx:
-            contributors = self.github.get_contributors(repo_name=repo, file_path=file)
+            contributors = self.github.__get_contributors(
+                repo_name=repo, file_path=file
+            )
             # read index.json
             with open(file, "r") as f:
                 index = json.load(f)

@@ -1,54 +1,7 @@
 import re
-import requests
 from datetime import datetime, timedelta
-from .utils.feishu import Feishu
-
-
-class GitHub:
-    """GitHub 相关 API"""
-
-    def __init__(self, token: str) -> None:
-        self.token = token
-
-    def get_issues_list(self, repo_name: str) -> list:
-        """获取 issues 列表
-
-        Args:
-            repo_name (str): 仓库名称
-        """
-        url = f"https://api.github.com/repos/{repo_name}/issues"
-        headers = {
-            "Authorization": "token " + self.token,
-            "Accept": "application/vnd.github+json",
-        }
-        params = {
-            "state": "all",
-            "per_page": 100,
-        }
-
-        all_issues = []
-        page = 1
-
-        while True:
-            params["page"] = page
-            print(f"Fetching page {page} of issues...")
-            response = requests.get(url, headers=headers, params=params)
-            if response.status_code != 200:
-                raise Exception(
-                    f"Error retrieving issues: {response.status_code}, {response.text}"
-                )
-
-            issues = response.json()
-            if not issues:
-                break
-
-            all_issues.extend(issues)
-            page += 1
-
-        # 仅保留 Issue，去掉 PR
-        noly_issues = [i for i in all_issues if "pull_request" not in i.keys()]
-
-        return noly_issues
+from .utils.feishu_api import Feishu
+from .utils.github_api import GitHub
 
 
 class SyncIssuesToFeishu:
@@ -86,13 +39,14 @@ class SyncIssuesToFeishu:
         # Make a dict of ISSUE_NUM and record_id
         records_dicts = {r["fields"]["ISSUE_NUM"]: r["record_id"] for r in records}
         # Get all issues from github
-        issues_list = self.github.get_issues_list(repo_name)
+        issues_list = self.github.__get_issues_list(repo_name)
         print(f"Found {len(issues_list)} issues in GitHub.")
         # Feishu 未关闭的 Issue
         feishu_not_closed_issue_nums = [
             str(r["fields"]["ISSUE_NUM"])
             for r in records
-            if r["fields"]["ISSUE_STATE"] == "OPEN" and r["fields"]["REPO_NAME"] == repo_name
+            if r["fields"]["ISSUE_STATE"] == "OPEN"
+            and r["fields"]["REPO_NAME"] == repo_name
         ]
         print(f"Found {len(feishu_not_closed_issue_nums)} OPEN ISSUE in Feishu.")
         # 忽略已经关闭的 ISSUE

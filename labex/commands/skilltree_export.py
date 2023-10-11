@@ -2,7 +2,7 @@ import os
 import csv
 import glob
 import json
-from .utils.feishu import Feishu
+from .utils.feishu_api import Feishu
 from rich import print
 
 
