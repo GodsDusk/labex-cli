@@ -7,21 +7,11 @@ from titlecase import titlecase
 
 
 class CreateProject:
-    def __init__(self, gpt_model: str):
+    def __init__(self, gpt_model: str = "35"):
         self.openai_type = "azure"
         self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
         self.openai_version = "2023-07-01-preview"
-        if self.openai_key is None:
-            print(
-                "[red]✗ ERROR:[/red] AZURE_OPENAI_API_KEY environment variable not set."
-            )
-            exit(1)
-        if self.openai_base is None:
-            print(
-                "[red]✗ ERROR:[/red] AZURE_OPENAI_API_BASE environment variable not set."
-            )
-            exit(1)
         # gpt model
         if gpt_model == "35":
             self.engine = "gpt-35-turbo-16k"
