@@ -82,6 +82,7 @@ class SyncPRToFeishu:
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
         )
+        print(f"[green]✔ RECORDS:[/green] {len(records)}")
         # Make a dict of PR_NUMBER and record_id
         num_id_dicts = {r["fields"]["PR_NUM"]: r["record_id"] for r in records}
         print(f"[yellow]➜ TASK2:[/yellow] Get data from GitHub")
@@ -144,7 +145,7 @@ class SyncPRToFeishu:
                 # 如果 index.json 不存在
                 if index_json == None:
                     print(f"[red]➜ SKIPPED:[/red] No index.json found.")
-                    return
+                    continue
 
                 ###################
                 # STEP2 更新 PR 状态
@@ -153,17 +154,23 @@ class SyncPRToFeishu:
                 # 判断 PR 是否已经合并或关闭
                 if pr_state != "open":
                     print(f"[red]➜ SKIPPED:[/red] PR is not open.")
-                    return
+                    continue
                 # 判断 PR 是否已经测试完成
                 if "Test Completed" not in pr_labels_list:
                     print(f"[red]➜ SKIPPED:[/red] PR is not tested completed.")
-                    return
+                    continue
+
+                # 从 PR 描述中获取 issue id
+                pr_body = pr["body"]
+                issue_id = self.__get_pr_assign_issue_id(pr_body)
+
                 # 判断 PR 是否正确关联了 issue 或者选择了 noissue
                 if issue_id == 0 and "noissue" not in pr_labels_list:
                     comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue, 无法分配 Reviewer。请你在 PR 描述中按要求添加, 如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue, 请在 Labels 中选择 `noissue`, 系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
                     self.github.comment_pr(repo_name, pr_number, comment)
                     print(f"→ No issue id found in {pr_number}, comment to {pr_user}")
-                    return
+                    continue
+
                 # 如果检查通过, 则更新 PR 状态
 
                 # STEP1 更新 Milestone
@@ -171,39 +178,36 @@ class SyncPRToFeishu:
                 pr_milestone = pr.get("milestone")
                 # 如果 PR 原本存在 milestone
                 if pr_milestone != None:
+                    date_milestone_str = pr_milestone["title"]
                     print(f"[red]➜ SKIPPED:[/red] PR already has a milestone.")
-                    return
-                # 如果 PR 原本不存在 milestone
-                # 使用更新日期所在的周作为 milestone
-                date_milestone_str = self.__date_milestone(pr["updated_at"])
-                pr_milestone_number = milestones.get(date_milestone_str, None)
-                # 如果 pr_milestone_number 不存在, 则创建 milestone
-                if pr_milestone_number == None:
-                    # 获取周日日期
-                    due_on = self.__sunday_of_date(pr["updated_at"])
-                    # 创建 milestone
-                    self.github.create_milestone(repo_name, date_milestone_str, due_on)
-                    # 重新获取 pr_milestone_number
-                    milestones = self.github.list_milestone(repo_name)
+                else:
+                    # 如果 PR 原本不存在 milestone
+                    # 使用更新日期所在的周作为 milestone
+                    date_milestone_str = self.__date_milestone(pr["updated_at"])
                     pr_milestone_number = milestones.get(date_milestone_str, None)
-                # 如果 pr_milestone_number 依然不存在, 则跳过
-                if pr_milestone_number == None:
-                    print(f"[red]➜ SKIPPED:[/red] PR milestone still not found.")
-                    return
-                # 如果 pr_milestone_number 存在, 则更新 milestone
-                payloads = {"milestone": pr_milestone_number}
-                self.github.patch_pr(
-                    repo_name,
-                    pr_number,
-                    payloads,
-                )
-                print(
-                    f"[green]➜ UPDATED:[/green] PR milestone to {date_milestone_str}, {pr_milestone_number}"
-                )
+                    # 如果 pr_milestone_number 不存在, 则创建 milestone
+                    if pr_milestone_number == None:
+                        # 获取周日日期
+                        due_on = self.__sunday_of_date(pr["updated_at"])
+                        # 创建 milestone
+                        self.github.create_milestone(
+                            repo_name, date_milestone_str, due_on
+                        )
+                        # 重新获取 pr_milestone_number
+                        milestones = self.github.list_milestone(repo_name)
+                        pr_milestone_number = milestones.get(date_milestone_str, None)
+                    # 如果 pr_milestone_number 存在, 则更新 milestone
+                    payloads = {"milestone": pr_milestone_number}
+                    self.github.patch_pr(
+                        repo_name,
+                        pr_number,
+                        payloads,
+                    )
+                    print(
+                        f"[green]➜ UPDATED:[/green] PR milestone to {date_milestone_str}, {pr_milestone_number}"
+                    )
                 # STEP2 为 PR 添加 Reviewer
-                # 从 PR 描述中获取 issue id
-                pr_body = pr["body"]
-                issue_id = self.__get_pr_assign_issue_id(pr_body)
+
                 # 如果 issue_id 不为 0, 则获取 issue user
                 if issue_id != 0:
                     issue = self.github.get_issue(repo_name, issue_id)
@@ -225,19 +229,19 @@ class SyncPRToFeishu:
                 # 如果 reviewer 已经是 assignees, 则跳过添加
                 if reviewer in assignees_list:
                     print(f"[green]➜ SKIPPED:[/green] {reviewer} already in assignees.")
-                    return
-                # 如果 reviewer 不在 assignees 里, 则添加 reviewer
-                assignees_list.append(reviewer)
-                payloads = {"assignees": assignees_list}
-                self.github.patch_pr(
-                    repo_name,
-                    pr_number,
-                    payloads,
-                )
-                # 添加评论通知 reviewer
-                comment = f"Hi, @{pr_user} \n\n系统已将 @{reviewer} 自动分配为 Reviewer。一般情况下，@{reviewer} 会在 2 个工作日内完成 Review, 并与你沟通。如果一直没有进展，请及时通过评论或微信群与 @{reviewer} 联系确认。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
-                self.github.comment_pr(repo_name, pr_number, comment)
-                print(f"[green]➜ UPDATED:[/green] {reviewer} added as a reviewer.")
+                else:
+                    # 如果 reviewer 不在 assignees 里, 则添加 reviewer
+                    assignees_list.append(reviewer)
+                    payloads = {"assignees": assignees_list}
+                    self.github.patch_pr(
+                        repo_name,
+                        pr_number,
+                        payloads,
+                    )
+                    # 添加评论通知 reviewer
+                    comment = f"Hi, @{pr_user} \n\n系统已将 @{reviewer} 自动分配为 Reviewer。一般情况下，@{reviewer} 会在 2 个工作日内完成 Review, 并与你沟通。如果一直没有进展，请及时通过评论或微信群与 @{reviewer} 联系确认。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
+                    self.github.comment_pr(repo_name, pr_number, comment)
+                    print(f"[green]➜ UPDATED:[/green] {reviewer} added as a reviewer.")
 
                 #######################
                 # STEP3 更新 Feishu 记录
