@@ -20,9 +20,7 @@ class AddContributors:
         idx = self.get_index_json(path=path)
         i = 1
         for file in idx:
-            contributors = self.github.__get_contributors(
-                repo_name=repo, file_path=file
-            )
+            contributors = self.github.get_contributors(repo_name=repo, file_path=file)
             # read index.json
             with open(file, "r") as f:
                 index = json.load(f)

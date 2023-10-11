@@ -39,7 +39,7 @@ class SyncIssuesToFeishu:
         # Make a dict of ISSUE_NUM and record_id
         records_dicts = {r["fields"]["ISSUE_NUM"]: r["record_id"] for r in records}
         # Get all issues from github
-        issues_list = self.github.__get_issues_list(repo_name)
+        issues_list = self.github.get_issues_list(repo_name)
         print(f"Found {len(issues_list)} issues in GitHub.")
         # Feishu 未关闭的 Issue
         feishu_not_closed_issue_nums = [

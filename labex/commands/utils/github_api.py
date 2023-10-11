@@ -10,7 +10,7 @@ class GitHub:
         self.token = token
 
     @retry(stop_max_attempt_number=2)
-    def __get_issue(self, repo_name: str, issue_number: int) -> str:
+    def get_issue(self, repo_name: str, issue_number: int) -> str:
         url = f"https://api.github.com/repos/{repo_name}/issues/{issue_number}"
         headers = {
             "Authorization": "token " + self.token,
@@ -20,7 +20,7 @@ class GitHub:
         return r.json()
 
     @retry(stop_max_attempt_number=2)
-    def __patch_pr(self, repo_name: str, pr_number: int, payloads: dict) -> dict:
+    def patch_pr(self, repo_name: str, pr_number: int, payloads: dict) -> dict:
         url = f"https://api.github.com/repos/{repo_name}/issues/{pr_number}"
         r = requests.patch(
             url=url,
@@ -33,7 +33,7 @@ class GitHub:
         return r.json()
 
     @retry(stop_max_attempt_number=2)
-    def __comment_pr(self, repo_name: str, pr_number: int, comment_text: str) -> dict:
+    def comment_pr(self, repo_name: str, pr_number: int, comment_text: str) -> dict:
         url = f"https://api.github.com/repos/{repo_name}/issues/{pr_number}/comments"
         r = requests.post(
             url=url,
@@ -50,7 +50,7 @@ class GitHub:
         return r.json()
 
     @retry(stop_max_attempt_number=2)
-    def __get_pr_list(self, repo_name: str) -> list:
+    def get_pr_list(self, repo_name: str) -> list:
         """获取 pr 列表
 
         Args:
@@ -87,7 +87,7 @@ class GitHub:
         return all_pulls
 
     @retry(stop_max_attempt_number=2)
-    def __list_milestone(self, repo_name: str) -> list:
+    def list_milestone(self, repo_name: str) -> list:
         """获取 milestone 列表"""
         url = f"https://api.github.com/repos/{repo_name}/milestones"
         headers = {
@@ -100,7 +100,7 @@ class GitHub:
         return title_nums
 
     @retry(stop_max_attempt_number=2)
-    def __create_milestone(self, repo_name: str, title: str, due_on: str) -> dict:
+    def create_milestone(self, repo_name: str, title: str, due_on: str) -> dict:
         """创建 milestone
 
         Args:
@@ -136,7 +136,7 @@ class GitHub:
         return r.json()
 
     @retry(stop_max_attempt_number=2)
-    def __list_collaborators(self, repo_name: str) -> list:
+    def list_collaborators(self, repo_name: str) -> list:
         """获取仓库的协作者列表"""
         url = f"https://api.github.com/repos/{repo_name}/collaborators"
         headers = {
@@ -151,7 +151,7 @@ class GitHub:
         return names
 
     @retry(stop_max_attempt_number=2)
-    def __pr_index_json(self, repo_name: str, pr_number: int) -> list:
+    def pr_index_json(self, repo_name: str, pr_number: int) -> list:
         url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/files"
         headers = {
             "Accept": "application/vnd.github+json",
@@ -185,7 +185,7 @@ class GitHub:
             return None, None
 
     @retry(stop_max_attempt_number=2)
-    def __pr_reviews(self, repo_name: str, pr_number: int) -> list:
+    def pr_reviews(self, repo_name: str, pr_number: int) -> list:
         url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/reviews"
         headers = {
             "Accept": "application/vnd.github+json",
@@ -202,7 +202,7 @@ class GitHub:
         return list(set(approved_by)), list(set(changes_requested_by))
 
     @retry(stop_max_attempt_number=2)
-    def __get_issues_list(self, repo_name: str) -> list:
+    def get_issues_list(self, repo_name: str) -> list:
         """获取 issues 列表
 
         Args:
@@ -243,7 +243,7 @@ class GitHub:
         return noly_issues
 
     @retry(stop_max_attempt_number=2)
-    def __get_contributors(self, repo_name: str, file_path: str) -> str:
+    def get_contributors(self, repo_name: str, file_path: str) -> str:
         # Set the API URL
         url = f"https://api.github.com/repos/{repo_name}/commits"
         # Set the headers for authentication
