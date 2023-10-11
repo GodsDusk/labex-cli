@@ -151,10 +151,6 @@ class SyncPRToFeishu:
                 # STEP2 更新 PR 状态
                 ###################
 
-                # 判断 PR 是否已经合并或关闭
-                if pr_state != "open":
-                    print(f"[red]➜ SKIPPED:[/red] PR is not open.")
-                    continue
                 # 判断 PR 是否已经测试完成
                 if "Test Completed" not in pr_labels_list:
                     print(f"[red]➜ SKIPPED:[/red] PR is not tested completed.")
