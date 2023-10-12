@@ -1,5 +1,6 @@
 import os
 import click
+
 from .commands.utils.version import CheckUpdate
 from .commands.utils.auth import LabExLogin
 
@@ -14,6 +15,7 @@ from .commands.index_update_title import UpdateIndexTitle
 from .commands.index_set_fee_type import SetFeeType
 from .commands.index_add_contributors import AddContributors
 from .commands.index_rename import StandardName
+from .commands.index_add_skills import AddSkills
 
 from .commands.skilltree_export import ExportSkills
 from .commands.skilltree_notify import SkillTreeNotify
@@ -288,6 +290,28 @@ def rename(path, mode):
 
 
 idx.add_command(rename)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Directory path",
+    metavar="<path>",
+)
+@click.option(
+    "--skilltree",
+    type=click.Choice(list(AddSkills().languages.keys())),
+    help="choose a skilltree",
+)
+def addskills(path, skilltree):
+    """Add skills to index.json"""
+    AddSkills().add_skills(dir_path=path, skilltree=skilltree)
+
+
+idx.add_command(addskills)
 
 
 # =========================
