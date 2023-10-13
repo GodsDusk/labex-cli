@@ -262,3 +262,6 @@ class MDTranslator:
         lab_name_en = f"{index['type']}-{self.__title_slugify(title)}"
         os.rename(lab_name, lab_name_en)
         print(f"[green]✔ DONE:[/green] {lab_name} → {lab_name_en}")
+        # run prettier
+        os.system(f"prettier --log-level silent --write {lab_name_en}")
+        print(f"[green]✔ prettier done![/green]")

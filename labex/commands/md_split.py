@@ -195,3 +195,6 @@ class MDSplitter:
         }
         base_file.write(json.dumps(base_config, indent=2, ensure_ascii=False))
         print(f"[green]✔ {lab_slug}/index.json created![/green]")
+        # run prettier
+        os.system(f"prettier --log-level silent --write {lab_slug}")
+        print(f"[green]✔ prettier done![/green]")
