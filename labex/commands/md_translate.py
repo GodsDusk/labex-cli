@@ -258,7 +258,10 @@ class MDTranslator:
         # rename lab folder
         if not click.confirm("Rename lab folder?"):
             return
-        lab_name = os.path.dirname(lab_path)
+        if "/" in lab_path:
+            lab_name = os.path.dirname(lab_path)
+        else:
+            lab_name = lab_path
         lab_name_en = f"{index['type']}-{self.__title_slugify(title)}"
         os.rename(lab_name, lab_name_en)
         print(f"[green]✔ DONE:[/green] {lab_name} → {lab_name_en}")

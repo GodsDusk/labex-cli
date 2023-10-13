@@ -84,10 +84,14 @@ class MDSplitter:
         """create new lab folder"""
         # parse md file
         lab_title, lab_intro, lab_steps, lab_summary = self.__parse_md(md_path)
-        if not click.confirm("Start creating lab?"):
-            return
+        # choose lab type
+        lab_type = click.prompt(
+            "Choose lab type:",
+            type=click.Choice(["lab", "challenge", "project"]),
+            default="lab",
+        )
         # create lab slug
-        lab_slug = f"lab-{lab_title.lower().replace(' ', '-')}"
+        lab_slug = f"{lab_type}-{lab_title.lower().replace(' ', '-')}"
         if os.path.exists(lab_slug):
             print(f"[red]✘ {lab_slug} already exists![/red]")
             return
@@ -176,7 +180,7 @@ class MDSplitter:
         base_file = open(f"{lab_slug}/index.json", "w")
         # index.json config template
         base_config = {
-            "type": "lab",
+            "type": lab_type,
             "title": lab_title,
             "description": lab_description,
             "difficulty": "Beginner",
