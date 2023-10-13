@@ -478,11 +478,27 @@ feishu.add_command(pr)
     type=bool,
     default=False,
     show_default=True,
-    help="Skip the labs that have been synced.",
+    help="Skip the labs that have been synced. This option is prioritized over --full.",
 )
-def lab(appid, appsecret, repo, skip):
+@click.option(
+    "--full",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Synchronize all labs without checking for changes in record fields.",
+)
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Directory path",
+)
+def lab(appid, appsecret, repo, skip, full, path):
     """Sync Repo labs to Feishu"""
-    SyncLabsToFeishu(app_id=appid, app_secret=appsecret, repo=repo).sync_labs(skip=skip)
+    SyncLabsToFeishu(app_id=appid, app_secret=appsecret, repo=repo).sync_labs(
+        skip=skip, full=full, path=path
+    )
 
 
 feishu.add_command(lab)

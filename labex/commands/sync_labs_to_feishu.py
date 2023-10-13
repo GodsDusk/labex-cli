@@ -1,6 +1,7 @@
 import re
 import os
 import json
+from rich import print
 from jsonschema import validate
 from .utils.feishu_api import Feishu
 
@@ -138,13 +139,16 @@ class SyncLabsToFeishu:
         }
         return data
 
-    def sync_labs(self, skip: bool, path=".") -> None:
+    def sync_labs(self, skip: bool, full: bool, path: str) -> None:
         """Sync labs from github to feishu
 
         Args:
             skip (bool): skip the labs that already in feishu
+            full (bool): synchronize all labs without checking for changes in record fields.
             path (str, optional): Defaults to ".".
         """
+        print(f"[yellow]➜ TASK:[/yellow] Syncing {self.repo} to Feishu...")
+        print(f"[yellow]➜ MODE:[/yellow] Skip: {skip}, Full: {full}")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
@@ -200,46 +204,62 @@ class SyncLabsToFeishu:
                             print(f"↓ Skipping {data_path} because of skip=True")
                             continue
                         else:
-                            # Compare JSON to determine whether to update
-                            feishu_fields_data = path_dicts[data_path]["fields_data"]
-                            new_data = data
-                            # Only compare the required fields
-                            str_fields = [
-                                "TITLE",
-                                "DIRECTION",
-                                "BACKEND",
-                                "DIFFICULTY",
-                                "REPO_NAME",
-                                "HIDDEN",
-                                "FEE_TYPE",
-                            ]
-                            list_fields = ["SKILLS_ID"]
-                            num_fields = ["STEPS", "SCRIPTS", "DESC_WORDS", "TIME"]
-                            # Compare the fields, if any change, update
-                            if (
-                                any(
-                                    feishu_fields_data[field] != new_data[field]
-                                    for field in str_fields
-                                )
-                                or any(
-                                    sorted(feishu_fields_data.get(field, []))
-                                    != sorted(new_data[field])
-                                    for field in list_fields
-                                )
-                                or any(
-                                    int(feishu_fields_data[field])
-                                    != int(new_data[field])
-                                    for field in num_fields
-                                )
-                            ):
-                                # Update record
+                            if full:
+                                # Update record with full=True
                                 record_id = path_dicts[data_path]["record_id"]
                                 r = self.feishu.update_bitable_record(
                                     self.app_token, self.table_id, record_id, payloads
                                 )
                                 print(f"→ Updating {data_path} {r['msg'].upper()}")
                             else:
-                                print(f"↓ Skipping {data_path} because of no change")
+                                # Update record with full=False
+                                # Compare JSON to determine whether to update
+                                feishu_fields_data = path_dicts[data_path][
+                                    "fields_data"
+                                ]
+                                new_data = data
+                                # Only compare the required fields
+                                str_fields = [
+                                    "TITLE",
+                                    "DIRECTION",
+                                    "BACKEND",
+                                    "DIFFICULTY",
+                                    "REPO_NAME",
+                                    "HIDDEN",
+                                    "FEE_TYPE",
+                                ]
+                                list_fields = ["SKILLS_ID"]
+                                num_fields = ["STEPS", "SCRIPTS", "DESC_WORDS", "TIME"]
+                                # Compare the fields, if any change, update
+                                if (
+                                    any(
+                                        feishu_fields_data[field] != new_data[field]
+                                        for field in str_fields
+                                    )
+                                    or any(
+                                        sorted(feishu_fields_data.get(field, []))
+                                        != sorted(new_data[field])
+                                        for field in list_fields
+                                    )
+                                    or any(
+                                        int(feishu_fields_data[field])
+                                        != int(new_data[field])
+                                        for field in num_fields
+                                    )
+                                ):
+                                    # Update record
+                                    record_id = path_dicts[data_path]["record_id"]
+                                    r = self.feishu.update_bitable_record(
+                                        self.app_token,
+                                        self.table_id,
+                                        record_id,
+                                        payloads,
+                                    )
+                                    print(f"→ Updating {data_path} {r['msg'].upper()}")
+                                else:
+                                    print(
+                                        f"↓ Skipping {data_path} because of no change"
+                                    )
                     else:
                         # Add record
                         r = self.feishu.add_bitable_record(
