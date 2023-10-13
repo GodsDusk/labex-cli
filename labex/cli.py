@@ -12,9 +12,9 @@ from .commands.md_split import MDSplitter
 
 from .commands.index_check import CheckIndexValidation
 from .commands.index_update_title import UpdateIndexTitle
-from .commands.index_set_fee_type import SetFeeType
+from .commands.index_add_fee_type import SetFeeType
 from .commands.index_add_contributors import AddContributors
-from .commands.index_rename import StandardName
+from .commands.index_update_step_name import StandardName
 from .commands.index_add_skills import AddSkills
 
 from .commands.skilltree_export import ExportSkills
@@ -173,6 +173,37 @@ def idx():
 cli.add_command(idx)
 
 
+@click.command(no_args_is_help=True)
+@click.option(
+    "--instance",
+    type=str,
+    required=True,
+    help="index.json file path",
+    metavar="<path>",
+)
+def check(instance):
+    """Check index.json based on schema.json
+
+    - instance: index.json file path
+    """
+    if instance is None:
+        CheckIndexValidation().validate_all_json("./")
+    else:
+        CheckIndexValidation().validate_json(instance)
+
+
+idx.add_command(check)
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def update():
+    """INDEX UPDATE COMMANDS GROUP"""
+    pass
+
+
+idx.add_command(update)
+
+
 @click.command()
 def title():
     """Update lab title from md files
@@ -181,7 +212,69 @@ def title():
     UpdateIndexTitle().title("./")
 
 
-idx.add_command(title)
+update.add_command(title)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Path to Repo",
+    metavar="<path>",
+)
+@click.option(
+    "--mode",
+    type=click.Choice(["check", "update"]),
+    default="check",
+    show_default=True,
+    help="check first, then update",
+)
+def stepname(path, mode):
+    """Standardize the name of the index.json file and the step file."""
+    StandardName(path=path).main(mode=mode)
+
+
+update.add_command(stepname)
+
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def add():
+    """INDEX ADD COMMANDS GROUP"""
+    pass
+
+
+idx.add_command(add)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--ghtoken",
+    type=str,
+    required=True,
+    help="Github Token",
+)
+@click.option(
+    "--repo",
+    type=str,
+    required=True,
+    help="Repo Name like 'labex-labs/scenarios'",
+)
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Path to Repo",
+    metavar="<path>",
+)
+def contributors(ghtoken, repo, path):
+    """Add Repo Contributors to index.json"""
+    AddContributors(ghtoken=ghtoken).add_contributors(path=path, repo=repo)
+
+
+add.add_command(contributors)
 
 
 @click.command(no_args_is_help=True)
@@ -214,82 +307,7 @@ def feetype(path, type, mode):
     SetFeeType().set(path, type, mode)
 
 
-idx.add_command(feetype)
-
-
-@click.command(no_args_is_help=True)
-@click.option(
-    "--instance",
-    type=str,
-    required=True,
-    help="index.json file path",
-    metavar="<path>",
-)
-def check(instance):
-    """Check index.json based on schema.json
-
-    - instance: index.json file path
-    """
-    if instance is None:
-        CheckIndexValidation().validate_all_json("./")
-    else:
-        CheckIndexValidation().validate_json(instance)
-
-
-idx.add_command(check)
-
-
-@click.command(no_args_is_help=True)
-@click.option(
-    "--ghtoken",
-    type=str,
-    required=True,
-    help="Github Token",
-)
-@click.option(
-    "--repo",
-    type=str,
-    required=True,
-    help="Repo Name like 'labex-labs/scenarios'",
-)
-@click.option(
-    "--path",
-    type=str,
-    default="./",
-    show_default=True,
-    help="Path to Repo",
-    metavar="<path>",
-)
-def contributors(ghtoken, repo, path):
-    """Add Repo Contributors to index.json"""
-    AddContributors(ghtoken=ghtoken).add_contributors(path=path, repo=repo)
-
-
-idx.add_command(contributors)
-
-
-@click.command(no_args_is_help=True)
-@click.option(
-    "--path",
-    type=str,
-    default="./",
-    show_default=True,
-    help="Path to Repo",
-    metavar="<path>",
-)
-@click.option(
-    "--mode",
-    type=click.Choice(["check", "update"]),
-    default="check",
-    show_default=True,
-    help="check first, then update",
-)
-def rename(path, mode):
-    """Standardize the name of the index.json file and the step file."""
-    StandardName(path=path).main(mode=mode)
-
-
-idx.add_command(rename)
+add.add_command(feetype)
 
 
 @click.command(no_args_is_help=True)
@@ -306,12 +324,12 @@ idx.add_command(rename)
     type=click.Choice(list(AddSkills().languages.keys())),
     help="choose a skilltree",
 )
-def addskills(path, skilltree):
+def skills(path, skilltree):
     """Add skills to index.json"""
     AddSkills().add_skills(dir_path=path, skilltree=skilltree)
 
 
-idx.add_command(addskills)
+add.add_command(skills)
 
 
 # =========================
