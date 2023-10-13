@@ -1,5 +1,6 @@
 import json
 import requests
+from rich import print
 
 
 class Feishu:
@@ -43,9 +44,7 @@ class Feishu:
                 if r.json()["data"]["total"] > 0:
                     records += r.json()["data"]["items"]
                     print(
-                        print(
-                            f"[green]✔ RECORDS:[/green] {len(records)}, page_token: {page_token}"
-                        )
+                        f"[green]✔ RECORDS:[/green] {len(records)}, page_token: {page_token}"
                     )
         return records
 
