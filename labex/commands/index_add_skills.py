@@ -54,34 +54,36 @@ class AddSkills:
                     with open(index_path, "r") as f:
                         data = json.load(f)
                     steps = data["details"]["steps"]
-                    new_lab_skills = []
+                    task_type = "ADD"
                     for step in steps:
                         step_text = os.path.join(root, step["text"])
-                        # read the step file
-                        with open(step_text, "r") as f:
-                            step_content = f.read()
-                        step_skills = []
-                        # parse the code block
-                        languages = self.languages[skilltree]
-                        for language in languages:
-                            code_block_content = self.__parse_code_block(
-                                step_content, language
-                            )
-                            code_block_content = "\n".join(code_block_content)
-                            skills = self.parse_skills.parse(
-                                skilltree, code_block_content
-                            )
-                            step_skills += skills
-                        # update the index.json file
                         skills_original = step.get("skills", [])
-                        all_skills = list(set(skills_original + step_skills))
+                        if skilltree == None:
+                            # only sort the skills
+                            all_skills = list(set(skills_original))
+                            task_type = "SORT"
+                        else:
+                            # read the step file
+                            with open(step_text, "r") as f:
+                                step_content = f.read()
+                            step_skills = []
+                            # parse the code block
+                            languages = self.languages[skilltree]
+                            for language in languages:
+                                code_block_content = self.__parse_code_block(
+                                    step_content, language
+                                )
+                                code_block_content = "\n".join(code_block_content)
+                                skills = self.parse_skills.parse(
+                                    skilltree, code_block_content
+                                )
+                                step_skills += skills
+                            # update the index.json file
+                            all_skills = list(set(skills_original + step_skills))
                         step["skills"] = sorted(all_skills)
-                        new_lab_skills += step_skills
                     # update the index.json file
                     with open(index_path, "w") as f:
                         json.dump(data, f, indent=2, ensure_ascii=False)
                     # run prettier
                     os.system(f"prettier --log-level silent --write {index_path}")
-                    print(
-                        f"[green]→ ADD SKILLS:[/] {len(set(new_lab_skills))} {index_path}"
-                    )
+                    print(f"[green]→ {task_type} SKILLS:[/] {index_path}")
