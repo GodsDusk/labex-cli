@@ -36,7 +36,7 @@ def cli():
     """LabEx Command Line Interface"""
     pass
 
-
+@click.command()
 @click.option("--username", type=str, help="Username")
 @click.option("--password", type=str, help="Password")
 @click.option(
@@ -53,7 +53,6 @@ def login(username, password, check):
     Support passing in the username and password as parameters. If they do not exist, prompt for login.
     """
     LabExLogin().login_account(un=username, pw=password, check=check)
-
 
 cli.add_command(login)
 
