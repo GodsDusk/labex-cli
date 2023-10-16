@@ -35,7 +35,6 @@ class MDTranslator:
             self.engine = "gpt-4"
         # system prompts
         self.trans_prompts = "You are a professional translator. You are helping an English speaker translate Chinese into English. Only translate text and cannot interpret it."
-        self.desc_prompts = "You are an AI assistant. Rewrite the content into one sentence and start with 'In this lab'"
 
     def __chat_gpt(self, system_prompts: str, user_prompts: str) -> str:
         """ChatGPT API
@@ -237,8 +236,9 @@ class MDTranslator:
                 f.write(intro_text)
         # summary into description
         description = index["description"]
-        if not description.startswith("In this lab"):
-            description_en = self.__chat_gpt(self.desc_prompts, intro_text)
+        if not description.startswith(f"In this {index['type']}"):
+            desc_prompts = f"You are an AI assistant. Rewrite the content into one sentence and start with 'In this {index['type']}'"
+            description_en = self.__chat_gpt(desc_prompts, intro_text)
             index["description"] = description_en
         # translate finish
         finish = index["details"]["finish"]
