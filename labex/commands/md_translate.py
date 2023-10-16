@@ -34,7 +34,7 @@ class MDTranslator:
         elif gpt_model == "4":
             self.engine = "gpt-4"
         # system prompts
-        self.trans_prompts = "You are a professional translator. You are helping an English speaker translate Chinese into English. Only translate text and cannot interpret it."
+        self.trans_prompts = "You are a professional translator. You are helping an English speaker translate Chinese into English. Using Formal Language. Only translate text and cannot interpret it."
 
     def __chat_gpt(self, system_prompts: str, user_prompts: str) -> str:
         """ChatGPT API
