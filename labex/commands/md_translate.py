@@ -4,6 +4,7 @@ import json
 import openai
 import tiktoken
 from rich import print
+from titlecase import titlecase
 from rich.progress import track
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
@@ -196,7 +197,7 @@ class MDTranslator:
             return
         if self.__in_chinese(title):
             title = self.__chat_gpt(self.trans_prompts, title)
-            index["title"] = title
+            index["title"] = titlecase(title)
         for step in track(steps, description="➜ TRANSLATING STEPS"):
             # translate step text
             step_text_path = os.path.join(lab_path, step["text"])
@@ -209,7 +210,7 @@ class MDTranslator:
                     f.write(step_text)
             # replace step title
             step_title = step_text.split("\n")[0].replace("# ", "").strip()
-            step["title"] = step_title
+            step["title"] = titlecase(step_title)
             # translate step verify
             step_verifies = step["verify"]
             for step_verify in step_verifies:
@@ -218,7 +219,7 @@ class MDTranslator:
                 if self.__in_chinese(verify_name):
                     # translate verify name
                     verify_name = self.__chat_gpt(self.trans_prompts, verify_name)
-                    step_verify["name"] = verify_name
+                    step_verify["name"] = titlecase(verify_name)
                 if self.__in_chinese(verify_hint):
                     # translate verify hint
                     verify_hint = self.__chat_gpt(self.trans_prompts, verify_hint)
