@@ -37,7 +37,6 @@ def cli():
     pass
 
 
-@click.command(no_args_is_help=True)
 @click.option("--username", type=str, help="Username")
 @click.option("--password", type=str, help="Password")
 @click.option(
