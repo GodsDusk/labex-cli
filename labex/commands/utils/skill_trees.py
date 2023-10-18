@@ -1604,6 +1604,113 @@ class ParseSkills:
 
         return list(set(skills))
 
+    def __parse_html_skill(self, content):
+        tags = [
+            "p",
+            "abbr",
+            "title",
+            "head",
+            "body",
+            "address",
+            "section",
+            "a",
+            "style",
+            "article",
+            "li",
+            "ul",
+            "footer",
+            "time",
+            "aside",
+            "audio",
+            "source",
+            "input",
+            "button",
+            "progress",
+            "b",
+            "meta",
+            "base",
+            "form",
+            "label",
+            "br",
+            "textarea",
+            "bdi",
+            "div",
+            "script",
+            "bdo",
+            "blockquote",
+            "cite",
+            "canvas",
+            "table",
+            "tr",
+            "th",
+            "td",
+            "code",
+            "pre",
+            "colgroup",
+            "col",
+            "data",
+            "datalist",
+            "option",
+            "dl",
+            "dt",
+            "dd",
+            "img",
+            "del",
+            "ins",
+            "details",
+            "summary",
+            "dfn",
+            "dialog",
+            "link",
+            "em",
+            "embed ",
+            "object",
+            "fieldset",
+            "legend",
+            "figure",
+            "figcaption",
+            "main",
+            "header",
+            "nav",
+            "hgroup",
+            "i",
+            "iframe",
+            "map",
+            "area",
+            "kbd",
+            "samp",
+            "ol",
+            "meter",
+            "noscript",
+            "optgroup",
+            "select",
+            "output",
+            "ruby",
+            "rp",
+            "rt",
+            "small",
+            "video",
+            "span",
+            "s",
+            "strong",
+            "sub",
+            "sup",
+            "thead",
+            "tbody",
+            "tfoot",
+            "template",
+            "var",
+            "caption",
+            "mark",
+        ]
+
+        skills = []
+        for tag in tags:
+            if f"<{tag}>" or f"<{tag} " or f"</{tag}>" in content:
+                skills.append(f"html/{tag}")
+        if "</h1>" or "</h2>" or "</h3>" or "</h4>" or "</h5>" or "</h6>" in content:
+            skills.append("html/heading")
+
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
@@ -1627,3 +1734,5 @@ class ParseSkills:
             return self.__parse_cpp_skill(content)
         elif language == "c":
             return self.__parse_c_skill(content)
+        elif language == "html":
+            return self.__parse_html_skill(content)
