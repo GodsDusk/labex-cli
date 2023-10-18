@@ -136,7 +136,7 @@ class ParseSkills:
         if "==" in content or "!=" in content or "<" in content or ">" in content:
             skills.append("python/comparison")
         # python/boolean
-        if "True" in content or "False" in content:
+        if " True" in content or " False" in content:
             skills.append("python/boolean")
         # python/switch_case
         if "switch " in content and "case " in content:
