@@ -103,7 +103,15 @@ class ParseSkills:
         if ".py" in content:
             skills.append("python/python_scripts")
         # python/math_operator
-        if "+" in content or "-" in content or "*" in content or "/" in content:
+        if (
+            " + " in content
+            or " - " in content
+            or " * " in content
+            or " / " in content
+            or " % " in content
+            or " ** " in content
+            or " // " in content
+        ):
             skills.append("python/math_operator")
         # python/assignment
         if " = " in content:
@@ -133,7 +141,12 @@ class ParseSkills:
         if "yield " in content:
             skills.append("python/yield_values")
         # python/comparison
-        if "==" in content or "!=" in content or "<" in content or ">" in content:
+        if (
+            " == " in content
+            or " != " in content
+            or " < " in content
+            or " > " in content
+        ):
             skills.append("python/comparison")
         # python/boolean
         if " True" in content or " False" in content:
