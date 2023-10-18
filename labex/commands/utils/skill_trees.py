@@ -1706,10 +1706,213 @@ class ParseSkills:
 
         skills = []
         for tag in tags:
-            if f"<{tag}>" or f"<{tag} " or f"</{tag}>" in content:
+            if f"<{tag}>" in content or f"<{tag} " in content or f"</{tag}>" in content:
                 skills.append(f"html/{tag}")
-        if "</h1>" or "</h2>" or "</h3>" or "</h4>" or "</h5>" or "</h6>" in content:
+        if (
+            "</h1>" in content
+            or "</h2>" in content
+            or "</h3>" in content
+            or "</h4>" in content
+            or "</h5>" in content
+            or "</h6>" in content
+        ):
             skills.append("html/heading")
+        return list(set(skills))
+
+    def __parse_css_skill(self, content):
+        tags = [
+            "animation_name",
+            "animation_duration",
+            "animation_iteration_count",
+            "animation_timing_function",
+            "animation_delay",
+            "animation_direction",
+            "animation",
+            "keyframes",
+            "calc",
+            "var",
+            "attr",
+            "clamp",
+            "radial_gradient",
+            "minmax",
+            "url",
+            "blur",
+            "brightness",
+            "linear_gradient",
+            "custom_properties",
+            "position",
+            "place_items",
+            "padding_bottom",
+            "padding",
+            "padding_top",
+            "padding_left",
+            "object_fit",
+            "object_position",
+            "top",
+            "left",
+            "bottom",
+            "right",
+            "clear",
+            "float",
+            "vertical_align",
+            "z_index",
+            "order",
+            "width",
+            "height",
+            "max_width",
+            "max_height",
+            "min_width",
+            "before",
+            "after",
+            "webkit_scrollbar",
+            "webkit_scrollbar_track",
+            "webkit_scrollbar_thumb",
+            "selection",
+            "first_letter",
+            "border_color",
+            "border_width",
+            "border_block",
+            "border_radius",
+            "border",
+            "outline",
+            "border_top",
+            "border_bottom",
+            "border_left",
+            "border_right",
+            "background_color",
+            "background",
+            "background_image",
+            "background_size",
+            "background_repeat",
+            "background_clip",
+            "background_position",
+            "opacity",
+            "color",
+            "filter",
+            "visibility",
+            "all",
+            "backdrop_filter",
+            "display",
+            "translate_3d",
+            "translate_x",
+            "scale",
+            "rotate",
+            "perspective",
+            "rotate_y",
+            "translate_z",
+            "scale_x",
+            "translate",
+            "rotate_x",
+            "rotate_z",
+            "justify_content",
+            "box_sizing",
+            "box_shadow",
+            "margin",
+            "margin_bottom",
+            "margin_right",
+            "margin_left",
+            "margin_top",
+            "content",
+            "user_select",
+            "white_space",
+            "quotes",
+            "line_height",
+            "text_align",
+            "text_shadow",
+            "text_decoration",
+            "text_overflow",
+            "font_family",
+            "font_weight",
+            "font_size",
+            "hover",
+            "empty",
+            "not",
+            "first_child",
+            "focus_within",
+            "fullscreen",
+            "active",
+            "focus",
+            "invalid",
+            "checked",
+            "nth_child",
+            "transition",
+            "transition_property",
+            "transition_delay",
+            "cursor",
+            "pointer_events",
+            "counter_reset",
+            "counter_increment",
+            "list_style",
+            "list_style_type",
+            "overflow_y",
+            "overflow_x",
+            "overflow",
+            "grid_column",
+            "grid_auto_flow",
+            "grid_template_columns",
+            "grid_auto_rows",
+            "grid_row",
+            "grid_template_rows",
+            "grid_area",
+            "webkit_text_fill_color",
+            "webkit_line_clamp",
+            "align_items",
+            "align_self",
+            "flex_flow",
+            "flex_direction",
+            "flex_wrap",
+            "flex_basis",
+            "transform_origin",
+            "transform_style",
+            "scrollbar_width",
+            "scroll_snap_type",
+            "scroll_snap_align",
+            "overscroll_behavior_x",
+            "overscroll_behavior_y",
+            "column_count",
+            "column_gap",
+            "column_width",
+            "class_selector",
+            "external",
+        ]
+
+        skills = []
+        for tag in tags:
+            if f"{tag.replace('_', '-')}:" in content:
+                skills.append(f"css/{tag}")
+
+        return list(set(skills))
+
+    def __parse_jquery_skill(self, content):
+        slugs = {
+            "children": "children",
+            "parent": "parent",
+            "siblings": "siblings",
+            "append": "append",
+            "addClass": "add_class",
+            "remove": "remove",
+            "removeClass": "remove_class",
+            "attr": "attr",
+            "html": "html",
+            "text": "text",
+            "css": "css",
+            "show": "show",
+            "fadeOut": "fade_out",
+            "hide": "hide",
+            "bind": "bind",
+            "on": "on",
+            "appendTo": "append_to",
+            "mouseover": "mouseover",
+            "toggle": "toggle",
+            "fadeIn": "fade_in",
+        }
+
+        skills = []
+        for slug in slugs:
+            if f".{slug}(" in content:
+                skills.append(f"jquery/{slugs[slug]}")
+
+        return list(set(skills))
 
     def parse(self, language: str, content: str):
         if language == "python":
@@ -1736,3 +1939,7 @@ class ParseSkills:
             return self.__parse_c_skill(content)
         elif language == "html":
             return self.__parse_html_skill(content)
+        elif language == "css":
+            return self.__parse_css_skill(content)
+        elif language == "jquery":
+            return self.__parse_jquery_skill(content)
