@@ -404,6 +404,8 @@ class CreateProject:
         with open(step_raw_path, "w") as f:
             f.write(lab_content)
             print(f"[green]✔ SAVE:[/green] {step_raw_path}")
+        os.system(f"prettier --log-level silent --write {step_raw_path}")
+        print(f"[green]✔ prettier done![/green]")
 
     def create_project_lab(self, path: str) -> None:
         """STEP3: Create Project Lab
@@ -432,6 +434,8 @@ class CreateProject:
                 lab_folder_name = f"project-{lab_title_lower}"
             # rename folder to lab_title_lower
             os.rename(path, lab_folder_name)
+            os.system(f"prettier --log-level silent --write {lab_folder_name}")
+            print(f"[green]✔ prettier done![/green]")
         else:
             print(f"[red]✗ ERROR:[/red] {step_raw_path} not found.")
 
@@ -489,6 +493,8 @@ class CreateProject:
             with open(course_config_path, "w") as f:
                 json.dump(course_config, f, indent=2, ensure_ascii=False)
             print(f"[green]✔ DONE:[/green] {course_config_path} created successfully.")
+            os.system(f"prettier --log-level silent --write {course_config_path}")
+            print(f"[green]✔ prettier done![/green]")
 
         else:
             print(f"[red]✗ ERROR:[/red] {index_path} not found.")
@@ -548,3 +554,5 @@ In this project, you will learn:
                     print(
                         f"[green]✔ DONE:[/green] {lab_intro_path} replaced successfully."
                     )
+                os.system(f"prettier --log-level silent --write {lab_intro_path}")
+                print(f"[green]✔ prettier done![/green]")
