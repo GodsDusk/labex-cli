@@ -210,7 +210,18 @@ class MDTranslator:
                     f.write(step_text)
             # replace step title
             step_title = step_text.split("\n")[0].replace("# ", "").strip()
-            step["title"] = titlecase(step_title)
+            step_title_titlecase = titlecase(step_title)
+            # replace step title in step_text_path
+            with open(step_text_path, "r", encoding="utf-8") as f:
+                step_text = f.read()
+            # delete the first line in step_text
+            step_text = "\n".join(step_text.split("\n")[1:])
+            # add step title in step_text
+            step_text = f"# {step_title_titlecase}\n{step_text}"
+            with open(step_text_path, "w", encoding="utf-8") as f:
+                f.write(step_text)
+            # replace step title in index.json
+            step["title"] = step_title_titlecase
             # translate step verify
             step_verifies = step["verify"]
             for step_verify in step_verifies:
