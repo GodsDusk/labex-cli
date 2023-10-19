@@ -244,6 +244,10 @@ class MDTranslator:
         if self.__in_chinese(intro_text):
             # translate intro text
             intro_text = self.__chat_gpt(self.trans_prompts, intro_text)
+            # delete the first line in intro_text
+            intro_text = "\n".join(intro_text.split("\n")[1:])
+            # add step title in intro_text
+            intro_text = f"# Introduction\n{intro_text}"
             with open(intro_text_path, "w", encoding="utf-8") as f:
                 f.write(intro_text)
         # summary into description
@@ -261,6 +265,10 @@ class MDTranslator:
         if self.__in_chinese(finish_text):
             # translate finish text
             finish_text = self.__chat_gpt(self.trans_prompts, finish_text)
+            # delete the first line in finish_text
+            finish_text = "\n".join(finish_text.split("\n")[1:])
+            # add step title in finish_text
+            finish_text = f"# Summary\n{finish_text}"
             with open(finish_text_path, "w", encoding="utf-8") as f:
                 f.write(finish_text)
         # save index.json
