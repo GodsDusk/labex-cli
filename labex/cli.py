@@ -19,7 +19,7 @@ from .commands.index_add_skills import AddSkills
 
 from .commands.skilltree_export import ExportSkills
 from .commands.skilltree_notify import SkillTreeNotify
-from .commands.skilltree_first_page_labs import FirstPageLabs
+from .commands.skilltree_top_labs import TopLabs
 
 from .commands.sync_pr_to_feishu import SyncPRToFeishu
 from .commands.sync_labs_to_feishu import SyncLabsToFeishu
@@ -35,6 +35,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 def cli():
     """LabEx Command Line Interface"""
     pass
+
 
 @click.command()
 @click.option("--username", type=str, help="Username")
@@ -53,6 +54,7 @@ def login(username, password, check):
     Support passing in the username and password as parameters. If they do not exist, prompt for login.
     """
     LabExLogin().login_account(un=username, pw=password, check=check)
+
 
 cli.add_command(login)
 
@@ -387,12 +389,18 @@ skt.add_command(notify)
     required=True,
     help="Feishu App Secret",
 )
-def fplabs(appid, appsecret):
-    """Update SkillTree First Page Labs"""
-    FirstPageLabs(appid, appsecret).main()
+@click.option(
+    "--num",
+    type=int,
+    required=True,
+    help="Number of pro labs to be updated",
+)
+def toplabs(appid, appsecret, num):
+    """Update SkillTree Top Labs"""
+    TopLabs(appid, appsecret).main(pro_labs=num)
 
 
-skt.add_command(fplabs)
+skt.add_command(toplabs)
 
 # ===========================
 # SYNC SCRIPTS COMMANDS GROUP

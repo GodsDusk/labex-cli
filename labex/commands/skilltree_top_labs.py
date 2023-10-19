@@ -3,7 +3,7 @@ from .utils.feishu_api import Feishu
 from .utils.labex_api import UserData, AdminData
 
 
-class FirstPageLabs:
+class TopLabs:
     def __init__(self, app_id, app_secret) -> None:
         self.__user_data = UserData()
         self.__admin_data = AdminData()
@@ -53,7 +53,7 @@ class FirstPageLabs:
         }
         return path_dicts
 
-    def main(self) -> None:
+    def main(self, pro_labs: int) -> None:
         path_dicts = self.__parse_lab_path()
         trees = self.__parse_skills_tree()
         print(f"Get {len(trees)} skills tree")
@@ -66,7 +66,7 @@ class FirstPageLabs:
             # select first 5 labs
             first_five_labs = first_course_labs[:5]
             # get pro labs
-            page_size = 50 - len(first_five_labs)
+            page_size = pro_labs - len(first_five_labs)
             pro_labs = self.__get_pro_labs(tree_alias, page_size)
             tree_lab_path = first_five_labs + pro_labs
             # get real lab path
