@@ -469,6 +469,9 @@ class CreateProject:
             if "CPP" in skills:
                 skills.remove("CPP")
                 skills.append("C++")
+            if "Jquery" in skills:
+                skills.remove("Jquery")
+                skills.append("jQuery")
             course_config = {
                 "name": title,
                 "description": description,
