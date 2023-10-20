@@ -31,7 +31,7 @@ class UpdateIndexTime:
                     ):
                         data["time"] = lab_time_new
                         with open(index_json_path, "w") as f:
-                            json.dump(data, f, indent=4)
+                            json.dump(data, f, indent=4, ensure_ascii=False)
                         print(f"➜ UPDATE: {index_json_path}")
                         os.system(
                             f"prettier --log-level silent --write {index_json_path}"
