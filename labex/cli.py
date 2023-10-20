@@ -16,6 +16,7 @@ from .commands.index_add_fee_type import SetFeeType
 from .commands.index_add_contributors import AddContributors
 from .commands.index_update_step_name import StandardName
 from .commands.index_add_skills import AddSkills
+from .commands.index_update_time import UpdateIndexTime
 
 from .commands.skilltree_export import ExportSkills
 from .commands.skilltree_notify import SkillTreeNotify
@@ -205,14 +206,40 @@ idx.add_command(update)
 
 
 @click.command()
-def title():
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Path",
+    metavar="<path>",
+)
+def title(path):
     """Update lab title from md files
     - excute from lab directory
     """
-    UpdateIndexTitle().title("./")
+    UpdateIndexTitle().title(path)
 
 
 update.add_command(title)
+
+
+@click.command()
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Path",
+    metavar="<path>",
+)
+def time(path):
+    """Update lab time in index.json
+    """
+    UpdateIndexTime().update_time(path)
+
+
+update.add_command(time)
 
 
 @click.command(no_args_is_help=True)
