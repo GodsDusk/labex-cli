@@ -540,10 +540,6 @@ In this project, you will learn:
 
 ```
 """
-        # save lab_intro_prompt to prompts.md
-        prompts_path = os.path.join(path, "prompts.md")
-        with open(prompts_path, "w") as f:
-            f.write(lab_intro_prompt)
         print(f"[yellow]➜ PROMPTS:[/yellow] {lab_intro_prompt}")
         if click.confirm(f"➜ Generate new intro.md using ChatGPT?"):
             new_lab_intro = self.__chat_gpt(lab_intro_prompt)
