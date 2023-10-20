@@ -41,8 +41,8 @@ class TopLabs:
     def __parse_lab_path(self) -> dict:
         # get all feishu records
         app_token = "bascnNz4Nqjqgqm1Nm5AYke6xxb"
-        table_id = "tblW2umsCYJWzzUX"
-        records = self.feishu.get_bitable_records(app_token, table_id, params="")
+        lab_table_id = "tblW2umsCYJWzzUX"
+        records = self.feishu.get_bitable_records(app_token, lab_table_id, params="")
         # Drop Duplicate records
         records = list({v["fields"]["PATH"]: v for v in records}.values())
         print(f"Found {len(records)} labs in Feishu after deduplication.")

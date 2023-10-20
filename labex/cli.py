@@ -25,6 +25,7 @@ from .commands.skilltree_top_labs import TopLabs
 from .commands.sync_pr_to_feishu import SyncPRToFeishu
 from .commands.sync_labs_to_feishu import SyncLabsToFeishu
 from .commands.sync_issues_to_feishu import SyncIssuesToFeishu
+from .commands.sync_course_to_feishu import SyncCoursesToFeishu
 
 from .commands.project_create import CreateProject
 
@@ -234,8 +235,7 @@ update.add_command(title)
     metavar="<path>",
 )
 def time(path):
-    """Update lab time in index.json
-    """
+    """Update lab time in index.json"""
     UpdateIndexTime().update_time(path)
 
 
@@ -530,7 +530,7 @@ feishu.add_command(pr)
 def lab(appid, appsecret, repo, skip, full, path):
     """Sync Repo labs to Feishu"""
     SyncLabsToFeishu(app_id=appid, app_secret=appsecret, repo=repo).sync_labs(
-        skip=skip, full=full, path=path
+        skip=skip, full=full, dirpath=path
     )
 
 
@@ -570,6 +570,56 @@ def issue(appid, appsecret, ghtoken, repo):
 
 
 feishu.add_command(issue)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--appid",
+    type=str,
+    required=True,
+    help="Feishu App ID",
+)
+@click.option(
+    "--appsecret",
+    type=str,
+    required=True,
+    help="Feishu App Secret",
+)
+@click.option(
+    "--repo",
+    type=str,
+    required=True,
+    help="Github Repo Name",
+)
+@click.option(
+    "--skip",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Skip the courses that have been synced. This option is prioritized over --full.",
+)
+@click.option(
+    "--full",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Synchronize all courses without checking for changes in record fields.",
+)
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Directory path",
+)
+def course(appid, appsecret, repo, skip, full, path):
+    """Sync Repo courses to Feishu"""
+    SyncCoursesToFeishu(app_id=appid, app_secret=appsecret, repo=repo).sync_courses(
+        skip=skip, full=full, dirpath=path
+    )
+
+
+feishu.add_command(course)
 
 # ======================
 # PROJECT COMMANDS GROUP

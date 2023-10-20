@@ -39,7 +39,7 @@ class SyncLabsToFeishu:
         lab_schema = os.path.join(os.path.dirname(__file__), "utils/lab_schema.json")
         self.schema = Schema(lab_schema)
         self.app_token = "bascnNz4Nqjqgqm1Nm5AYke6xxb"
-        self.table_id = "tblW2umsCYJWzzUX"
+        self.lab_table_id = "tblW2umsCYJWzzUX"
         self.skills_table_id = "tblV5pGIsGZMxmE9"
         self.repo = repo
 
@@ -136,19 +136,19 @@ class SyncLabsToFeishu:
         }
         return data
 
-    def sync_labs(self, skip: bool, full: bool, path: str) -> None:
+    def sync_labs(self, skip: bool, full: bool, dirpath: str) -> None:
         """Sync labs from github to feishu
 
         Args:
             skip (bool): skip the labs that already in feishu
             full (bool): synchronize all labs without checking for changes in record fields.
-            path (str, optional): Defaults to ".".
+            dirpath (str, optional): Defaults to ".".
         """
         print(f"[yellow]➜ TASK:[/yellow] Syncing {self.repo} to Feishu...")
         print(f"[yellow]➜ MODE:[/yellow] Skip: {skip}, Full: {full}")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
-            self.app_token, self.table_id, params=""
+            self.app_token, self.lab_table_id, params=""
         )
         print(f"Found {len(records)} labs in Feishu.")
         # Drop Duplicate records
@@ -176,7 +176,7 @@ class SyncLabsToFeishu:
         # If path in path_dicts, update record
         # If path not in path_dicts, add record
         data_paths = []
-        for dirpath, dirnames, filenames in os.walk(path):
+        for dirpath, dirnames, filenames in os.walk(dirpath):
             filenames = [f for f in filenames if f == "index.json"]
             for filename in filenames:
                 try:
@@ -205,7 +205,10 @@ class SyncLabsToFeishu:
                                 # Update record with full=True
                                 record_id = path_dicts[data_path]["record_id"]
                                 r = self.feishu.update_bitable_record(
-                                    self.app_token, self.table_id, record_id, payloads
+                                    self.app_token,
+                                    self.lab_table_id,
+                                    record_id,
+                                    payloads,
                                 )
                                 print(f"→ Updating {data_path} {r['msg'].upper()}")
                             else:
@@ -248,7 +251,7 @@ class SyncLabsToFeishu:
                                     record_id = path_dicts[data_path]["record_id"]
                                     r = self.feishu.update_bitable_record(
                                         self.app_token,
-                                        self.table_id,
+                                        self.lab_table_id,
                                         record_id,
                                         payloads,
                                     )
@@ -260,7 +263,7 @@ class SyncLabsToFeishu:
                     else:
                         # Add record
                         r = self.feishu.add_bitable_record(
-                            self.app_token, self.table_id, payloads
+                            self.app_token, self.lab_table_id, payloads
                         )
                         print(f"↑ Adding {data_path} {r['msg'].upper()}")
                 except Exception as e:
@@ -270,15 +273,15 @@ class SyncLabsToFeishu:
             path for path in path_dicts if path_dicts[path]["repo_name"] == self.repo
         ]
         print(
-            f"Found {len(repo_path_dicts)} labs in this Repo, checking if need delete..."
+            f"Found {len(repo_path_dicts)} labs in this {self.repo}, checking if need delete..."
         )
         deleted = 0
         for path in repo_path_dicts:
             if path not in data_paths:
                 record_id = path_dicts[path]["record_id"]
                 r = self.feishu.delete_bitable_record(
-                    self.app_token, self.table_id, record_id
+                    self.app_token, self.lab_table_id, record_id
                 )
                 print(f"× Deleting {record_id}-{path} {r['msg'].upper()}")
                 deleted += 1
-        print(f"Deleted {deleted} labs")
+        print(f"Deleted {deleted} labs in {self.repo}")
