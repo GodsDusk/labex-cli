@@ -24,7 +24,11 @@ class UpdateIndexTime:
                     # lab steps
                     steps = data["details"]["steps"]
                     lab_time_new = len(steps) * 5
-                    if type(lab_time_old) is str or lab_time_old == 0:
+                    if (
+                        type(lab_time_old) is str
+                        or lab_time_old == 0
+                        or int(lab_time_new) > int(lab_time_old)
+                    ):
                         data["time"] = lab_time_new
                         with open(index_json_path, "w") as f:
                             json.dump(data, f, indent=4)
