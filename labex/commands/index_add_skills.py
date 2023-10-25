@@ -78,6 +78,19 @@ class AddSkills:
                                     skilltree, code_block_content
                                 )
                                 step_skills += skills
+                            # if step solutions is not empty, parse the solutions
+                            solutions = step.get("solutions", [])
+                            if solutions:
+                                for solution in solutions:
+                                    solution_text = os.path.join(
+                                        root, "solutions", solution
+                                    )
+                                    with open(solution_text, "r") as f:
+                                        solution_content = f.read()
+                                    skills = self.parse_skills.parse(
+                                        skilltree, solution_content
+                                    )
+                                    step_skills += skills
                             # update the index.json file
                             all_skills = list(set(skills_original + step_skills))
                         step["skills"] = sorted(all_skills)
