@@ -2296,6 +2296,187 @@ class ParseSkills:
                 skills.append(f"react/{slugs[slug]}")
         return list(set(skills))
 
+    def parse_java_skill(self, content):
+        skills = []
+        # java/method_overriding
+        if "@Override" in content:
+            skills.append("java/method_overriding")
+        # java/annotation
+        if "@" in content:
+            skills.append("java/annotation")
+        # java/net
+        if "net." in content:
+            skills.append("java/net")
+        # java/reflect
+        if "reflect." in content:
+            skills.append("java/reflect")
+        # java/stream
+        if "stream." in content:
+            skills.append("java/stream")
+        # java/xml_dom4j
+        if "dom4j." in content:
+            skills.append("java/xml_dom4j")
+        # java/abstraction
+        if "abstract" in content:
+            skills.append("java/abstraction")
+        # java/arraylist
+        if "ArrayList" in content:
+            skills.append("java/arraylist")
+        # java/classes_objects
+        if "class " in content:
+            skills.append("java/classes_objects")
+        # java/date
+        if "date." in content:
+            skills.append("java/date")
+        # java/enums
+        if "enum " in content:
+            skills.append("java/enums")
+        # java/exceptions
+        if "Exception" in content:
+            skills.append("java/exceptions")
+        # java/hashmap
+        if "HashMap" in content:
+            skills.append("java/hashmap")
+        # java/hashset
+        if "HashSet" in content:
+            skills.append("java/hashset")
+        # java/inheritance
+        if "extends " in content:
+            skills.append("java/inheritance")
+        # java/interface
+        if "interface " in content:
+            skills.append("java/interface")
+        # java/iterator
+        if "Iterator" in content:
+            skills.append("java/iterator")
+        # java/linkedlist
+        if "LinkedList" in content:
+            skills.append("java/linkedlist")
+        # java/packages_api
+        if "package " in content:
+            skills.append("java/packages_api")
+        # java/regex
+        if "regex." in content:
+            skills.append("java/regex")
+        # java/threads
+        if "Thread" in content:
+            skills.append("java/threads")
+        # java/user_input
+        if "Scanner" in content:
+            skills.append("java/user_input")
+        # java/wrapper_classes
+        if (
+            "intValue(" in content
+            or "doubleValue(" in content
+            or "booleanValue(" in content
+            or "byteValue(" in content
+            or "shortValue(" in content
+            or "longValue(" in content
+            or "floatValue(" in content
+            or "charValue(" in content
+        ):
+            skills.append("java/wrapper_classes")
+        # java/files
+        if "File" in content:
+            skills.append("java/files")
+        # java/io
+        if "io." in content:
+            skills.append("java/io")
+        # java/nio
+        if "nio." in content:
+            skills.append("java/nio")
+        # java/create_write_files
+        if "File" in content and ".createNewFile(" in content:
+            skills.append("java/create_write_files")
+        # java/delete_files
+        if "File" in content and ".delete(" in content:
+            skills.append("java/delete_files")
+        # java/read_files
+        if "File" in content and ".read(" in content:
+            skills.append("java/read_files")
+        # java/identifier
+        if "identifier" in content:
+            skills.append("java/identifier")
+        # java/sorting
+        if "sort(" in content:
+            skills.append("java/sorting")
+        # java/stringbuffer_stringbuilder
+        if "StringBuffer" in content or "StringBuilder" in content:
+            skills.append("java/stringbuffer_stringbuilder")
+        # java/working
+        if "working" in content:
+            skills.append("java/working")
+        # java/arrays
+        if "[]" in content:
+            skills.append("java/arrays")
+        # java/booleans
+        if "boolean" in content:
+            skills.append("java/booleans")
+        # java/break_continue
+        if "break" in content or "continue" in content:
+            skills.append("java/break_continue")
+        # java/comments
+        if "//" in content or "/*" in content:
+            skills.append("java/comments")
+        # java/data_types
+        if (
+            "byte" in content
+            or "short" in content
+            or "int" in content
+            or "long" in content
+            or "float" in content
+            or "double" in content
+            or "char" in content
+            or "boolean" in content
+        ):
+            skills.append("java/data_types")
+        # java/for_loop
+        if "for (" in content:
+            skills.append("java/for_loop")
+        # java/if_else
+        if "if (" in content:
+            skills.append("java/if_else")
+        # java/math
+        if "Math." in content:
+            skills.append("java/math")
+        # java/operators
+        if (
+            "+" in content
+            or "-" in content
+            or "*" in content
+            or "/" in content
+            or "%" in content
+            or "=" in content
+            or "++" in content
+            or "--" in content
+        ):
+            skills.append("java/operators")
+        # java/output
+        if "System.out.println(" in content:
+            skills.append("java/output")
+        # java/strings
+        if "String " in content:
+            skills.append("java/strings")
+        # java/switch
+        if "switch (" in content:
+            skills.append("java/switch")
+        # java/variables
+        if "var " in content:
+            skills.append("java/variables")
+        # java/while_loop
+        if "while (" in content:
+            skills.append("java/while_loop")
+        # java/collections_methods
+        if "Collections." in content:
+            skills.append("java/collections_methods")
+        # java/math_methods
+        if "Math." in content:
+            skills.append("java/math_methods")
+        if "System." in content:
+            skills.append("java/system_methods")
+
+        return list(set(skills))
+
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
@@ -2329,3 +2510,5 @@ class ParseSkills:
             return self.__parse_javascript_skill(content)
         elif language == "react":
             return self.parse_react_skill(content)
+        elif language == "java":
+            return self.parse_java_skill(content)
