@@ -133,3 +133,4 @@ labex/commands/utils/github.json
 labex/commands/utils/account.json
 .vscode/settings.json
 test.*
+test/*
