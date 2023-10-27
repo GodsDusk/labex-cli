@@ -1,6 +1,8 @@
+import os
 import json
 import requests
 from rich import print
+from requests_toolbelt import MultipartEncoder
 
 
 class Feishu:
@@ -86,3 +88,33 @@ class Feishu:
             },
         )
         return r.json()
+
+    def upload_media(self, file_path: str, parent_type: str, parent_node: str) -> None:
+        """Upload media to feishu
+
+        Args:
+            file_path (str): file path
+            parent_type (str): https://open.feishu.cn/document/server-docs/docs/drive-v1/media/introduction
+            parent_node (str): https://open.feishu.cn/document/server-docs/docs/drive-v1/media/introduction
+
+        Returns:
+            _type_: _description_
+        """
+        file_path = os.path.abspath(file_path)
+        file_name = os.path.basename(file_path)
+        file_size = os.path.getsize(file_path)
+        url = "https://open.feishu.cn/open-apis/drive/v1/medias/upload_all"
+        form = {
+            "file_name": file_name,
+            "parent_type": parent_type,
+            "parent_node": parent_node,
+            "size": str(file_size),
+            "file": (open(file_path, "rb")),
+        }
+        multi_form = MultipartEncoder(form)
+        headers = {
+            "Authorization": f"Bearer {self.tenant_access_token()}",
+        }
+        headers["Content-Type"] = multi_form.content_type
+        response = requests.request("POST", url, headers=headers, data=multi_form)
+        return response.json()

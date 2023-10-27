@@ -19,12 +19,15 @@ class SyncCoursesToFeishu:
         self.course_table_id = "tblHpYvtI1OqDmwK"
         self.repo = repo
 
-    def __parse_json(self, file_path: str, labs_dict: dict) -> dict:
+    def __parse_json(
+        self, file_path: str, labs_dict: dict, is_upload_cover: bool = False
+    ) -> dict:
         """Parse course.json file
 
         Args:
             file_path (str): course.json file path
             labs_dict (dict): feishu labs dict {lab_path: record_id}
+            is_upload_cover (bool): upload cover to feishu, Defaults to False.
 
         Returns:
             dict: feishu record payload
@@ -69,6 +72,37 @@ class SyncCoursesToFeishu:
             "LABS_ERROR": list(set(not_in_labs_dict)),
         }
         return data
+
+    def __is_upload_cover(self, file_path: str, payloads: dict) -> bool:
+        """Check if need upload cover to feishu
+
+        Args:
+            file_path (str): _description_
+            payloads (dict): _description_
+
+        Returns:
+            bool: _description_
+        """
+        try:
+            with open(file_path, "r") as f:
+                course = json.load(f)
+            course_cover = course.get("cover", None)
+            cover_path = file_path.replace(
+                "course.json", course_cover.replace("./", "")
+            )
+            print(f"[yellow]➜ TASK:[/yellow] Uploading cover {cover_path}")
+            cover_record = self.feishu.upload_media(
+                file_path=cover_path,
+                parent_type="bitable_image",
+                parent_node=self.app_token,
+            )
+            file_token = cover_record["data"]["file_token"]
+            data = payloads["fields"]
+            data["COVER"] = [{"file_token": file_token}]
+            payloads["fields"] = data
+            return payloads
+        except:
+            return payloads
 
     def sync_courses(self, skip: bool, full: bool, dirpath: str) -> None:
         """Sync courses from github to feishu
@@ -130,6 +164,8 @@ class SyncCoursesToFeishu:
                             if full:
                                 # Update record with full=True
                                 record_id = name_dicts[course_name]["record_id"]
+                                # upload course cover
+                                payloads = self.__is_upload_cover(filepath, payloads)
                                 r = self.feishu.update_bitable_record(
                                     self.app_token,
                                     self.course_table_id,
@@ -188,6 +224,8 @@ class SyncCoursesToFeishu:
                                         f"↓ Skipping {course_name} because of no change"
                                     )
                     else:
+                        # upload course cover
+                        payloads = self.__is_upload_cover(filepath, payloads)
                         # Add record
                         r = self.feishu.add_bitable_record(
                             self.app_token, self.course_table_id, payloads
