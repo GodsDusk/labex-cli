@@ -22,7 +22,7 @@ setup(
         "titlecase",
         "langchain",
         "tiktoken",
-        "requests_toolbelt"
+        "requests_toolbelt",
     ],
     entry_points="""
         [console_scripts]
