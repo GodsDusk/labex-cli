@@ -126,9 +126,9 @@ def translate(path, gpt):
     """TRANSLATE MD/IPYNB FILE"""
     md_translator = MDTranslator(gpt_model=gpt)
     ipynb_tr_translator = IpynbTranslator(gpt_model=gpt)
-    if os.path.isfile(path) and path.endwith(".md"):
+    if os.path.isfile(path) and path.endswith(".md"):
         md_translator.translate_md(path)
-    elif os.path.isfile(path) and path.endwith(".ipynb"):
+    elif os.path.isfile(path) and path.endswith(".ipynb"):
         ipynb_tr_translator.translate_ipynb(path)
     elif os.path.isdir(path):
         md_translator.translate_lab(path)

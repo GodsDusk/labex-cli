@@ -97,24 +97,24 @@ class IpynbTranslator:
         Args:
             ipynb_file (str): ipynb file
         """
+        file_name = os.path.basename(ipynb_file)
         ipynb = self.__parse_ipynb(ipynb_file)
-        for cell in track(ipynb["cells"], description="Translating..."):
+        all_tokens = 0
+        for cell in track(ipynb["cells"], description=f"Translating {file_name}..."):
             if cell["cell_type"] == "markdown" or cell["cell_type"] == "code":
                 cell_source = cell["source"]
                 source_translated = []
-                cell_tokens = 0
                 for source in cell_source:
                     if self.__in_chinese(source):
                         output_text, total_tokens = self.__chat_gpt(
                             self.trans_prompts, source
                         )
                         source_translated.append(output_text)
-                        cell_tokens += total_tokens
+                        all_tokens += total_tokens
                     else:
                         source_translated.append(source)
                 cell["source"] = source_translated
-                print(f"{cell['cell_type']} cell used tokens: {cell_tokens}")
-
         output_file = ipynb_file.replace(".ipynb", f"_en.ipynb")
         with open(output_file, "w") as f:
             json.dump(ipynb, f, indent=2, ensure_ascii=False)
+        print(f"[green]✓ SUCCESS:[/green] {output_file}, used {all_tokens} tokens.")
