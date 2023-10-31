@@ -76,10 +76,18 @@ cli.add_command(lab)
 
 
 @click.command()
-def create():
+@click.option(
+    "--path",
+    type=str,
+    help="if not set, it will create a new lab in the current directory",
+)
+def create(path):
     """CREATE NEW LABS"""
     CheckUpdate().check_version()
-    CreateLab().init_base()
+    if path is None:
+        CreateLab().init_base()
+    if path.endswith(".ipynb"):
+        CreateLab().init_notebook(path)
 
 
 lab.add_command(create)

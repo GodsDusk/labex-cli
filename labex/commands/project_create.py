@@ -18,7 +18,7 @@ class CreateProject:
         elif gpt_model == "4":
             self.engine = "gpt-4"
 
-    def __chat_gpt(self, prompts: str) -> str:
+    def chat_gpt(self, prompts: str) -> str:
         """ChatGPT API
 
         Args:
@@ -346,7 +346,7 @@ class CreateProject:
                         print(f"[green]✔ SAVE:[/green] {path_name}")
                     else:
                         print(f"[red]➜ MODE:[/red] Change to markdown mode.")
-                        lab_content = self.__chat_gpt(
+                        lab_content = self.chat_gpt(
                             lab_content_prompt,
                         )
                         if lab_content is not None:
@@ -358,7 +358,7 @@ class CreateProject:
                             print(f"[green]✔ SAVE:[/green] {path_name}")
                 elif mode == "md":
                     print(f"[yellow]➜ MODE:[/yellow] Markdown")
-                    lab_content = self.__chat_gpt(
+                    lab_content = self.chat_gpt(
                         lab_content_prompt,
                     )
                     if lab_content is not None:
@@ -400,7 +400,7 @@ class CreateProject:
         if not click.confirm(f"➜ Generate step_raw.md using ChatGPT?"):
             return
         step_raw_path = os.path.join(path, "step_raw.md")
-        lab_content = self.__chat_gpt(lab_content_prompt)
+        lab_content = self.chat_gpt(lab_content_prompt)
         with open(step_raw_path, "w") as f:
             f.write(lab_content)
             print(f"[green]✔ SAVE:[/green] {step_raw_path}")
@@ -545,7 +545,7 @@ In this project, you will learn:
 """
         print(f"[yellow]➜ PROMPTS:[/yellow] {lab_intro_prompt}")
         if click.confirm(f"➜ Generate new intro.md using ChatGPT?"):
-            new_lab_intro = self.__chat_gpt(lab_intro_prompt)
+            new_lab_intro = self.chat_gpt(lab_intro_prompt)
             print(f"[yellow]➜ NEW INTRO:[/yellow] \n\n{new_lab_intro}")
             if click.confirm(f"➜ Replace intro.md?"):
                 with open(lab_intro_path, "w") as f:
