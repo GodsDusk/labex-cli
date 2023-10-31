@@ -105,6 +105,9 @@ class IpynbTranslator:
                 cell_source = cell["source"]
                 source_translated = []
                 for source in cell_source:
+                    if "base64" in source or len(source) > 4096:
+                        print(f"[yellow]→ SKIP:[/yellow] source too long or base64.")
+                        continue
                     if self.__in_chinese(source):
                         output_text, total_tokens = self.__chat_gpt(
                             self.trans_prompts, source
