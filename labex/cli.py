@@ -8,6 +8,7 @@ from .commands.lab_create import CreateLab
 from .commands.lab_unverified import LabForTesting
 
 from .commands.md_translate import MDTranslator
+from .commands.jupyter_translate import IpynbTranslator
 from .commands.md_split import MDSplitter
 
 from .commands.index_check import CheckIndexValidation
@@ -107,25 +108,11 @@ def unverified(mode, repo):
 lab.add_command(unverified)
 
 
-# ==================
-# MD COMMANDS GROUP
-# ==================
-
-
-@click.group(context_settings=CONTEXT_SETTINGS)
-def md():
-    """MD COMMANDS GROUP"""
-    pass
-
-
-cli.add_command(md)
-
-
 @click.command(no_args_is_help=True)
 @click.option(
     "--path",
     type=str,
-    help="Path to md file",
+    help="Path to md/ipynb file",
     metavar="<path>",
 )
 @click.option(
@@ -136,15 +123,18 @@ cli.add_command(md)
     help="gpt model, select from gpt-35-turbo-16k and gpt-4",
 )
 def translate(path, gpt):
-    """TRANSLATE MD FILE"""
-    translator = MDTranslator(gpt_model=gpt)
-    if os.path.isfile(path):
-        translator.translate_md(path)
+    """TRANSLATE MD/IPYNB FILE"""
+    md_translator = MDTranslator(gpt_model=gpt)
+    ipynb_tr_translator = IpynbTranslator(gpt_model=gpt)
+    if os.path.isfile(path) and path.endwith(".md"):
+        md_translator.translate_md(path)
+    elif os.path.isfile(path) and path.endwith(".ipynb"):
+        ipynb_tr_translator.translate_ipynb(path)
     elif os.path.isdir(path):
-        translator.translate_lab(path)
+        md_translator.translate_lab(path)
 
 
-md.add_command(translate)
+lab.add_command(translate)
 
 
 @click.command(no_args_is_help=True)
@@ -159,7 +149,7 @@ def split(path):
     MDSplitter().new_lab(md_path=path)
 
 
-md.add_command(split)
+lab.add_command(split)
 
 # =========================
 # INDEX JSON COMMANDS GROUP
