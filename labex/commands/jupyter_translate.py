@@ -4,7 +4,6 @@ import json
 import openai
 import tiktoken
 from rich import print
-from titlecase import titlecase
 from rich.progress import track
 
 
@@ -34,7 +33,7 @@ class IpynbTranslator:
         elif gpt_model == "4":
             self.engine = "gpt-4"
         # system prompts
-        self.trans_prompts = "you are a professional translator. you are helping an english speaker translate chinese into english. using formal language. you can only translate text and cannot interpret it, and do not explain."
+        self.trans_prompts = "You are a translation engine, you can only translate chinese markdown text into english using formal language. You cannot interpret it, and do not explain."
 
     def __chat_gpt(self, system_prompts: str, user_prompts: str) -> str:
         """ChatGPT API
@@ -91,33 +90,70 @@ class IpynbTranslator:
             ipynb = json.load(f)
         return ipynb
 
+    def __count_tokens(self, ipynb_file: str) -> None:
+        """Count tokens of ipynb file
+
+        Args:
+            ipynb_file (str): ipynb file
+
+        Returns:
+            tokens length: tokens of sentences in Chinese
+            pricing: pricing
+        """
+        ipynb = self.__parse_ipynb(ipynb_file)
+        all_content = ""
+        cell_count = 0
+        for cell in ipynb["cells"]:
+            if cell["cell_type"] == "markdown" or cell["cell_type"] == "code":
+                cell_source = cell["source"]
+                for source in cell_source:
+                    if self.__in_chinese(source):
+                        all_content += source
+                        cell_count += 1
+        cell_tokens = self.tokenizer.encode(all_content, disallowed_special=())
+        cell_length = len(cell_tokens)
+        prompts_tokens = self.tokenizer.encode(
+            self.trans_prompts, disallowed_special=()
+        )
+        prompts_length = len(prompts_tokens) * cell_count
+        length = cell_length + prompts_length
+        # pricing
+        pricing = round(length / 1000 * 0.004, 2)
+        return length, pricing
+
     def translate_ipynb(self, ipynb_file: str) -> None:
         """Translate ipynb file
 
         Args:
             ipynb_file (str): ipynb file
         """
-        file_name = os.path.basename(ipynb_file)
-        ipynb = self.__parse_ipynb(ipynb_file)
-        all_tokens = 0
-        for cell in track(ipynb["cells"], description=f"Translating {file_name}..."):
-            if cell["cell_type"] == "markdown" or cell["cell_type"] == "code":
-                cell_source = cell["source"]
-                source_translated = []
-                for source in cell_source:
-                    if "base64" in source or len(source) > 4096:
-                        print(f"[yellow]→ SKIP:[/yellow] source too long or base64.")
-                        continue
-                    if self.__in_chinese(source):
-                        output_text, total_tokens = self.__chat_gpt(
-                            self.trans_prompts, source
-                        )
-                        source_translated.append(output_text)
-                        all_tokens += total_tokens
-                    else:
-                        source_translated.append(source)
-                cell["source"] = source_translated
-        output_file = ipynb_file.replace(".ipynb", f"_en.ipynb")
-        with open(output_file, "w") as f:
-            json.dump(ipynb, f, indent=2, ensure_ascii=False)
-        print(f"[green]✓ SUCCESS:[/green] {output_file}, used {all_tokens} tokens.")
+        length, pricing = self.__count_tokens(ipynb_file)
+        if click.confirm(f"Translate {ipynb_file} ({length} tokens, ${pricing})?"):
+            file_name = os.path.basename(ipynb_file)
+            ipynb = self.__parse_ipynb(ipynb_file)
+            all_tokens = 0
+            for cell in track(
+                ipynb["cells"], description=f"Translating {file_name}..."
+            ):
+                if cell["cell_type"] == "markdown" or cell["cell_type"] == "code":
+                    cell_source = cell["source"]
+                    source_translated = []
+                    for source in cell_source:
+                        if "base64" in source or len(source) > 4096:
+                            print(
+                                f"[yellow]→ SKIP:[/yellow] source too long or base64."
+                            )
+                            continue
+                        if self.__in_chinese(source):
+                            output_text, total_tokens = self.__chat_gpt(
+                                self.trans_prompts, source
+                            )
+                            source_translated.append(output_text)
+                            all_tokens += total_tokens
+                        else:
+                            source_translated.append(source)
+                    cell["source"] = source_translated
+            output_file = ipynb_file.replace(".ipynb", f"_en.ipynb")
+            with open(output_file, "w") as f:
+                json.dump(ipynb, f, indent=2, ensure_ascii=False)
+            print(f"[green]✓ SUCCESS:[/green] {output_file}, used {all_tokens} tokens.")
