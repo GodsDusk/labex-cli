@@ -244,3 +244,6 @@ class CreateLab:
             base_file = open(f"{lab_slug}/index.json", "w")
             base_file.write(json.dumps(base_config, indent=2, ensure_ascii=False))
             os.system(f"prettier --log-level silent --write {lab_slug}/* ")
+        if click.confirm(f"Delete {path}"):
+            os.remove(path)
+            print(f"[green]✔[/green] {path} is deleted.")
