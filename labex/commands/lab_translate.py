@@ -9,7 +9,7 @@ from rich.progress import track
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-class MDTranslator:
+class Translator:
     def __init__(self, gpt_model: str):
         # split text into chunks
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -35,7 +35,7 @@ class MDTranslator:
         elif gpt_model == "4":
             self.engine = "gpt-4"
         # system prompts
-        self.trans_prompts = "You are a professional translator. You are helping an English speaker translate Chinese into English. Using Formal Language. Only translate text and cannot interpret it."
+        self.trans_prompts = "You are a translation engine, you can only translate chinese markdown text into english using formal language. You cannot interpret it, and do not explain."
 
     def __chat_gpt(self, system_prompts: str, user_prompts: str) -> str:
         """ChatGPT API
@@ -61,10 +61,13 @@ class MDTranslator:
                 {"role": "user", "content": user_prompts},
             ],
         )
-        print(
-            f"[green]✔ {response['model'].upper()}:[/green] {response['usage']['total_tokens']} TOKENS."
-        )
-        return response["choices"][0]["message"]["content"]
+        output_text = response["choices"][0]["message"]["content"]
+        output_tokens = response["usage"]["total_tokens"]
+        return output_text, output_tokens
+
+    def __token_price(self, tokens: int) -> float:
+        pricing = round(tokens / 1000 * 0.004, 2)
+        return pricing
 
     def __tiktoken_len(self, text) -> int:
         """length function"""
@@ -100,12 +103,17 @@ class MDTranslator:
             str: translated text
         """
         chunks = self.__text_splitter(text)
+        tokens = self.__tiktoken_len(text)
+        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, ${self.__token_price(tokens)}")
         print(f"[yellow]➜ CHUNKS:[/yellow] {len(chunks)}")
         text_translated = ""
+        text_tokens = 0
         if click.confirm("Start translating?"):
             for chunk in track(chunks, description="➜ Translating"):
-                text_translated += self.__chat_gpt(self.trans_prompts, chunk)
-        return text_translated
+                output_text, output_tokens = self.__chat_gpt(self.trans_prompts, chunk)
+                text_translated += output_text
+                text_tokens += output_tokens
+        return text_translated, text_tokens
 
     def __in_chinese(self, text: str) -> bool:
         """Check if the text is in Chinese
@@ -155,7 +163,7 @@ class MDTranslator:
         # read text
         with open(file_path, "r", encoding="utf-8") as f:
             text = f.read()
-        text_translated = self.__translate_text(text)
+        text_translated, text_tokens = self.__translate_text(text)
         # save translated text
         file_name = os.path.basename(file_path)
         file_suffix = os.path.splitext(file_name)[-1]
@@ -163,7 +171,9 @@ class MDTranslator:
         file_path_translated = os.path.join(os.path.dirname(file_path), new_file_name)
         with open(file_path_translated, "w", encoding="utf-8") as f:
             f.write(text_translated)
-        print(f"[green]✔ DONE:[/green] {file_path_translated}")
+        print(
+            f"[green]✔ DONE:[/green] {file_path_translated} (tokens: {text_tokens}, ${self.__token_price(text_tokens)})"
+        )
 
     def translate_lab(self, lab_path: str) -> str:
         """Translate Lab Folder
@@ -195,8 +205,10 @@ class MDTranslator:
         print(f"[yellow]➜ STEPS:[/yellow] {len(steps)}")
         if not click.confirm("Start translating?"):
             return
+        all_tokens = 0
         if self.__in_chinese(title):
-            title = self.__chat_gpt(self.trans_prompts, title)
+            title, output_tokens = self.__chat_gpt(self.trans_prompts, title)
+            all_tokens += output_tokens
             index["title"] = titlecase(title)
         for step in track(steps, description="➜ TRANSLATING STEPS"):
             # translate step text
@@ -205,7 +217,10 @@ class MDTranslator:
                 step_text = f.read()
             if self.__in_chinese(step_text):
                 # translate step text
-                step_text = self.__chat_gpt(self.trans_prompts, step_text)
+                step_text, output_tokens = self.__chat_gpt(
+                    self.trans_prompts, step_text
+                )
+                all_tokens += output_tokens
                 with open(step_text_path, "w", encoding="utf-8") as f:
                     f.write(step_text)
             # replace step title
@@ -229,11 +244,17 @@ class MDTranslator:
                 verify_hint = step_verify["hint"]
                 if self.__in_chinese(verify_name):
                     # translate verify name
-                    verify_name = self.__chat_gpt(self.trans_prompts, verify_name)
+                    verify_name, output_tokens = self.__chat_gpt(
+                        self.trans_prompts, verify_name
+                    )
+                    all_tokens += output_tokens
                     step_verify["name"] = titlecase(verify_name)
                 if self.__in_chinese(verify_hint):
                     # translate verify hint
-                    verify_hint = self.__chat_gpt(self.trans_prompts, verify_hint)
+                    verify_hint, output_tokens = self.__chat_gpt(
+                        self.trans_prompts, verify_hint
+                    )
+                    all_tokens += output_tokens
                     step_verify["hint"] = verify_hint
         # translate intro
         intro = index["details"]["intro"]
@@ -243,7 +264,8 @@ class MDTranslator:
             intro_text = f.read()
         if self.__in_chinese(intro_text):
             # translate intro text
-            intro_text = self.__chat_gpt(self.trans_prompts, intro_text)
+            intro_text, output_tokens = self.__chat_gpt(self.trans_prompts, intro_text)
+            all_tokens += output_tokens
             # delete the first line in intro_text
             intro_text = "\n".join(intro_text.split("\n")[1:])
             # add step title in intro_text
@@ -254,7 +276,8 @@ class MDTranslator:
         description = index["description"]
         if not description.startswith(f"In this {index['type']}"):
             desc_prompts = f"You are an AI assistant. Rewrite the content into one sentence and start with 'In this {index['type']}'"
-            description_en = self.__chat_gpt(desc_prompts, intro_text)
+            description_en, output_tokens = self.__chat_gpt(desc_prompts, intro_text)
+            all_tokens += output_tokens
             index["description"] = description_en
         # translate finish
         finish = index["details"]["finish"]
@@ -264,7 +287,10 @@ class MDTranslator:
             finish_text = f.read()
         if self.__in_chinese(finish_text):
             # translate finish text
-            finish_text = self.__chat_gpt(self.trans_prompts, finish_text)
+            finish_text, output_tokens = self.__chat_gpt(
+                self.trans_prompts, finish_text
+            )
+            all_tokens += output_tokens
             # delete the first line in finish_text
             finish_text = "\n".join(finish_text.split("\n")[1:])
             # add step title in finish_text
@@ -274,7 +300,9 @@ class MDTranslator:
         # save index.json
         with open(index_path, "w", encoding="utf-8") as f:
             json.dump(index, f, indent=2, ensure_ascii=False)
-        print(f"[green]✔ DONE:[/green] {index_path}")
+        print(
+            f"[green]✔ DONE:[/green] {index_path} (tokens: {all_tokens}, ${self.__token_price(all_tokens)})"
+        )
         # rename lab folder
         if not click.confirm("Rename lab folder?"):
             return
@@ -288,3 +316,85 @@ class MDTranslator:
         # run prettier
         os.system(f"prettier --log-level silent --write {lab_name_en}")
         print(f"[green]✔ prettier done![/green]")
+
+    def __parse_ipynb(self, ipynb_file: str) -> dict:
+        """Parse ipynb file
+
+        Args:
+            ipynb_file (str): ipynb file
+
+        Returns:
+            dict: parsed ipynb
+        """
+        with open(ipynb_file, "r") as f:
+            ipynb = json.load(f)
+        return ipynb
+
+    def __count_ipynb_tokens(self, ipynb_file: str) -> None:
+        """Count tokens of ipynb file
+
+        Args:
+            ipynb_file (str): ipynb file
+
+        Returns:
+            tokens length: tokens of sentences in Chinese
+            pricing: pricing
+        """
+        ipynb = self.__parse_ipynb(ipynb_file)
+        all_content = ""
+        cell_count = 0
+        for cell in ipynb["cells"]:
+            if cell["cell_type"] == "markdown" or cell["cell_type"] == "code":
+                cell_source = cell["source"]
+                for source in cell_source:
+                    if self.__in_chinese(source):
+                        all_content += source
+                        cell_count += 1
+        cell_tokens = self.tokenizer.encode(all_content, disallowed_special=())
+        cell_length = len(cell_tokens)
+        prompts_tokens = self.tokenizer.encode(
+            self.trans_prompts, disallowed_special=()
+        )
+        prompts_length = len(prompts_tokens) * cell_count
+        length = cell_length + prompts_length
+        return length
+
+    def translate_ipynb(self, ipynb_file: str) -> None:
+        """Translate ipynb file
+
+        Args:
+            ipynb_file (str): ipynb file
+        """
+        tokens = self.__count_ipynb_tokens(ipynb_file)
+        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, ${self.__token_price(tokens)}")
+        if click.confirm(f"Translate {ipynb_file}?"):
+            file_name = os.path.basename(ipynb_file)
+            ipynb = self.__parse_ipynb(ipynb_file)
+            all_tokens = 0
+            for cell in track(
+                ipynb["cells"], description=f"Translating {file_name}..."
+            ):
+                if cell["cell_type"] == "markdown" or cell["cell_type"] == "code":
+                    cell_source = cell["source"]
+                    source_translated = []
+                    for source in cell_source:
+                        if "base64" in source or len(source) > 4096:
+                            print(
+                                f"[yellow]→ SKIP:[/yellow] source too long or base64."
+                            )
+                            continue
+                        if self.__in_chinese(source):
+                            output_text, output_tokens = self.__chat_gpt(
+                                self.trans_prompts, source
+                            )
+                            all_tokens += output_tokens
+                            source_translated.append(output_text)
+                        else:
+                            source_translated.append(source)
+                    cell["source"] = source_translated
+            output_file = ipynb_file.replace(".ipynb", f"_en.ipynb")
+            with open(output_file, "w") as f:
+                json.dump(ipynb, f, indent=2, ensure_ascii=False)
+            print(
+                f"[green]✔ DONE:[/green] {output_file} (tokens: {all_tokens}, ${self.__token_price(all_tokens)})"
+            )

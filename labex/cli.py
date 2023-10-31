@@ -7,9 +7,8 @@ from .commands.utils.auth import LabExLogin
 from .commands.lab_create import CreateLab
 from .commands.lab_unverified import LabForTesting
 
-from .commands.md_translate import MDTranslator
-from .commands.jupyter_translate import IpynbTranslator
-from .commands.md_split import MDSplitter
+from .commands.lab_translate import Translator
+from .commands.lab_split import MDSplitter
 
 from .commands.index_check import CheckIndexValidation
 from .commands.index_update_title import UpdateIndexTitle
@@ -124,14 +123,13 @@ lab.add_command(unverified)
 )
 def translate(path, gpt):
     """TRANSLATE MD/IPYNB FILE"""
-    md_translator = MDTranslator(gpt_model=gpt)
-    ipynb_tr_translator = IpynbTranslator(gpt_model=gpt)
+    translator = Translator(gpt_model=gpt)
     if os.path.isfile(path) and path.endswith(".md"):
-        md_translator.translate_md(path)
+        translator.translate_md(path)
     elif os.path.isfile(path) and path.endswith(".ipynb"):
-        ipynb_tr_translator.translate_ipynb(path)
+        translator.translate_ipynb(path)
     elif os.path.isdir(path):
-        md_translator.translate_lab(path)
+        translator.translate_lab(path)
 
 
 lab.add_command(translate)
