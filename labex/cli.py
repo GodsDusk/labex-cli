@@ -111,7 +111,7 @@ lab.add_command(unverified)
 @click.option(
     "--path",
     type=str,
-    help="Path to md/ipynb file",
+    help="md/ipynb file path",
     metavar="<path>",
 )
 @click.option(
