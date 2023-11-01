@@ -1,6 +1,7 @@
 import os
 import json
 import openai
+import requests
 
 
 class ChatGPT:
@@ -9,6 +10,7 @@ class ChatGPT:
         self.openai_type = "azure"
         self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
+        self.cf_ai_gateway = os.getenv("CLOUDFLARE_AI_GATEWAY")
         self.openai_version = "2023-07-01-preview"
         self.engine = engine
 
@@ -21,20 +23,45 @@ class ChatGPT:
         Returns:
             str: response
         """
-        openai.api_type = self.openai_type
-        openai.api_key = self.openai_key
-        openai.api_base = self.openai_base
-        openai.api_version = self.openai_version
-        response = openai.ChatCompletion.create(
-            engine=self.engine,
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompts,
+        if self.cf_ai_gateway is None:
+            openai.api_type = self.openai_type
+            openai.api_key = self.openai_key
+            openai.api_base = self.openai_base
+            openai.api_version = self.openai_version
+            response = openai.ChatCompletion.create(
+                engine=self.engine,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_prompts,
+                    },
+                    {"role": "user", "content": user_prompts},
+                ],
+            )
+        else:
+            # https://gateway.ai.cloudflare.com/v1/ACCOUNT_TAG/GATEWAY/azure-openai/RESOURCE_NAME/MODEL_NAME/chat/completions
+            endpoint_url = self.cf_ai_gateway
+            response = requests.post(
+                url=endpoint_url,
+                params={
+                    "api-version": self.openai_version,
                 },
-                {"role": "user", "content": user_prompts},
-            ],
-        )
+                headers={
+                    "Content-Type": "application/json",
+                    "Api-Key": self.openai_key,
+                },
+                data=json.dumps(
+                    {
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": system_prompts,
+                            },
+                            {"role": "user", "content": user_prompts},
+                        ]
+                    }
+                ),
+            ).json()
         output_text = response["choices"][0]["message"]["content"]
         output_tokens = response["usage"]["total_tokens"]
         return output_text, output_tokens
