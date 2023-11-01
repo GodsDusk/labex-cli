@@ -1,69 +1,22 @@
 import os
 import click
 import json
-import openai
 import tiktoken
 from rich import print
 from titlecase import titlecase
 from rich.progress import track
+from .utils.gpt_api import ChatGPT
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 class Translator:
-    def __init__(self, gpt_model: str):
+    def __init__(self, gpt_model: str) -> None:
         # split text into chunks
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
         self.chunk_size = 4096
-        # openai
-        self.openai_type = "azure"
-        self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
-        self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
-        self.openai_version = "2023-07-01-preview"
-        if self.openai_key is None:
-            print(
-                "[red]✗ ERROR:[/red] AZURE_OPENAI_API_KEY environment variable not set."
-            )
-            exit(1)
-        if self.openai_base is None:
-            print(
-                "[red]✗ ERROR:[/red] AZURE_OPENAI_API_BASE environment variable not set."
-            )
-            exit(1)
-        # gpt model
-        if gpt_model == "35":
-            self.engine = "gpt-35-turbo-16k"
-        elif gpt_model == "4":
-            self.engine = "gpt-4"
+        self.gpt = ChatGPT(gpt_model)
         # system prompts
-        self.trans_prompts = "You are a translation engine, you can only translate chinese markdown text into english using formal language. You cannot interpret it, and do not explain."
-
-    def __chat_gpt(self, system_prompts: str, user_prompts: str) -> str:
-        """ChatGPT API
-
-        Args:
-            prompts (str): prompts
-
-        Returns:
-            str: response
-        """
-        openai.api_type = self.openai_type
-        openai.api_key = self.openai_key
-        openai.api_base = self.openai_base
-        openai.api_version = self.openai_version
-        response = openai.ChatCompletion.create(
-            deployment_id=self.engine,
-            model=self.engine,
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompts,
-                },
-                {"role": "user", "content": user_prompts},
-            ],
-        )
-        output_text = response["choices"][0]["message"]["content"]
-        output_tokens = response["usage"]["total_tokens"]
-        return output_text, output_tokens
+        self.system_prompts = "You are a translation engine, you can only translate chinese markdown text into english using formal language. You cannot interpret it, and do not explain."
 
     def __token_price(self, tokens: int) -> float:
         pricing = round(tokens / 1000 * 0.004, 2)
@@ -104,13 +57,15 @@ class Translator:
         """
         chunks = self.__text_splitter(text)
         tokens = self.__tiktoken_len(text)
-        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, ${self.__token_price(tokens)}")
+        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, {self.__token_price(tokens)} USD")
         print(f"[yellow]➜ CHUNKS:[/yellow] {len(chunks)}")
         text_translated = ""
         text_tokens = 0
         if click.confirm("Start translating?"):
             for chunk in track(chunks, description="➜ Translating"):
-                output_text, output_tokens = self.__chat_gpt(self.trans_prompts, chunk)
+                output_text, output_tokens = self.gpt.azure_open_ai(
+                    self.system_prompts, chunk
+                )
                 text_translated += output_text
                 text_tokens += output_tokens
         return text_translated, text_tokens
@@ -172,7 +127,7 @@ class Translator:
         with open(file_path_translated, "w", encoding="utf-8") as f:
             f.write(text_translated)
         print(
-            f"[green]✔ DONE:[/green] {file_path_translated} (tokens: {text_tokens}, ${self.__token_price(text_tokens)})"
+            f"[green]✔ DONE:[/green] {file_path_translated} (tokens: {text_tokens}, {self.__token_price(text_tokens)} USD)"
         )
 
     def translate_lab(self, lab_path: str) -> str:
@@ -207,7 +162,7 @@ class Translator:
             return
         all_tokens = 0
         if self.__in_chinese(title):
-            title, output_tokens = self.__chat_gpt(self.trans_prompts, title)
+            title, output_tokens = self.gpt.azure_open_ai(self.system_prompts, title)
             all_tokens += output_tokens
             index["title"] = titlecase(title)
         for step in track(steps, description="➜ TRANSLATING STEPS"):
@@ -217,8 +172,8 @@ class Translator:
                 step_text = f.read()
             if self.__in_chinese(step_text):
                 # translate step text
-                step_text, output_tokens = self.__chat_gpt(
-                    self.trans_prompts, step_text
+                step_text, output_tokens = self.gpt.azure_open_ai(
+                    self.system_prompts, step_text
                 )
                 all_tokens += output_tokens
                 with open(step_text_path, "w", encoding="utf-8") as f:
@@ -244,15 +199,15 @@ class Translator:
                 verify_hint = step_verify["hint"]
                 if self.__in_chinese(verify_name):
                     # translate verify name
-                    verify_name, output_tokens = self.__chat_gpt(
-                        self.trans_prompts, verify_name
+                    verify_name, output_tokens = self.gpt.azure_open_ai(
+                        self.system_prompts, verify_name
                     )
                     all_tokens += output_tokens
                     step_verify["name"] = titlecase(verify_name)
                 if self.__in_chinese(verify_hint):
                     # translate verify hint
-                    verify_hint, output_tokens = self.__chat_gpt(
-                        self.trans_prompts, verify_hint
+                    verify_hint, output_tokens = self.gpt.azure_open_ai(
+                        self.system_prompts, verify_hint
                     )
                     all_tokens += output_tokens
                     step_verify["hint"] = verify_hint
@@ -264,7 +219,9 @@ class Translator:
             intro_text = f.read()
         if self.__in_chinese(intro_text):
             # translate intro text
-            intro_text, output_tokens = self.__chat_gpt(self.trans_prompts, intro_text)
+            intro_text, output_tokens = self.gpt.azure_open_ai(
+                self.system_prompts, intro_text
+            )
             all_tokens += output_tokens
             # delete the first line in intro_text
             intro_text = "\n".join(intro_text.split("\n")[1:])
@@ -276,7 +233,9 @@ class Translator:
         description = index["description"]
         if not description.startswith(f"In this {index['type']}"):
             desc_prompts = f"You are an AI assistant. Rewrite the content into one sentence and start with 'In this {index['type']}'"
-            description_en, output_tokens = self.__chat_gpt(desc_prompts, intro_text)
+            description_en, output_tokens = self.gpt.azure_open_ai(
+                desc_prompts, intro_text
+            )
             all_tokens += output_tokens
             index["description"] = description_en
         # translate finish
@@ -287,8 +246,8 @@ class Translator:
             finish_text = f.read()
         if self.__in_chinese(finish_text):
             # translate finish text
-            finish_text, output_tokens = self.__chat_gpt(
-                self.trans_prompts, finish_text
+            finish_text, output_tokens = self.gpt.azure_open_ai(
+                self.system_prompts, finish_text
             )
             all_tokens += output_tokens
             # delete the first line in finish_text
@@ -301,7 +260,7 @@ class Translator:
         with open(index_path, "w", encoding="utf-8") as f:
             json.dump(index, f, indent=2, ensure_ascii=False)
         print(
-            f"[green]✔ DONE:[/green] {index_path} (tokens: {all_tokens}, ${self.__token_price(all_tokens)})"
+            f"[green]✔ DONE:[/green] {index_path} (tokens: {all_tokens}, {self.__token_price(all_tokens)} USD)"
         )
         # rename lab folder
         if not click.confirm("Rename lab folder?"):
@@ -353,7 +312,7 @@ class Translator:
         cell_tokens = self.tokenizer.encode(all_content, disallowed_special=())
         cell_length = len(cell_tokens)
         prompts_tokens = self.tokenizer.encode(
-            self.trans_prompts, disallowed_special=()
+            self.system_prompts, disallowed_special=()
         )
         prompts_length = len(prompts_tokens) * cell_count
         length = cell_length + prompts_length
@@ -366,7 +325,7 @@ class Translator:
             ipynb_file (str): ipynb file
         """
         tokens = self.__count_ipynb_tokens(ipynb_file)
-        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, ${self.__token_price(tokens)}")
+        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, {self.__token_price(tokens)} USD")
         if click.confirm(f"Translate {ipynb_file}?"):
             file_name = os.path.basename(ipynb_file)
             ipynb = self.__parse_ipynb(ipynb_file)
@@ -384,8 +343,8 @@ class Translator:
                             )
                             continue
                         if self.__in_chinese(source):
-                            output_text, output_tokens = self.__chat_gpt(
-                                self.trans_prompts, source
+                            output_text, output_tokens = self.gpt.azure_open_ai(
+                                self.system_prompts, source
                             )
                             all_tokens += output_tokens
                             source_translated.append(output_text)
@@ -396,5 +355,5 @@ class Translator:
             with open(output_file, "w") as f:
                 json.dump(ipynb, f, indent=2, ensure_ascii=False)
             print(
-                f"[green]✔ DONE:[/green] {output_file} (tokens: {all_tokens}, ${self.__token_price(all_tokens)})"
+                f"[green]✔ DONE:[/green] {output_file} (tokens: {all_tokens}, {self.__token_price(all_tokens)} USD)"
             )

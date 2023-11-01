@@ -4,14 +4,17 @@ import click
 from rich import print
 from rich.prompt import Prompt
 from titlecase import titlecase
-from .project_create import CreateProject
+from .utils.gpt_api import ChatGPT
 
 
 class CreateLab:
     """Create a new lab or challenge"""
 
     def __init__(self) -> None:
-        pass
+        self.gpt = ChatGPT(engine="gpt-35-turbo")
+        self.system_prompts = (
+            "You are an AI assistant that helps people find information."
+        )
 
     def init_step(self, step_index: int, lab_type: str, lab_slug: str) -> dict:
         """Initialize a step
@@ -233,13 +236,14 @@ class CreateLab:
             # append the cells to markdown
             lines = [line for cell in cells for line in cell["source"]]
             lines = "\n".join(lines)
-            intro = CreateProject().chat_gpt(
-                prompts=f"{lines}\n\n---\n\nPlease write a one-sentence introduction based on the programming experiment abstract above. Start with 'In this lab,'"
+            intro, tokens = self.gpt.azure_open_ai(
+                system_prompts=self.system_prompts,
+                user_prompts=f"{lines}\n\n---\n\nPlease write a one-sentence introduction based on the programming experiment abstract above. Start with 'In this lab,'",
             )
             intro = intro.strip().replace("\n", " ")
             intro_file = open(f"{lab_slug}/intro.md", "w")
             intro_file.write(f"# Introduction\n\n{intro}")
-            print(f"[green]✔[/green] Introduction is revised.")
+            print(f"[green]✔[/green] Introduction is revised. use {tokens} tokens.")
             base_config["description"] = intro
             base_file = open(f"{lab_slug}/index.json", "w")
             base_file.write(json.dumps(base_config, indent=2, ensure_ascii=False))

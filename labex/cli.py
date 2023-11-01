@@ -124,10 +124,9 @@ lab.add_command(unverified)
 )
 @click.option(
     "--gpt",
-    default="35",
+    default="gpt-35-turbo",
     show_default=True,
-    type=click.Choice(["35", "4"]),
-    help="gpt-35-turbo-16k or gpt-4",
+    type=click.Choice(["gpt-35-turbo", "gpt-35-turbo-16k", "gpt-4"]),
 )
 def translate(path, gpt):
     """TRANSLATE MD/IPYNB FILE"""
@@ -662,10 +661,9 @@ pro.add_command(create)
 )
 @click.option(
     "--gpt",
-    default="35",
+    default="gpt-35-turbo",
     show_default=True,
-    type=click.Choice(["35", "4"]),
-    help="gpt-35-turbo-16k or gpt-4",
+    type=click.Choice(["gpt-35-turbo", "gpt-35-turbo-16k", "gpt-4"]),
 )
 @click.option(
     "--techstack",
@@ -701,10 +699,9 @@ create.add_command(s1)
 )
 @click.option(
     "--gpt",
-    default="35",
+    default="gpt-35-turbo",
     show_default=True,
-    type=click.Choice(["35", "4"]),
-    help="gpt-35-turbo-16k or gpt-4",
+    type=click.Choice(["gpt-35-turbo", "gpt-35-turbo-16k", "gpt-4"]),
 )
 def s2(path, gpt):
     """STEP2: CREATE PROJECT MARKDOWN BASED ON CODE"""
@@ -750,10 +747,9 @@ create.add_command(s4)
 )
 @click.option(
     "--gpt",
-    default="35",
+    default="gpt-35-turbo",
     show_default=True,
-    type=click.Choice(["35", "4"]),
-    help="gpt-35-turbo-16k or gpt-4",
+    type=click.Choice(["gpt-35-turbo", "gpt-35-turbo-16k", "gpt-4"]),
 )
 def s5(path, gpt):
     """STEP4: CREATE COURSE INTRUDUCTION BASED ON LAB"""

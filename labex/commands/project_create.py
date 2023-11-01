@@ -1,106 +1,44 @@
 import os
 import json
 import click
-import openai
 from rich import print
 from titlecase import titlecase
+from .utils.gpt_api import ChatGPT
 
 
 class CreateProject:
-    def __init__(self, gpt_model: str = "35"):
-        self.openai_type = "azure"
-        self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
-        self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
-        self.openai_version = "2023-07-01-preview"
-        # gpt model
-        if gpt_model == "35":
-            self.engine = "gpt-35-turbo-16k"
-        elif gpt_model == "4":
-            self.engine = "gpt-4"
-
-    def chat_gpt(self, prompts: str) -> str:
-        """ChatGPT API
-
-        Args:
-            prompts (str): prompts
-
-
-        Returns:
-            str: response
-        """
-        openai.api_type = self.openai_type
-        openai.api_key = self.openai_key
-        openai.api_base = self.openai_base
-        openai.api_version = self.openai_version
-        response = openai.ChatCompletion.create(
-            deployment_id=self.engine,
-            model=self.engine,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an AI assistant that helps people find information.",
-                },
-                {"role": "user", "content": prompts},
-            ],
+    def __init__(self, gpt_model: str) -> None:
+        self.gpt = ChatGPT(gpt_model)
+        self.system_prompts = (
+            "You are an AI assistant that helps people find information."
         )
-        print(
-            f"[green]✔ {response['model'].upper()}:[/green] {response['usage']['total_tokens']} TOKENS."
-        )
-        return response["choices"][0]["message"]["content"]
 
-    def __chat_gpt_fc(self, prompts: str, techstack: str) -> str:
-        """ChatGPT Function Call API
-
-        Args:
-            prompts (str): prompts
-            techstack (str): techstack for prompts
-
-        Returns:
-            str: response
-        """
-        messages = [{"role": "user", "content": prompts}]
-        functions = [
-            {
-                "name": "develop_a_project",
-                "description": f"Develop a project using {techstack}",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "title": {
-                            "type": "string",
-                            "description": "Project Title",
-                            "minLength": 5,
-                            "maxLength": 50,
-                        },
-                        "code_file_name": {
-                            "type": "string",
-                            "description": "The code file name of the project.",
-                        },
-                        "full_codes": {
-                            "type": "string",
-                            "description": "The full codes of the project. The project code must be ensured to be executable.",
-                        },
+    def __func_json(self, techstack: str) -> dict:
+        function_json = {
+            "name": "develop_a_project",
+            "description": f"Develop a project using {techstack}",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Project Title",
+                        "minLength": 5,
+                        "maxLength": 50,
                     },
-                    "required": ["title", "code_file_name", "full_codes"],
+                    "code_file_name": {
+                        "type": "string",
+                        "description": "The code file name of the project.",
+                    },
+                    "full_codes": {
+                        "type": "string",
+                        "description": "The full codes of the project. The project code must be ensured to be executable.",
+                    },
                 },
-            }
-        ]
-        openai.api_type = self.openai_type
-        openai.api_key = self.openai_key
-        openai.api_base = self.openai_base
-        openai.api_version = self.openai_version
-        response = openai.ChatCompletion.create(
-            engine=self.engine,
-            messages=messages,
-            functions=functions,
-            function_call="auto",  # auto is default, but we'll be explicit
-        )
-        response_message = response["choices"][0]["message"]
-        if response_message.get("function_call"):
-            function_args = json.loads(response_message["function_call"]["arguments"])
-            return function_args
-        else:
-            return None
+                "required": ["title", "code_file_name", "full_codes"],
+            },
+        }
+        return function_json
 
     def __parse_md(self, md: str) -> tuple:
         """Parse Lab MD File
@@ -329,8 +267,9 @@ class CreateProject:
                     return
                 if mode == "fc":
                     print(f"[yellow]➜ MODE:[/yellow] Function Call")
-                    lab_content = self.__chat_gpt_fc(
-                        lab_content_prompt, techstack=techstack
+                    lab_content = self.gpt.azure_open_ai_fc(
+                        user_prompts=lab_content_prompt,
+                        function_json=self.__func_json(techstack),
                     )
                     if lab_content is not None:
                         # create the folder
@@ -346,8 +285,8 @@ class CreateProject:
                         print(f"[green]✔ SAVE:[/green] {path_name}")
                     else:
                         print(f"[red]➜ MODE:[/red] Change to markdown mode.")
-                        lab_content = self.chat_gpt(
-                            lab_content_prompt,
+                        lab_content, tokens = self.gpt.azure_open_ai(
+                            self.system_prompts, lab_content_prompt
                         )
                         if lab_content is not None:
                             # create the folder
@@ -355,11 +294,13 @@ class CreateProject:
                             # save the json
                             with open(f"{path_name}/data.md", "w") as f:
                                 f.write(lab_content)
-                            print(f"[green]✔ SAVE:[/green] {path_name}")
+                            print(
+                                f"[green]✔ SAVE:[/green] {path_name}, {tokens} tokens used."
+                            )
                 elif mode == "md":
                     print(f"[yellow]➜ MODE:[/yellow] Markdown")
-                    lab_content = self.chat_gpt(
-                        lab_content_prompt,
+                    lab_content, tokens = self.gpt.azure_open_ai(
+                        self.system_prompts, lab_content_prompt
                     )
                     if lab_content is not None:
                         # create the folder
@@ -367,7 +308,9 @@ class CreateProject:
                         # save the json
                         with open(f"{path_name}/data.md", "w") as f:
                             f.write(lab_content)
-                        print(f"[green]✔ SAVE:[/green] {path_name}")
+                        print(
+                            f"[green]✔ SAVE:[/green] {path_name}, {tokens} tokens used."
+                        )
             except Exception as e:
                 print(f"[red]✗ ERROR:[/red] {project_name} failed, {e}")
                 pass
@@ -400,10 +343,12 @@ class CreateProject:
         if not click.confirm(f"➜ Generate step_raw.md using ChatGPT?"):
             return
         step_raw_path = os.path.join(path, "step_raw.md")
-        lab_content = self.chat_gpt(lab_content_prompt)
+        lab_content, tokens = self.gpt.azure_open_ai(
+            self.system_prompts, lab_content_prompt
+        )
         with open(step_raw_path, "w") as f:
             f.write(lab_content)
-            print(f"[green]✔ SAVE:[/green] {step_raw_path}")
+            print(f"[green]✔ SAVE:[/green] {step_raw_path}, {tokens} tokens used.")
         os.system(f"prettier --log-level silent --write {step_raw_path}")
         print(f"[green]✔ prettier done![/green]")
 
@@ -545,8 +490,12 @@ In this project, you will learn:
 """
         print(f"[yellow]➜ PROMPTS:[/yellow] {lab_intro_prompt}")
         if click.confirm(f"➜ Generate new intro.md using ChatGPT?"):
-            new_lab_intro = self.chat_gpt(lab_intro_prompt)
-            print(f"[yellow]➜ NEW INTRO:[/yellow] \n\n{new_lab_intro}")
+            new_lab_intro, tokens = self.gpt.azure_open_ai(
+                self.system_prompts, lab_intro_prompt
+            )
+            print(
+                f"[yellow]➜ NEW INTRO ({tokens} tokens):[/yellow] \n\n{new_lab_intro}"
+            )
             if click.confirm(f"➜ Replace intro.md?"):
                 with open(lab_intro_path, "w") as f:
                     f.write(new_lab_intro)
