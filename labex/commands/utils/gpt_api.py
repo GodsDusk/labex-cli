@@ -39,7 +39,6 @@ class ChatGPT:
                 ],
             )
         else:
-            print(self.cf_ai_gateway)
             # https://gateway.ai.cloudflare.com/v1/ACCOUNT_TAG/GATEWAY/azure-openai/RESOURCE_NAME/MODEL_NAME/chat/completions
             response = requests.post(
                 url=self.cf_ai_gateway,
