@@ -747,7 +747,7 @@ create.add_command(s4)
 )
 @click.option(
     "--gpt",
-    default="gpt-35-turbo",
+    default="gpt-35-turbo-16k",
     show_default=True,
     type=click.Choice(["gpt-35-turbo", "gpt-35-turbo-16k", "gpt-4"]),
 )

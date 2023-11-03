@@ -61,9 +61,12 @@ class ChatGPT:
                     }
                 ),
             ).json()
-        output_text = response["choices"][0]["message"]["content"]
-        output_tokens = response["usage"]["total_tokens"]
-        return output_text, output_tokens
+        try:
+            output_text = response["choices"][0]["message"]["content"]
+            output_tokens = response["usage"]["total_tokens"]
+            return output_text, output_tokens
+        except Exception as e:
+            print(response)
 
     def azure_open_ai_fc(self, user_prompts: str, function_json: dict) -> str:
         """ChatGPT Function Call API
