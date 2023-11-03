@@ -752,7 +752,7 @@ create.add_command(s4)
     type=click.Choice(["gpt-35-turbo", "gpt-35-turbo-16k", "gpt-4"]),
 )
 def s5(path, gpt):
-    """STEP4: CREATE COURSE INTRUDUCTION BASED ON LAB"""
+    """STEP5: CREATE COURSE INTRUDUCTION BASED ON LAB"""
     CreateProject(gpt_model=gpt).create_course_intro(path=path)
 
 

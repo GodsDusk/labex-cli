@@ -5,11 +5,12 @@ import requests
 
 
 class ChatGPT:
-    def __init__(self, engine: str) -> None:
+    def __init__(self, engine: str = "gpt-35-turbo") -> None:
         # openai
         self.openai_type = "azure"
         self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
+        self.deploy_name = os.getenv("AZURE_DEPLOYMENT_NAME")
         self.cf_ai_gateway = os.getenv("CLOUDFLARE_AI_GATEWAY")
         self.openai_version = "2023-07-01-preview"
         self.engine = engine
@@ -39,12 +40,10 @@ class ChatGPT:
                 ],
             )
         else:
-            # https://gateway.ai.cloudflare.com/v1/ACCOUNT_TAG/GATEWAY/azure-openai/RESOURCE_NAME/MODEL_NAME/chat/completions
+            endpoint_url = f"{self.cf_ai_gateway}/{self.deploy_name}/{self.engine}/chat/completions?api-version={self.openai_version}"
+            print(endpoint_url)
             response = requests.post(
-                url=self.cf_ai_gateway,
-                params={
-                    "api-version": self.openai_version,
-                },
+                url=endpoint_url,
                 headers={
                     "Content-Type": "application/json",
                     "Api-Key": self.openai_key,
