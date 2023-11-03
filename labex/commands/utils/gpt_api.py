@@ -41,7 +41,6 @@ class ChatGPT:
             )
         else:
             endpoint_url = f"{self.cf_ai_gateway}/{self.deploy_name}/{self.engine}/chat/completions?api-version={self.openai_version}"
-            print(endpoint_url)
             response = requests.post(
                 url=endpoint_url,
                 headers={
