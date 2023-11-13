@@ -142,10 +142,19 @@ class SyncPRToFeishu:
                 )
                 # 从 PR 中获取 index.json
                 index_json, lab_path = self.github.pr_index_json(repo_name, pr_number)
-                # 如果 index.json 不存在
-                if index_json == None:
-                    print(f"[red]➜ SKIPPED:[/red] No index.json found.")
-                    continue
+                # 如果 lab_path 不存在
+                if lab_path == None:
+                    # 如果 index.json 不存在
+                    if index_json == None:
+                        print(f"[red]➜ SKIPPED:[/red] No index.json found.")
+                        continue
+                    else:
+                        comment = f"Hi, @{pr_user} \n\n该 PR 检测到变更内容包含对 {index_json} 个 index.json 的修改。为了避免冲突和更好统计数据，一个 PR 仅能包含对 1 个 lab 的内容变更。请重新从 master 拉取最新的分支提交。在修改完成之前，系统不会分配 Reviewer。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
+                        self.github.comment_pr(repo_name, pr_number, comment)
+                        print(
+                            f"→ Multiple ({index_json}) index.json found in {pr_number}, comment to {pr_user}"
+                        )
+                        continue
 
                 ###################
                 # STEP2 更新 PR 状态

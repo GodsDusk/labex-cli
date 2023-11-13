@@ -181,6 +181,8 @@ class GitHub:
             index_json = requests.get(index_json_download_url, headers=headers).json()
             lab_path = content_urls[0]["filename"].removesuffix("/index.json")
             return index_json, lab_path
+        elif len(content_urls) > 1:
+            return len(content_urls), None
         else:
             return None, None
 
