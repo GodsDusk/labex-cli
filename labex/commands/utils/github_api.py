@@ -20,6 +20,17 @@ class GitHub:
         return r.json()
 
     @retry(stop_max_attempt_number=2)
+    def list_issue_comments(self, repo_name: str, issue_number: int) -> str:
+        url = f"https://api.github.com/repos/{repo_name}/issues/{issue_number}/comments"
+        headers = {
+            "Authorization": "token " + self.token,
+            "Accept": "application/vnd.github+json",
+        }
+        r = requests.get(url, headers=headers)
+        comments = [c["body"] for c in r.json()]
+        return comments
+
+    @retry(stop_max_attempt_number=2)
     def patch_pr(self, repo_name: str, pr_number: int, payloads: dict) -> dict:
         url = f"https://api.github.com/repos/{repo_name}/issues/{pr_number}"
         r = requests.patch(
