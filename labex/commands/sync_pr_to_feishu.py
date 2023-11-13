@@ -154,7 +154,7 @@ class SyncPRToFeishu:
                         comment = f"Hi, @{pr_user} \n\n该 PR 检测到变更内容包含对 {index_json} 个 index.json 的修改。为了避免冲突和更好统计数据，一个 PR 仅能包含对 1 个 lab 的内容变更。请重新从 master 拉取最新的分支提交。在修改完成之前，系统不会分配 Reviewer。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
                         if comment in pr_comments:
                             print(
-                                f"→ [red]➜ SKIPPED:[/red] Multiple ({index_json}) index.json found in {pr_number}, has been commented to {pr_user}"
+                                f"→ [red]➜ SKIPPED:[/red] Multiple ({index_json}) index.json found in {pr_number}, comment to {pr_user} skip because already commented."
                             )
                             continue
                         self.github.comment_pr(repo_name, pr_number, comment)
@@ -181,7 +181,7 @@ class SyncPRToFeishu:
                     comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue, 无法分配 Reviewer。请你在 PR 描述中按要求添加, 如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue, 请在 Labels 中选择 `noissue`, 系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
                     if comment in pr_comments:
                         print(
-                            f"→ [red]➜ SKIPPED:[/red] No issue id found in {pr_number}, has been commented to {pr_user}"
+                            f"→ [red]➜ SKIPPED:[/red] No issue id found in {pr_number}, comment to {pr_user} skip because already commented."
                         )
                         continue
                     self.github.comment_pr(repo_name, pr_number, comment)
