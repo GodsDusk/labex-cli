@@ -100,15 +100,6 @@ class SyncLabsToFeishu:
                     in_skills_tree.append(skill_id)
                 else:
                     not_in_skills_tree.append(skill)
-        # is lanqiao source
-        source = "LABEX"
-        is_lanqiao = index.get("lqid")
-        if is_lanqiao != None:
-            source = "LANQIAO"
-        # is open source
-        is_open_source = index.get("license")
-        if is_open_source != None:
-            source = "OPEN SOURCE"
         data = {
             "PATH": path_slug,
             "TITLE": lab_title,
@@ -124,7 +115,6 @@ class SyncLabsToFeishu:
             "SKILLS_ERROR": list(set(not_in_skills_tree)),
             "DESC_WORDS": lab_desc_words,
             "DESC": lab_desc,
-            "SOURCE": source,
             "CONTRIBUTORS": list(lab_contributors),
             "GITHUB": {
                 "link": f"https://github.com/{self.repo}/tree/master/{path_slug}",
@@ -134,6 +124,17 @@ class SyncLabsToFeishu:
             "HIDDEN": lab_hidden,
             "FEE_TYPE": lab_fee_type.title(),
         }
+        # is lanqiao source
+        source = "LABEX"
+        is_lanqiao = index.get("lqid")
+        if is_lanqiao != None:
+            source = "LANQIAO"
+            data["LQID"] = int(is_lanqiao)
+        # is open source
+        is_open_source = index.get("license")
+        if is_open_source != None:
+            source = "OPEN SOURCE"
+        data["SOURCE"] = source
         return data
 
     def sync_labs(self, skip: bool, full: bool, dirpath: str) -> None:
