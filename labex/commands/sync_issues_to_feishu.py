@@ -94,7 +94,7 @@ class SyncIssuesToFeishu:
                 else:
                     skills = [s.replace("`", "").replace(" ", "") for s in skills]
                 # steps
-                steps = re.findall(r"建议步骤数\*\*:(.*[0-9])", issues_body)
+                steps = re.findall(r"建议步骤数\*\*:.*([0-9])", issues_body)
                 if len(steps) == 0:
                     steps_num = 0
                 else:
