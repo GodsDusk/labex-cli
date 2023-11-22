@@ -118,10 +118,12 @@ class SyncCoursesToFeishu:
         records = self.feishu.get_bitable_records(
             self.app_token, self.course_table_id, params=""
         )
-        print(f"Found {len(records)} courses in Feishu.")
+        print(f"[green]✔ Found:[/green] {len(records)} courses in Feishu.")
         # Drop Duplicate records
         records = list({v["fields"]["NAME"]: v for v in records}.values())
-        print(f"Found {len(records)} courses in Feishu after deduplication.")
+        print(
+            f"[green]✔ Found:[/green] {len(records)} courses in Feishu after deduplication."
+        )
         # Make a full dict of name and record_id and repo_name
         name_dicts = {
             r["fields"]["NAME"]: {
@@ -137,7 +139,9 @@ class SyncCoursesToFeishu:
         )
         # Make a dict of lab_path and record_id
         labs_dicts = {r["fields"]["LAB_PATH"][0]["text"]: r["record_id"] for r in labs}
-        print(f"Found {len(labs_dicts)} labs in Feishu, start syncing...")
+        print(
+            f"[green]✔ Found:[/green] {len(labs_dicts)} labs in Feishu, start syncing..."
+        )
         # Walk through all index.json files
         # If course name in name_dicts, update record
         # If course name not in name_dicts, add record
@@ -158,7 +162,9 @@ class SyncCoursesToFeishu:
                     if course_name in name_dicts:
                         if skip:
                             # Skip record
-                            print(f"↓ Skipping {course_name} because of skip=True")
+                            print(
+                                f"[yellow]➜ SKIPPED:[/yellow] {course_name} because of skip=True"
+                            )
                             continue
                         else:
                             if full:
@@ -172,7 +178,9 @@ class SyncCoursesToFeishu:
                                     record_id,
                                     payloads,
                                 )
-                                print(f"→ Updating {course_name} {r['msg'].upper()}")
+                                print(
+                                    f"[green]↑ UPDATED:[/green] {course_name} {r['msg'].upper()}"
+                                )
                             else:
                                 # Update record with full=False
                                 # Compare JSON to determine whether to update
@@ -217,11 +225,11 @@ class SyncCoursesToFeishu:
                                         payloads,
                                     )
                                     print(
-                                        f"→ Updating {course_name} {r['msg'].upper()}"
+                                        f"[green]↑ UPDATED:[/green] {course_name} {r['msg'].upper()}"
                                     )
                                 else:
                                     print(
-                                        f"↓ Skipping {course_name} because of no change"
+                                        f"[yellow]➜ SKIPPED:[/yellow] {course_name} because of no change"
                                     )
                     else:
                         # upload course cover
@@ -230,7 +238,9 @@ class SyncCoursesToFeishu:
                         r = self.feishu.add_bitable_record(
                             self.app_token, self.course_table_id, payloads
                         )
-                        print(f"↑ Adding {course_name} {r['msg'].upper()}")
+                        print(
+                            f"[green]↑ ADDED:[/green] {course_name} {r['msg'].upper()}"
+                        )
                 except Exception as e:
                     print(f"× Error {filepath} {e}")
         # Delete records not in this repo
@@ -238,7 +248,7 @@ class SyncCoursesToFeishu:
             name for name in name_dicts if name_dicts[name]["repo_name"] == self.repo
         ]
         print(
-            f"Found {len(repo_name_dicts)} courses in {self.repo}, checking if need delete..."
+            f"[green]✔ Found:[/green] {len(repo_name_dicts)} courses in {self.repo}, checking if need delete..."
         )
         deleted = 0
         for name in repo_name_dicts:
@@ -249,4 +259,4 @@ class SyncCoursesToFeishu:
                 )
                 print(f"× Deleting {record_id}-{name} {r['msg'].upper()}")
                 deleted += 1
-        print(f"Deleted {deleted} courses in {self.repo}")
+        print(f"[green]✔ Deleted[/green] {deleted} courses in {self.repo}")

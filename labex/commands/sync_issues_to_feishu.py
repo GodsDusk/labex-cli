@@ -1,4 +1,5 @@
 import re
+from rich import print
 from datetime import datetime, timedelta
 from .utils.feishu_api import Feishu
 from .utils.github_api import GitHub
@@ -31,16 +32,18 @@ class SyncIssuesToFeishu:
         skills_dicts = {
             r["fields"]["SKILL_ID"][0]["text"]: r["record_id"] for r in skills
         }
-        print(f"Found {len(skills_dicts)} skills in Feishu.")
+        print(f"[green]✔ Found:[/green] {len(skills_dicts)} skills in Feishu.")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
         )
         # Make a dict of ISSUE_NUM and record_id
         records_dicts = {r["fields"]["ISSUE_NUM"]: r["record_id"] for r in records}
+        # Make a dict of ISSUE_NUM and fields
+        records_dicts_fields = {r["fields"]["ISSUE_NUM"]: r["fields"] for r in records}
         # Get all issues from github
         issues_list = self.github.get_issues_list(repo_name)
-        print(f"Found {len(issues_list)} issues in GitHub.")
+        print(f"[green]✔ Found:[/green] {len(issues_list)} issues in GitHub.")
         # Feishu 未关闭的 Issue
         feishu_not_closed_issue_nums = [
             str(r["fields"]["ISSUE_NUM"])
@@ -48,7 +51,9 @@ class SyncIssuesToFeishu:
             if r["fields"]["ISSUE_STATE"] == "OPEN"
             and r["fields"]["REPO_NAME"] == repo_name
         ]
-        print(f"Found {len(feishu_not_closed_issue_nums)} OPEN ISSUE in Feishu.")
+        print(
+            f"[green]✔ Found:[/green] {len(feishu_not_closed_issue_nums)} OPEN ISSUE in Feishu."
+        )
         # 忽略已经关闭的 ISSUE
         issues_list = [
             issue
@@ -58,7 +63,7 @@ class SyncIssuesToFeishu:
         ]
         # 忽略 locked 的 issue
         issues_list = [issue for issue in issues_list if issue["locked"] == False]
-        print(f"Processing {len(issues_list)} OPEN issue...")
+        print(f"[green]✔ Processing:[/green] {len(issues_list)} OPEN issue...")
         for issue in issues_list:
             try:
                 issue_title = issue["title"]
@@ -125,21 +130,32 @@ class SyncIssuesToFeishu:
                         "ISSUE_BODY": issues_body,
                     }
                 }
-                # Update record
+                # Update record if exists else add record
                 if str(issue_number) in records_dicts.keys():
-                    r = self.feishu.update_bitable_record(
-                        self.app_token,
-                        self.table_id,
-                        records_dicts[str(issue_number)],
-                        payloads,
-                    )
-                    print(f"→ Updating {issue_title} {r['msg'].upper()}")
+                    # Update record if issue_state changed
+                    if (
+                        issue_state.upper()
+                        != records_dicts_fields[str(issue_number)]["ISSUE_STATE"]
+                    ):
+                        r = self.feishu.update_bitable_record(
+                            self.app_token,
+                            self.table_id,
+                            records_dicts[str(issue_number)],
+                            payloads,
+                        )
+                        print(
+                            f"[green]↑ UPDATED:[/green] {issue_title} {r['msg'].upper()}"
+                        )
+                    else:
+                        print(
+                            f"[yellow]➜ SKIPPED:[/yellow] {issue_title}'s state not changed."
+                        )
                 else:
                     # Add record
                     r = self.feishu.add_bitable_record(
                         self.app_token, self.table_id, payloads
                     )
-                    print(f"↑ Adding {issue_title} {r['msg'].upper()}")
+                    print(f"[green]↑ ADDED:[/green] {issue_title} {r['msg'].upper()}")
 
             except Exception as e:
                 print(f"Exception: {e}")
