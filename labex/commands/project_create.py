@@ -480,7 +480,7 @@ In this project, you will learn to:
 
 - 
 
-## Skills
+## Achievements
 
 In this project, you will learn:
 
