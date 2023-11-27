@@ -1,3 +1,6 @@
+import re
+
+
 class ParseSkills:
     def __init__(self) -> None:
         pass
@@ -1654,118 +1657,111 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_html_skill(self, content):
-        tags = [
-            "p",
-            "abbr",
-            "title",
-            "head",
-            "body",
-            "address",
-            "section",
-            "a",
-            "style",
-            "article",
-            "li",
-            "ul",
-            "footer",
-            "time",
-            "aside",
-            "audio",
-            "source",
-            "input",
-            "button",
-            "progress",
-            "b",
-            "meta",
-            "base",
-            "form",
-            "label",
-            "br",
-            "textarea",
-            "bdi",
-            "div",
-            "script",
-            "bdo",
-            "blockquote",
-            "cite",
-            "canvas",
-            "table",
-            "tr",
-            "th",
-            "td",
-            "code",
-            "pre",
-            "colgroup",
-            "col",
-            "data",
-            "datalist",
-            "option",
-            "dl",
-            "dt",
-            "dd",
-            "img",
-            "del",
-            "ins",
-            "details",
-            "summary",
-            "dfn",
-            "dialog",
-            "link",
-            "em",
-            "embed ",
-            "object",
-            "fieldset",
-            "legend",
-            "figure",
-            "figcaption",
-            "main",
-            "header",
-            "nav",
-            "hgroup",
-            "i",
-            "iframe",
-            "map",
-            "area",
-            "kbd",
-            "samp",
-            "ol",
-            "meter",
-            "noscript",
-            "optgroup",
-            "select",
-            "output",
-            "ruby",
-            "rp",
-            "rt",
-            "small",
-            "video",
-            "span",
-            "s",
-            "strong",
-            "sub",
-            "sup",
-            "thead",
-            "tbody",
-            "tfoot",
-            "template",
-            "var",
-            "caption",
-            "mark",
-        ]
-
         skills = []
-        for tag in tags:
-            if f"<{tag}>" in content or f"<{tag} " in content or f"</{tag}>" in content:
-                skills.append(f"html/{tag}")
-        if (
-            "</h1>" in content
-            or "</h2>" in content
-            or "</h3>" in content
-            or "</h4>" in content
-            or "</h5>" in content
-            or "</h6>" in content
+
+        # Basic HTML Structure
+        if re.search(r"<(base|body)[ >]", content):
+            skills.append("html/basic_elems")
+
+        if re.search(r"<meta[^>]*charset", content):
+            skills.append("html/charset")
+
+        if re.search(r"<html[^>]*lang", content):
+            skills.append("html/lang_decl")
+
+        if re.search(r"<meta[^>]*viewport", content):
+            skills.append("html/viewport")
+
+        if re.search(r"<head[ >]", content):
+            skills.append("html/head_elems")
+
+        # HTML Text Content and Formatting
+        if re.search(
+            r"<(h[1-6]|strong|em|b|i|mark|del|ins|sub|sup|small|s|abbr|address|cite|blockquote)[ >]",
+            content,
         ):
-            skills.append("html/heading")
+            skills.append("html/text_head")
+
+        if re.search(r"<(p|br)[ >]", content):
+            skills.append("html/para_br")
+
+        if re.search(r"<(q|blockquote)[ >]", content):
+            skills.append("html/quotes")
+
+        if re.search(r"<(bdi|bdo)[ >]", content):
+            skills.append("html/text_dir")
+
+        if re.search(r"<(ol|ul|li|dl|dt|dd)[ >]", content):
+            skills.append("html/lists_desc")
+
+        # HTML Layout and Sectioning
+        if re.search(r"<(section|article|aside|header|footer|main)[ >]", content):
+            skills.append("html/layout")
+
+        if re.search(r"<(nav|a)[ >]", content):
+            skills.append("html/nav_links")
+
+        if re.search(r"aria-", content):
+            skills.append("html/access_cons")
+
+        if re.search(r"<div[ >]", content):
+            skills.append("html/doc_flow")
+
+        # HTML Multimedia and Graphics
+        if re.search(r"<(img|audio|video|canvas)[ >]", content):
+            skills.append("html/multimedia")
+
+        if re.search(r"<map[ >]", content):
+            skills.append("html/img_maps")
+
+        if re.search(r"<(figure|figcaption)[ >]", content):
+            skills.append("html/fig_cap")
+
+        if re.search(r"<(iframe|embed|object)[ >]", content):
+            skills.append("html/embed_media")
+
+        # HTML Tables
+        if re.search(r"<table[ >]", content):
+            skills.append("html/tables")
+
+        if re.search(r"<table[^>]*(rowspan|colspan)[ >]", content):
+            skills.append("html/complex_tbl")
+
+        if re.search(r"<th[ >]", content):
+            skills.append("html/tbl_access")
+
+        # HTML Forms and Input
+        if re.search(
+            r"<(form|input|button|select|optgroup|option|label|fieldset|legend|datalist|output|textarea|progress|meter)[ >]",
+            content,
+        ):
+            skills.append("html/forms")
+
+        if re.search(r'(required|type=["\']text)["\']', content):
+            skills.append("html/form_valid")
+
+        if re.search(r"<fieldset[ >]", content):
+            skills.append("html/form_group")
+
+        if re.search(r"<(input|select|textarea|button)[^>]*aria-", content):
+            skills.append("html/form_access")
+
+        # Advanced HTML Elements
+        if re.search(
+            r"<(template|noscript|data|bdi|ruby|rt|rp|dfn|code|var|samp|kbd|pre)[ >]",
+            content,
+        ):
+            skills.append("html/inter_elems")
+
+        if re.search(r"data-[^=]*=", content):
+            skills.append("html/custom_attr")
+
+        if re.search(r"role=", content):
+            skills.append("html/adv_access")
+
+        if re.search(r"<template[ >]", content):
+            skills.append("html/templating")
+
         return list(set(skills))
 
     def __parse_css_skill(self, content):
@@ -2576,7 +2572,6 @@ class ParseSkills:
         if "CREATE VIEW " in content:
             skills.append("mysql/views")
         return list(set(skills))
-
 
     def parse(self, language: str, content: str):
         if language == "python":
