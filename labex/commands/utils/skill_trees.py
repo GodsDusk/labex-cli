@@ -1769,166 +1769,112 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_css_skill(self, content):
-        tags = [
-            "animation_name",
-            "animation_duration",
-            "animation_iteration_count",
-            "animation_timing_function",
-            "animation_delay",
-            "animation_direction",
-            "animation",
-            "keyframes",
-            "calc",
-            "var",
-            "attr",
-            "clamp",
-            "radial_gradient",
-            "minmax",
-            "url",
-            "blur",
-            "brightness",
-            "linear_gradient",
-            "custom_properties",
-            "position",
-            "place_items",
-            "padding_bottom",
-            "padding",
-            "padding_top",
-            "padding_left",
-            "object_fit",
-            "object_position",
-            "top",
-            "left",
-            "bottom",
-            "right",
-            "clear",
-            "float",
-            "vertical_align",
-            "z_index",
-            "order",
-            "width",
-            "height",
-            "max_width",
-            "max_height",
-            "min_width",
-            "before",
-            "after",
-            "webkit_scrollbar",
-            "webkit_scrollbar_track",
-            "webkit_scrollbar_thumb",
-            "selection",
-            "first_letter",
-            "border_color",
-            "border_width",
-            "border_block",
-            "border_radius",
-            "border",
-            "outline",
-            "border_top",
-            "border_bottom",
-            "border_left",
-            "border_right",
-            "background_color",
-            "background",
-            "background_image",
-            "background_size",
-            "background_repeat",
-            "background_clip",
-            "background_position",
-            "opacity",
-            "color",
-            "filter",
-            "visibility",
-            "all",
-            "backdrop_filter",
-            "display",
-            "translate_3d",
-            "translate_x",
-            "scale",
-            "rotate",
-            "perspective",
-            "rotate_y",
-            "translate_z",
-            "scale_x",
-            "translate",
-            "rotate_x",
-            "rotate_z",
-            "justify_content",
-            "box_sizing",
-            "box_shadow",
-            "margin",
-            "margin_bottom",
-            "margin_right",
-            "margin_left",
-            "margin_top",
-            "content",
-            "user_select",
-            "white_space",
-            "quotes",
-            "line_height",
-            "text_align",
-            "text_shadow",
-            "text_decoration",
-            "text_overflow",
-            "font_family",
-            "font_weight",
-            "font_size",
-            "hover",
-            "empty",
-            "not",
-            "first_child",
-            "focus_within",
-            "fullscreen",
-            "active",
-            "focus",
-            "invalid",
-            "checked",
-            "nth_child",
-            "transition",
-            "transition_property",
-            "transition_delay",
-            "cursor",
-            "pointer_events",
-            "counter_reset",
-            "counter_increment",
-            "list_style",
-            "list_style_type",
-            "overflow_y",
-            "overflow_x",
-            "overflow",
-            "grid_column",
-            "grid_auto_flow",
-            "grid_template_columns",
-            "grid_auto_rows",
-            "grid_row",
-            "grid_template_rows",
-            "grid_area",
-            "webkit_text_fill_color",
-            "webkit_line_clamp",
-            "align_items",
-            "align_self",
-            "flex_flow",
-            "flex_direction",
-            "flex_wrap",
-            "flex_basis",
-            "transform_origin",
-            "transform_style",
-            "scrollbar_width",
-            "scroll_snap_type",
-            "scroll_snap_align",
-            "overscroll_behavior_x",
-            "overscroll_behavior_y",
-            "column_count",
-            "column_gap",
-            "column_width",
-            "class_selector",
-            "external",
-        ]
-
         skills = []
-        for tag in tags:
-            if f"{tag.replace('_', '-')}:" in content:
-                skills.append(f"css/{tag}")
+        # css/selectors
+        if "{" in content and "}" in content and ":" in content:
+            skills.append("css/selectors")
+        # css/properties
+        if ":" in content and ";" in content and "{" not in content:
+            skills.append("css/properties")
+        # css/values
+        if ":" in content and ";" in content and "{" not in content:
+            skills.append("css/values")
+        # css/colors
+        if "#" in content or "rgb(" in content or "rgba(" in content:
+            skills.append("css/colors")
+        # css/fonts
+        if "font-" in content:
+            skills.append("css/fonts")
+        # css/text_styling
+        if "text-" in content:
+            skills.append("css/text_styling")
+        # css/box_model
+        if "box-" in content:
+            skills.append("css/box_model")
+        # css/margin_and_padding
+        if "margin" in content or "padding:" in content:
+            skills.append("css/margin_and_padding")
+        # css/borders
+        if "border" in content:
+            skills.append("css/borders")
+        # css/width_and_height
+        if "width" in content or "height:" in content:
+            skills.append("css/width_and_height")
+        # css/display_property
+        if "display" in content:
+            skills.append("css/display_property")
+        # css/positioning
+        if "position" in content:
+            skills.append("css/positioning")
+        # css/flexbox
+        if "flex" in content:
+            skills.append("css/flexbox")
+        # css/grid_layout
+        if "grid-" in content:
+            skills.append("css/grid_layout")
+        # css/pseudo-classes
+        if (
+            ":hover" in content
+            or ":active" in content
+            or ":focus" in content
+            or ":link" in content
+            or ":visited" in content
+            or ":first-child" in content
+            or ":last-child" in content
+            or ":nth-child" in content
+            or ":nth-last-child" in content
+            or ":nth-of-type" in content
+            or ":nth-last-of-type" in content
+            or ":first-of-type" in content
+            or ":last-of-type" in content
+            or ":only-child" in content
+            or ":only-of-type" in content
+            or ":empty" in content
+            or ":target" in content
+            or ":enabled" in content
+            or ":disabled" in content
+            or ":checked" in content
+        ):
+            skills.append("css/pseudo-classes")
+        # css/pseudo-elements
+        if "::" in content:
+            skills.append("css/pseudo-elements")
+        # css/backgrounds
+        if "background" in content:
+            skills.append("css/backgrounds")
+        # css/lists_and_tables
+        if "list-" in content or "table-" in content:
+            skills.append("css/lists_and_tables")
+        # css/media_queries
+        if "@media" in content:
+            skills.append("css/media_queries")
+        # css/mobile_first_design
+        if "min-" in content or "max-" in content:
+            skills.append("css/mobile_first_design")
+        # css/animations
+        if "animation" in content:
+            skills.append("css/animations")
+        # css/transitions
+        if "transition" in content:
+            skills.append("css/transitions")
+        # css/transformations
+        if "transform" in content:
+            skills.append("css/transformations")
+        # css/variables
+        if "--var" in content or "var(" in content:
+            skills.append("css/variables")
+        # css/mixins
+        if "@" in content and "{" in content:
+            skills.append("css/mixins")
+        # css/nesting
+        if "&" in content or ">" in content:
+            skills.append("css/nesting")
+        # css/import_and_extend
+        if "extend" in content or "import" in content:
+            skills.append("css/import_and_extend")
+        # css/comments
+        if "/*" in content or "*/" in content:
+            skills.append("css/comments")
 
         return list(set(skills))
 

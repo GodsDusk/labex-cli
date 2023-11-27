@@ -116,3 +116,39 @@ class AddSkills:
                     # run prettier
                     os.system(f"prettier --log-level silent --write {index_path}")
                     print(f"[green]→ {task_type} SKILLS:[/] {index_path}")
+
+
+class RemoveSkills:
+    def __init__(self) -> None:
+        pass
+
+    def remove_skills(self, dir_path: str, skilltree: str) -> None:
+        for root, dirs, files in os.walk(dir_path):
+            for file in files:
+                if file.endswith("index.json"):
+                    index_path = os.path.join(root, file)
+                    # read the index.json file
+                    try:
+                        with open(index_path, "r") as f:
+                            data = json.load(f)
+                        steps = data["details"]["steps"]
+                        is_remove = False
+                        for step in steps:
+                            step_skills = step.get("skills", [])
+                            for skill in step_skills:
+                                # remove all skill begin with skilltree
+                                if skill.startswith(skilltree):
+                                    step_skills.remove(skill)
+                                    is_remove = True
+                        # update the index.json file
+                        if is_remove:
+                            with open(index_path, "w") as f:
+                                json.dump(data, f, indent=2, ensure_ascii=False)
+                            # run prettier
+                            os.system(
+                                f"prettier --log-level silent --write {index_path}"
+                            )
+                            print(f"[green]→ REMOVE SKILLS:[/] {index_path}")
+                    except Exception as e:
+                        print(f"[red]→ ERROR:[/] {index_path}")
+                        print(e)

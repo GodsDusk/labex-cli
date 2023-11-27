@@ -15,7 +15,7 @@ from .commands.index_update_title import UpdateIndexTitle
 from .commands.index_add_fee_type import SetFeeType
 from .commands.index_add_contributors import AddContributors
 from .commands.index_update_step_name import StandardName
-from .commands.index_add_skills import AddSkills
+from .commands.index_skills import AddSkills, RemoveSkills
 from .commands.index_update_time import UpdateIndexTime
 
 from .commands.skilltree_export import ExportSkills
@@ -353,6 +353,36 @@ def skills(path, skilltree):
 
 add.add_command(skills)
 
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+def remove():
+    """INDEX REMOVE COMMANDS GROUP"""
+    pass
+
+
+idx.add_command(remove)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Directory path",
+    metavar="<path>",
+)
+@click.option(
+    "--skilltree",
+    type=click.Choice(list(AddSkills().languages.keys())),
+    help="choose a skilltree",
+)
+def skills(path, skilltree):
+    """Add skills to index.json"""
+    RemoveSkills().remove_skills(dir_path=path, skilltree=skilltree)
+
+
+remove.add_command(skills)
 
 # =========================
 # SKILL TREE COMMANDS GROUP
