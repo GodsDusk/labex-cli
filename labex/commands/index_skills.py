@@ -7,7 +7,7 @@ from .utils.skill_trees import ParseSkills
 class AddSkills:
     def __init__(self) -> None:
         self.languages = {
-            "python": ["py", "python"],
+            "python": ["py", "python", "bash", "shell"],
             "pandas": ["py", "python"],
             "numpy": ["py", "python"],
             "matplotlib": ["py", "python"],
@@ -34,7 +34,7 @@ class AddSkills:
             "cpp": ["cpp"],
             "go": ["go"],
             "rust": ["rust"],
-            "mysql": ["sql"],
+            "mysql": ["sql", "mysql", "bash", "shell"],
         }
         self.parse_skills = ParseSkills()
 
@@ -135,11 +135,15 @@ class RemoveSkills:
                         is_remove = False
                         for step in steps:
                             step_skills = step.get("skills", [])
-                            for skill in step_skills:
-                                # remove all skill begin with skilltree
-                                if skill.startswith(skilltree):
+                            skill_remove = [
+                                skill
+                                for skill in step_skills
+                                if skill.startswith(skilltree)
+                            ]
+                            if skill_remove:
+                                is_remove = True
+                                for skill in skill_remove:
                                     step_skills.remove(skill)
-                                    is_remove = True
                         # update the index.json file
                         if is_remove:
                             with open(index_path, "w") as f:

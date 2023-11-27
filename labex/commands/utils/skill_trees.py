@@ -2459,6 +2459,125 @@ class ParseSkills:
 
         return list(set(skills))
 
+    def parse_mysql_skill(self, content):
+        skills = []
+        # mysql/select
+        if "SELECT " in content:
+            skills.append("mysql/select")
+        # mysql/insert
+        if "INSERT " in content:
+            skills.append("mysql/insert")
+        # mysql/update
+        if "UPDATE " in content:
+            skills.append("mysql/update")
+        # mysql/delete
+        if "DELETE " in content:
+            skills.append("mysql/delete")
+        # mysql/create_table
+        if "CREATE TABLE " in content:
+            skills.append("mysql/create_table")
+        # mysql/drop_table
+        if "DROP TABLE " in content:
+            skills.append("mysql/drop_table")
+        # mysql/alter_table
+        if "ALTER TABLE " in content:
+            skills.append("mysql/alter_table")
+        # mysql/load_data
+        if "LOAD DATA " in content:
+            skills.append("mysql/load_data")
+        # mysql/rename
+        if "RENAME " in content:
+            skills.append("mysql/rename")
+        # mysql/source
+        if "SOURCE " in content:
+            skills.append("mysql/source")
+        # mysql/use_database
+        if "USE " in content:
+            skills.append("mysql/use_database")
+        # mysql/create_database
+        if "CREATE DATABASE " in content:
+            skills.append("mysql/create_database")
+        # mysql/drop_database
+        if "DROP DATABASE " in content:
+            skills.append("mysql/drop_database")
+        # mysql/database
+        if "DATABASE " in content:
+            skills.append("mysql/database")
+        # mysql/user
+        if "USER " in content:
+            skills.append("mysql/user")
+        # mysql/version
+        if "VERSION " in content:
+            skills.append("mysql/version")
+        # mysql/int
+        if "INT " in content:
+            skills.append("mysql/int")
+        # mysql/varchar
+        if "VARCHAR " in content:
+            skills.append("mysql/varchar")
+        # mysql/date
+        if "DATE " in content:
+            skills.append("mysql/date")
+        # mysql/float
+        if "FLOAT " in content:
+            skills.append("mysql/float")
+        # mysql/boolean
+        if "BOOLEAN " in content:
+            skills.append("mysql/boolean")
+        # mysql/index
+        if "INDEX " in content:
+            skills.append("mysql/index")
+        # mysql/explain_query
+        if "EXPLAIN " in content:
+            skills.append("mysql/explain_query")
+        # mysql/begin_transaction
+        if "BEGIN " in content:
+            skills.append("mysql/begin_transaction")
+        # mysql/commit
+        if "COMMIT " in content:
+            skills.append("mysql/commit")
+        # mysql/rollback
+        if "ROLLBACK " in content:
+            skills.append("mysql/rollback")
+        # mysql/identified_by
+        if "IDENTIFIED BY " in content:
+            skills.append("mysql/identified_by")
+        # mysql/grant_permission
+        if "GRANT " in content:
+            skills.append("mysql/grant_permission")
+        # mysql/revoke_permission
+        if "REVOKE " in content:
+            skills.append("mysql/revoke_permission")
+        # mysql/show_status
+        if "SHOW STATUS " in content:
+            skills.append("mysql/show_status")
+        # mysql/show_variables
+        if "SHOW VARIABLES " in content:
+            skills.append("mysql/show_variables")
+        # mysql/mysqladmin
+        if "mysqladmin" in content:
+            skills.append("mysql/mysqladmin")
+        # mysql/mysqldump
+        if "mysqldump" in content:
+            skills.append("mysql/mysqldump")
+        # mysql/mysqlimport
+        if "mysqlimport" in content:
+            skills.append("mysql/mysqlimport")
+        # mysql/secure_file_priv
+        if "secure_file_priv" in content:
+            skills.append("mysql/secure_file_priv")
+        # mysql/stored_procedures
+        if "CREATE PROCEDURE " in content:
+            skills.append("mysql/stored_procedures")
+        # mysql/triggers
+        if "CREATE TRIGGER " in content:
+            skills.append("mysql/triggers")
+        # mysql/views
+        if "CREATE VIEW " in content:
+            skills.append("mysql/views")
+        return list(set(skills))
+
+
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
@@ -2494,3 +2613,5 @@ class ParseSkills:
             return self.parse_react_skill(content)
         elif language == "java":
             return self.parse_java_skill(content)
+        elif language == "mysql":
+            return self.parse_mysql_skill(content)
