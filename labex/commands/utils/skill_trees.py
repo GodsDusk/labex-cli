@@ -1485,9 +1485,6 @@ class ParseSkills:
         # cpp/recursion
         if "recursion" in content:
             skills.append("cpp/recursion")
-        # cpp/oop
-        if "class " in content:
-            skills.append("cpp/oop")
         # cpp/classes_objects
         if "class " in content and "()" in content:
             skills.append("cpp/classes_objects")
@@ -1515,7 +1512,46 @@ class ParseSkills:
         # cpp/exceptions
         if "try {" in content:
             skills.append("cpp/exceptions")
-
+        # cpp/conditions
+        if (
+            "==" in content
+            or "!=" in content
+            or "<" in content
+            or ">" in content
+            or "<=" in content
+            or ">=" in content
+        ):
+            skills.append("cpp/conditions")
+        # cpp/operators
+        if (
+            "+" in content
+            or "-" in content
+            or "*" in content
+            or "/" in content
+            or "%" in content
+        ):
+            skills.append("cpp/operators")
+        # cpp/templates
+        if "template " in content:
+            skills.append("cpp/templates")
+        # cpp/string_manipulation
+        if "string " in content:
+            skills.append("cpp/string_manipulation")
+        # cpp/standard_containers
+        if (
+            "vector" in content
+            or "map" in content
+            or "set" in content
+            or "queue" in content
+            or "stack" in content
+        ):
+            skills.append("cpp/standard_containers")
+        # cpp/comments
+        if "//" in content or "/*" in content or "*/" in content:
+            skills.append("cpp/comments")
+        # cpp/code_formatting
+        if "indentation" in content:
+            skills.append("cpp/code_formatting")
         return list(set(skills))
 
     def __parse_c_skill(self, content):
