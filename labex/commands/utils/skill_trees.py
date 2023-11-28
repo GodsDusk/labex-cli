@@ -1559,100 +1559,105 @@ class ParseSkills:
 
     def __parse_c_skill(self, content):
         skills = []
-        # c/if_else
-        if "if (" in content:
-            skills.append("c/if_else")
-        # c/for_loop
-        if "for (" in content:
-            skills.append("c/for_loop")
-        # c/while_loop
-        if "while (" in content:
-            skills.append("c/while_loop")
-        # c/output
-        if "printf(" in content:
-            skills.append("c/output")
-        # c/variables
-        if "=" in content:
+        # Variables
+        if re.search(r"\b[a-zA-Z_][a-zA-Z0-9_]*\s*=", content):
             skills.append("c/variables")
-        # c/data_types
-        if (
-            "int " in content
-            or "float " in content
-            or "double " in content
-            or "char " in content
-        ):
+
+        # Data Types
+        if re.search(r"\b(int|char|float|double|long|short)\b", content):
             skills.append("c/data_types")
-        # c/constants
-        if "const " in content:
+
+        # Constants
+        if re.search(r"\b(const)\b", content):
             skills.append("c/constants")
-        # c/operators
-        if (
-            "+" in content
-            or "-" in content
-            or "*" in content
-            or "/" in content
-            or "%" in content
-        ):
+
+        # Operators
+        if re.search(r"[-+*/%<>=!&|]", content):
             skills.append("c/operators")
-        # c/booleans
-        if "bool " in content:
-            skills.append("c/booleans")
-        # c/switch
-        if "switch (" in content:
+
+        # Comments
+        if re.search(r"//|/\*.*\*/", content, re.DOTALL):
+            skills.append("c/comments")
+
+        # If...Else
+        if re.search(r"\bif\s*\(|\belse\b", content):
+            skills.append("c/if_else")
+
+        # Switch
+        if re.search(r"\bswitch\s*\(", content):
             skills.append("c/switch")
-        # c/break_continue
-        if "break;" in content:
+
+        # For Loop
+        if re.search(r"\bfor\s*\(", content):
+            skills.append("c/for_loop")
+
+        # While Loop
+        if re.search(r"\bwhile\s*\(", content):
+            skills.append("c/while_loop")
+
+        # Break/Continue
+        if re.search(r"\bbreak\b|\bcontinue\b", content):
             skills.append("c/break_continue")
-        # c/arrays
-        if "[]" in content:
+
+        # Arrays
+        if re.search(r"\[\]", content):
             skills.append("c/arrays")
-        # c/strings
-        if "string " in content:
+
+        # Strings
+        if re.search(r"\bchar\s*\*\s*|\bchar\s*\[", content):
             skills.append("c/strings")
-        # c/user_input
-        if "scanf(" in content:
-            skills.append("c/user_input")
-        # c/memory_address
-        if "&" in content:
-            skills.append("c/memory_address")
-        # c/pointers
-        if "*" in content:
-            skills.append("c/pointers")
-        # c/structures
-        if "struct " in content:
-            skills.append("c/structures")
-        # c/enums
-        if "enum " in content:
-            skills.append("c/enums")
-        # c/functions
-        if "() {" in content:
-            skills.append("c/functions")
-        # c/function_parameters
-        if (
-            "(int " in content
-            or "(float " in content
-            or "(double " in content
-            or "(char " in content
-        ):
-            skills.append("c/function_parameters")
-        # c/function_declaration
-        if "int " in content or "float " in content or "double " in content:
+
+        # Function Declaration
+        if re.search(r"\b[a-zA-Z_][a-zA-Z0-9_]*\s*\([^)]*\)\s*\{", content):
             skills.append("c/function_declaration")
-        # c/recursion
-        if "recursion" in content:
-            skills.append("c/recursion")
-        # c/math_functions
-        if "math.h" in content:
+
+        # Function Parameters
+        if re.search(r"\b[a-zA-Z_][a-zA-Z0-9_]*\s*\([^)]+\)\s*\{", content):
+            skills.append("c/function_parameters")
+
+        # Math Functions
+        if re.search(r"\b(sin|cos|tan|sqrt|pow)\b", content):
             skills.append("c/math_functions")
-        # c/create_files
-        if "fopen(" in content:
-            skills.append("c/create_files")
-        # c/write_to_files
-        if "fprintf(" in content:
+
+        # Structures
+        if re.search(r"\bstruct\b", content):
+            skills.append("c/structures")
+
+        # Enums
+        if re.search(r"\benum\b", content):
+            skills.append("c/enums")
+
+        # Pointers
+        if re.search(r"\*[^;=]*\s*\w+", content):
+            skills.append("c/pointers")
+
+        # Memory Address
+        if re.search(r"\&[a-zA-Z_][a-zA-Z0-9_]*", content):
+            skills.append("c/memory_address")
+
+        # Write To Files
+        if re.search(r"fopen\s*\([^)]*\)\s*|fprintf\s*\(", content):
             skills.append("c/write_to_files")
-        # c/read_files
-        if "fscanf(" in content:
+
+        # User Input
+        if re.search(r"scanf\s*\(", content):
+            skills.append("c/user_input")
+
+        # Recursion
+        if re.search(r"\b[a-zA-Z_][a-zA-Z0-9_]*\s*\([^)]*\)\s*\{[^}]*\1\s*\(", content):
+            skills.append("c/recursion")
+
+        # Create Files
+        if re.search(r"fopen\s*\([^)]*\)\s*", content):
+            skills.append("c/create_files")
+
+        # Read Files
+        if re.search(r"fopen\s*\([^)]*\)\s*|fscanf\s*\(", content):
             skills.append("c/read_files")
+
+        # Output
+        if re.search(r"printf\s*\(", content):
+            skills.append("c/output")
 
         return list(set(skills))
 

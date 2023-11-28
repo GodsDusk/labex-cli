@@ -138,7 +138,7 @@ class RemoveSkills:
                             skill_remove = [
                                 skill
                                 for skill in step_skills
-                                if skill.startswith(skilltree)
+                                if skill.startswith(f"{skilltree}/")
                             ]
                             if skill_remove:
                                 is_remove = True
