@@ -1409,152 +1409,142 @@ class ParseSkills:
 
     def __parse_cpp_skill(self, content):
         skills = []
-        # cpp/if_else
-        if "if (" in content:
-            skills.append("cpp/if_else")
-        # cpp/user_input
-        if "cin >>" in content:
-            skills.append("cpp/user_input")
-        # cpp/strings
-        if "string " in content:
-            skills.append("cpp/strings")
-        # cpp/math
-        if "math.h" in content:
-            skills.append("cpp/math")
-        # cpp/booleans
-        if "bool " in content:
-            skills.append("cpp/booleans")
-        # cpp/switch
-        if "switch (" in content:
-            skills.append("cpp/switch")
-        # cpp/while_loop
-        if "while (" in content:
-            skills.append("cpp/while_loop")
-        # cpp/break_continue
-        if "break;" in content:
-            skills.append("cpp/break_continue")
-        # cpp/for_loop
-        if "for (" in content:
-            skills.append("cpp/for_loop")
-        # cpp/arrays
-        if "[]" in content:
-            skills.append("cpp/arrays")
-        # cpp/structures
-        if "struct " in content:
-            skills.append("cpp/structures")
-        # cpp/references
-        if "&" in content:
-            skills.append("cpp/references")
-        # cpp/pointers
-        if "*" in content:
-            skills.append("cpp/pointers")
-        # cpp/data_types
-        if (
-            "int " in content
-            or "float " in content
-            or "double " in content
-            or "char " in content
-        ):
-            skills.append("cpp/data_types")
-        # cpp/variables
-        if "=" in content:
+        # Variables: Look for variable declarations
+        if re.search(r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b", content):
             skills.append("cpp/variables")
-        # cpp/output
-        if "cout <<" in content:
-            skills.append("cpp/output")
-        # cpp/functions
-        if "() {" in content:
-            skills.append("cpp/functions")
-        # cpp/function_parameters
-        if (
-            "(int " in content
-            or "(float " in content
-            or "(double " in content
-            or "(char " in content
-        ):
-            skills.append("cpp/function_parameters")
-        # cpp/function_overloading
-        if (
-            "int " in content
-            and "int " in content[content.index("int ") + 1 :]
-            or "float " in content
-            and "float " in content[content.index("float ") + 1 :]
-            or "double " in content
-            and "double " in content[content.index("double ") + 1 :]
-            or "char " in content
-            and "char " in content[content.index("char ") + 1 :]
-        ):
-            skills.append("cpp/function_overloading")
-        # cpp/recursion
-        if "recursion" in content:
-            skills.append("cpp/recursion")
-        # cpp/classes_objects
-        if "class " in content and "()" in content:
-            skills.append("cpp/classes_objects")
-        # cpp/class_methods
-        if "class " in content and "()" in content and "void " in content:
-            skills.append("cpp/class_methods")
-        # cpp/constructors
-        if "class " in content and "()" in content and "void " not in content:
-            skills.append("cpp/constructors")
-        # cpp/access_specifiers
-        if "public:" in content or "private:" in content:
-            skills.append("cpp/access_specifiers")
-        # cpp/encapsulation
-        if "private:" in content:
-            skills.append("cpp/encapsulation")
-        # cpp/inheritance
-        if "class " in content and "public:" in content and "private:" not in content:
-            skills.append("cpp/inheritance")
-        # cpp/polymorphism
-        if "virtual " in content:
-            skills.append("cpp/polymorphism")
-        # cpp/files
-        if "fstream" in content:
-            skills.append("cpp/files")
-        # cpp/exceptions
-        if "try {" in content:
-            skills.append("cpp/exceptions")
-        # cpp/conditions
-        if (
-            "==" in content
-            or "!=" in content
-            or "<" in content
-            or ">" in content
-            or "<=" in content
-            or ">=" in content
-        ):
-            skills.append("cpp/conditions")
-        # cpp/operators
-        if (
-            "+" in content
-            or "-" in content
-            or "*" in content
-            or "/" in content
-            or "%" in content
-        ):
+
+        # Data Types: Look for specific data type declarations
+        if re.search(r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b|\blong\b|\bshort\b", content):
+            skills.append("cpp/data_types")
+
+        # Operators: Look for operators like +, -, *, /, %, ++, --
+        if re.search(r"\+|-|\*|\/|%|\+\+|--", content):
             skills.append("cpp/operators")
-        # cpp/templates
-        if "template " in content:
-            skills.append("cpp/templates")
-        # cpp/string_manipulation
-        if "string " in content:
+
+        # Booleans: Look for boolean values and operators
+        if re.search(r"\btrue\b|\bfalse\b|\b&&\b|\b\|\|\b|\b!\b", content):
+            skills.append("cpp/booleans")
+
+        # Arrays: Look for array declarations
+        if re.search(r"\b\w+\[\d*\]", content):
+            skills.append("cpp/arrays")
+
+        # Strings: Look for string declarations
+        if re.search(r'\bstd::string\b|\bchar\s+\w+\[\d*\]', content):
+            skills.append("cpp/strings")
+
+        # Conditions: Look for if, else if, else
+        if re.search(r"\bif\b|\belse\b", content):
+            skills.append("cpp/conditions")
+
+        # If...Else: Specific check for if-else structure
+        if re.search(r"\bif\s*\(.*\)\s*\{.*\}\s*else\s*\{.*\}", content):
+            skills.append("cpp/if_else")
+
+        # Switch: Look for switch-case structure
+        if re.search(r"\bswitch\s*\(.*\)\s*\{", content):
+            skills.append("cpp/switch")
+
+        # Loops: Look for different loop structures
+        if re.search(r"\bfor\s*\(.*\)\s*\{", content):
+            skills.append("cpp/for_loop")
+        if re.search(r"\bwhile\s*\(.*\)\s*\{", content):
+            skills.append("cpp/while_loop")
+
+        # Break/Continue: Look for break and continue statements
+        if re.search(r"\bbreak\b|\bcontinue\b", content):
+            skills.append("cpp/break_continue")
+
+        # Functions: Look for function definitions
+        if re.search(r"\b\w+\s+\w+\s*\([^)]*\)\s*\{", content):
+            skills.append("cpp/functions")
+
+        # Function Parameters: Look for functions with parameters
+        if re.search(r"\b\w+\s+\w+\s*\([^)]+.*\)\s*\{", content):
+            skills.append("cpp/function_parameters")
+
+        # Function Overloading: This is harder to detect directly without more context
+        # Recursion: This is also difficult to detect directly without analyzing the function's behavior
+
+        # Classes/Objects: Look for class definitions
+        if re.search(r"\bclass\b\s+\w+\s*\{", content):
+            skills.append("cpp/classes_objects")
+
+        # Class Methods: Look for methods inside class definitions
+        if re.search(r"\bclass\b\s+\w+\s*\{[^}]*\b\w+\s+\w+\s*\([^)]*\)\s*\{", content):
+            skills.append("cpp/class_methods")
+
+        # Access Specifiers: Look for public, private, protected
+        if re.search(r"\bpublic\b|\bprivate\b|\bprotected\b", content):
+            skills.append("cpp/access_specifiers")
+
+        # Constructors: Look for constructor definitions
+        if re.search(r"\b\w+::\w+\s*\([^)]*\)\s*:", content):
+            skills.append("cpp/constructors")
+
+        # Encapsulation, Inheritance, Polymorphism, Pointers, References, Structures, Exceptions, Templates
+        # These require more complex analysis or context and are hard to detect with simple regex.
+
+        # Output: Look for cout statements
+        if re.search(r"\bstd::cout\b", content):
+            skills.append("cpp/output")
+
+        # User Input: Look for cin statements
+        if re.search(r"\bstd::cin\b", content):
+            skills.append("cpp/user_input")
+
+        # Files: Look for file operations
+        if re.search(r"\bstd::fstream\b|\bstd::ifstream\b|\bstd::ofstream\b", content):
+            skills.append("cpp/files")
+
+        # Math: Look for math operations and functions
+        if re.search(r"\bsqrt\b|\bpow\b|\bfabs\b|\bceil\b|\bfloor\b", content):
+            skills.append("cpp/math")
+
+        # String manipulation: Look for string operations
+        if re.search(r"\bstd::string\b.*\.length\b|\bstd::string\b.*\.substr\b|\bstd::string\b.*\.find\b", content):
             skills.append("cpp/string_manipulation")
-        # cpp/standard_containers
-        if (
-            "vector" in content
-            or "map" in content
-            or "set" in content
-            or "queue" in content
-            or "stack" in content
-        ):
+
+        # Standard Containers: Look for standard container usage like vector, map, set
+        if re.search(r"\bstd::vector\b|\bstd::map\b|\bstd::set\b", content):
             skills.append("cpp/standard_containers")
-        # cpp/comments
-        if "//" in content or "/*" in content or "*/" in content:
+
+        # Comments: Look for single and multi-line comments
+        if re.search(r"//|/\*.*\*/", content):
             skills.append("cpp/comments")
-        # cpp/code_formatting
-        if "indentation" in content:
-            skills.append("cpp/code_formatting")
+        
+        # Code Formatting: This is more about the style and cannot be detected via regex.
+        # Function Overloading: Difficult to detect with regex, requires analysis of multiple function signatures with the same name
+        # Recursion: Hard to detect with regex, requires analyzing whether a function calls itself
+
+        # Encapsulation: Generally related to the use of access specifiers and class structure
+        if re.search(r"\bclass\b.*\b(private|protected|public)\b", content):
+            skills.append("cpp/encapsulation")
+
+        # Inheritance: Look for class inheritance patterns
+        if re.search(r"\bclass\b\s+\w+\s*:\s*(public|private|protected)\s+\w+", content):
+            skills.append("cpp/inheritance")
+
+        # Polymorphism: Complex to detect, often involves function overriding in derived classes
+        # Pointers: Look for pointer declarations
+        if re.search(r"\b\w+\s*\*\w+", content):
+            skills.append("cpp/pointers")
+
+        # References: Look for reference declarations
+        if re.search(r"\b\w+&\w+", content):
+            skills.append("cpp/references")
+
+        # Structures: Look for struct definitions
+        if re.search(r"\bstruct\b\s+\w+", content):
+            skills.append("cpp/structures")
+
+        # Exceptions: Look for try, catch, throw
+        if re.search(r"\btry\b|\bcatch\b|\bthrow\b", content):
+            skills.append("cpp/exceptions")
+
+        # Templates: Look for template declarations
+        if re.search(r"\btemplate\s*<", content):
+            skills.append("cpp/templates")
         return list(set(skills))
 
     def __parse_c_skill(self, content):

@@ -377,9 +377,14 @@ idx.add_command(remove)
     type=click.Choice(list(AddSkills().languages.keys())),
     help="choose a skilltree",
 )
-def skills(path, skilltree):
+@click.option(
+    "--skill",
+    type=str,
+    help="delete single skill",
+)
+def skills(path, skilltree, skill):
     """Add skills to index.json"""
-    RemoveSkills().remove_skills(dir_path=path, skilltree=skilltree)
+    RemoveSkills().remove_skills(dir_path=path, skilltree=skilltree, remove_skill=skill)
 
 
 remove.add_command(skills)

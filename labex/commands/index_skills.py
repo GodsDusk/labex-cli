@@ -122,7 +122,7 @@ class RemoveSkills:
     def __init__(self) -> None:
         pass
 
-    def remove_skills(self, dir_path: str, skilltree: str) -> None:
+    def remove_skills(self, dir_path: str, skilltree: str, remove_skill: str) -> None:
         for root, dirs, files in os.walk(dir_path):
             for file in files:
                 if file.endswith("index.json"):
@@ -139,6 +139,7 @@ class RemoveSkills:
                                 skill
                                 for skill in step_skills
                                 if skill.startswith(f"{skilltree}/")
+                                or skill == remove_skill
                             ]
                             if skill_remove:
                                 is_remove = True
