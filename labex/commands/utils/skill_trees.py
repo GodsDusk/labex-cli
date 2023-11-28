@@ -1644,8 +1644,21 @@ class ParseSkills:
             skills.append("c/user_input")
 
         # Recursion
-        if re.search(r"\b[a-zA-Z_][a-zA-Z0-9_]*\s*\([^)]*\)\s*\{[^}]*\1\s*\(", content):
-            skills.append("c/recursion")
+        for match in re.finditer(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{', content):
+            func_name = match.group(1)
+            func_body_start = match.end()
+            brace_count = 1
+            i = func_body_start
+            while i < len(content) and brace_count > 0:
+                if content[i] == '{':
+                    brace_count += 1
+                elif content[i] == '}':
+                    brace_count -= 1
+                i += 1
+            func_body = content[func_body_start:i]
+            if re.search(r'\b' + re.escape(func_name) + r'\s*\(', func_body):
+                skills.append("c/recursion")
+                break
 
         # Create Files
         if re.search(r"fopen\s*\([^)]*\)\s*", content):
