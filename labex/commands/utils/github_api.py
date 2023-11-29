@@ -208,7 +208,7 @@ class GitHub:
         approved_by = []
         changes_requested_by = []
         for review in response.json():
-            review_state = review.get("state", "NONE")
+            review_state = review.get("state", "PENDING_REVIEW")
             if review_state == "APPROVED":
                 approved_by.append(review["user"]["login"])
             elif review_state == "CHANGES_REQUESTED":
