@@ -1410,11 +1410,16 @@ class ParseSkills:
     def __parse_cpp_skill(self, content):
         skills = []
         # Variables: Look for variable declarations
-        if re.search(r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b", content):
+        if re.search(
+            r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b", content
+        ):
             skills.append("cpp/variables")
 
         # Data Types: Look for specific data type declarations
-        if re.search(r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b|\blong\b|\bshort\b", content):
+        if re.search(
+            r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b|\blong\b|\bshort\b",
+            content,
+        ):
             skills.append("cpp/data_types")
 
         # Operators: Look for operators like +, -, *, /, %, ++, --
@@ -1430,7 +1435,7 @@ class ParseSkills:
             skills.append("cpp/arrays")
 
         # Strings: Look for string declarations
-        if re.search(r'\bstd::string\b|\bchar\s+\w+\[\d*\]', content):
+        if re.search(r"\bstd::string\b|\bchar\s+\w+\[\d*\]", content):
             skills.append("cpp/strings")
 
         # Conditions: Look for if, else if, else
@@ -1502,7 +1507,10 @@ class ParseSkills:
             skills.append("cpp/math")
 
         # String manipulation: Look for string operations
-        if re.search(r"\bstd::string\b.*\.length\b|\bstd::string\b.*\.substr\b|\bstd::string\b.*\.find\b", content):
+        if re.search(
+            r"\bstd::string\b.*\.length\b|\bstd::string\b.*\.substr\b|\bstd::string\b.*\.find\b",
+            content,
+        ):
             skills.append("cpp/string_manipulation")
 
         # Standard Containers: Look for standard container usage like vector, map, set
@@ -1512,7 +1520,7 @@ class ParseSkills:
         # Comments: Look for single and multi-line comments
         if re.search(r"//|/\*.*\*/", content):
             skills.append("cpp/comments")
-        
+
         # Code Formatting: This is more about the style and cannot be detected via regex.
         # Function Overloading: Difficult to detect with regex, requires analysis of multiple function signatures with the same name
         # Recursion: Hard to detect with regex, requires analyzing whether a function calls itself
@@ -1522,7 +1530,9 @@ class ParseSkills:
             skills.append("cpp/encapsulation")
 
         # Inheritance: Look for class inheritance patterns
-        if re.search(r"\bclass\b\s+\w+\s*:\s*(public|private|protected)\s+\w+", content):
+        if re.search(
+            r"\bclass\b\s+\w+\s*:\s*(public|private|protected)\s+\w+", content
+        ):
             skills.append("cpp/inheritance")
 
         # Polymorphism: Complex to detect, often involves function overriding in derived classes
@@ -1634,19 +1644,21 @@ class ParseSkills:
             skills.append("c/user_input")
 
         # Recursion
-        for match in re.finditer(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{', content):
+        for match in re.finditer(
+            r"\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{", content
+        ):
             func_name = match.group(1)
             func_body_start = match.end()
             brace_count = 1
             i = func_body_start
             while i < len(content) and brace_count > 0:
-                if content[i] == '{':
+                if content[i] == "{":
                     brace_count += 1
-                elif content[i] == '}':
+                elif content[i] == "}":
                     brace_count -= 1
                 i += 1
             func_body = content[func_body_start:i]
-            if re.search(r'\b' + re.escape(func_name) + r'\s*\(', func_body):
+            if re.search(r"\b" + re.escape(func_name) + r"\s*\(", func_body):
                 skills.append("c/recursion")
                 break
 
@@ -2255,7 +2267,7 @@ class ParseSkills:
 
         return list(set(skills))
 
-    def parse_react_skill(self, content):
+    def __parse_react_skill(self, content):
         slugs = {
             "useCallback": "use_callback",
             "useContext": "use_context",
@@ -2282,7 +2294,7 @@ class ParseSkills:
                 skills.append(f"react/{slugs[slug]}")
         return list(set(skills))
 
-    def parse_java_skill(self, content):
+    def __parse_java_skill(self, content):
         skills = []
         # java/method_overriding
         if "@Override" in content:
@@ -2463,7 +2475,7 @@ class ParseSkills:
 
         return list(set(skills))
 
-    def parse_mysql_skill(self, content):
+    def __parse_mysql_skill(self, content):
         skills = []
         # mysql/select
         if "SELECT " in content:
@@ -2581,6 +2593,168 @@ class ParseSkills:
             skills.append("mysql/views")
         return list(set(skills))
 
+    def __parse_pandas_skill(self, content):
+        skills = []
+
+        # Read CSV
+        if re.search(r"\.read_csv\(", content):
+            skills.append("pandas/read_csv")
+
+        # Read Excel
+        if re.search(r"\.read_excel\(", content):
+            skills.append("pandas/read_excel")
+
+        # Read from SQL
+        if re.search(r"\.read_sql\(", content):
+            skills.append("pandas/read_sql")
+
+        # Write to CSV
+        if re.search(r"\.to_csv\(", content):
+            skills.append("pandas/write_csv")
+
+        # Write to Excel
+        if re.search(r"\.to_excel\(", content):
+            skills.append("pandas/write_excel")
+
+        # Write to SQL
+        if re.search(r"\.to_sql\(", content):
+            skills.append("pandas/write_sql")
+
+        # Select Columns
+        if (
+            re.search(r"\[[\"'].*[\"']\]", content)
+            or re.search(r"\.loc\[", content)
+            or re.search(r"\.iloc\[", content)
+        ):
+            skills.append("pandas/select_columns")
+
+        # Select Rows
+        if re.search(r"\.loc\[", content) or re.search(r"\.iloc\[", content):
+            skills.append("pandas/select_rows")
+
+        # Conditional Selection
+        if re.search(r"\[.*\]", content) and re.search(
+            r"==|!=|>|<|>=|<=| in | not in ", content
+        ):
+            skills.append("pandas/conditional_selection")
+
+        # Slicing
+        if re.search(r"\.loc\[.*:.*\]", content) or re.search(
+            r"\.iloc\[.*:.*\]", content
+        ):
+            skills.append("pandas/slicing")
+
+        # Adding New Columns
+        if re.search(r"\['\w+'\]\s*=\s*", content):
+            skills.append("pandas/add_new_columns")
+
+        # Dropping Columns/Rows
+        if re.search(r"\.drop\(", content):
+            skills.append("pandas/drop_columns_rows")
+
+        # Changing Data Types
+        if re.search(r"\.astype\(", content):
+            skills.append("pandas/change_data_types")
+
+        # Sorting Data
+        if re.search(r"\.sort_values\(", content) or re.search(
+            r"\.sort_index\(", content
+        ):
+            skills.append("pandas/sort_data")
+
+        # Handling Missing Values
+        if re.search(r"\.fillna\(", content) or re.search(r"\.dropna\(", content):
+            skills.append("pandas/handle_missing_values")
+
+        # Removing Duplicates
+        if re.search(r"\.drop_duplicates\(", content):
+            skills.append("pandas/remove_duplicates")
+
+        # Data Normalization
+        # 此项可能需要根据具体使用场景进行判断，因为数据规范化方法可能多样
+
+        # Data Mapping
+        if re.search(r"\.map\(", content) or re.search(r"\.apply\(", content):
+            skills.append("pandas/data_mapping")
+
+        # Basic Statistics
+        if (
+            re.search(r"\.mean\(", content)
+            or re.search(r"\.median\(", content)
+            or re.search(r"\.sum\(", content)
+            or re.search(r"\.count\(", content)
+        ):
+            skills.append("pandas/basic_statistics")
+
+        # GroupBy Operations
+        if re.search(r"\.groupby\(", content):
+            skills.append("pandas/groupby_operations")
+
+        # Data Aggregation
+        if re.search(r"\.agg\(", content) or re.search(r"\.aggregate\(", content):
+            skills.append("pandas/data_aggregation")
+
+        # Pivot Tables
+        if re.search(r"\.pivot_table\(", content):
+            skills.append("pandas/pivot_tables")
+
+        # Data Normalization
+        if re.search(r"(\.min\(\)|\.max\(\)|\.mean\(\))", content) and re.search(
+            r"\.apply\(", content
+        ):
+            skills.append("pandas/data_normalization")
+
+        # Bar Plots
+        if re.search(r"\.plot\(\s*kind\s*=\s*['\"]bar['\"]", content) or re.search(
+            r"\.bar\(", content
+        ):
+            skills.append("pandas/bar_plots")
+
+        # Histograms
+        if re.search(r"\.hist\(", content) or re.search(
+            r"\.plot\(\s*kind\s*=\s*['\"]hist['\"]", content
+        ):
+            skills.append("pandas/histograms")
+
+        # Scatter Plots
+        if re.search(r"\.plot\(\s*kind\s*=\s*['\"]scatter['\"]", content) or re.search(
+            r"\.scatter\(", content
+        ):
+            skills.append("pandas/scatter_plots")
+
+        # Line Plots
+        if re.search(r"\.plot(\(\s*kind\s*=\s*['\"]line['\"])?", content) or re.search(
+            r"\.line\(", content
+        ):
+            skills.append("pandas/line_plots")
+
+        # Time Series Analysis
+        if (
+            re.search(r"\.resample\(", content)
+            or re.search(r"\.asfreq\(", content)
+            or re.search(r"\.rolling\(", content)
+        ):
+            skills.append("pandas/time_series_analysis")
+
+        # MultiIndex Indexing
+        if re.search(r"\.MultiIndex\(", content):
+            skills.append("pandas/multiindex_indexing")
+
+        # Merging Data
+        if re.search(r"\.merge\(", content) or re.search(r"\.join\(", content):
+            skills.append("pandas/merge_data")
+
+        # Reshaping Data
+        if (
+            re.search(r"\.melt\(", content)
+            or re.search(r"\.pivot\(", content)
+            or re.search(r"\.stack\(", content)
+            or re.search(r"\.unstack\(", content)
+        ):
+            skills.append("pandas/reshape_data")
+
+        return list(set(skills))
+
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
@@ -2613,8 +2787,10 @@ class ParseSkills:
         elif language == "javascript":
             return self.__parse_javascript_skill(content)
         elif language == "react":
-            return self.parse_react_skill(content)
+            return self.__parse_react_skill(content)
         elif language == "java":
-            return self.parse_java_skill(content)
+            return self.__parse_java_skill(content)
         elif language == "mysql":
-            return self.parse_mysql_skill(content)
+            return self.__parse_mysql_skill(content)
+        elif language == "pandas":
+            return self.__parse_pandas_skill(content)
