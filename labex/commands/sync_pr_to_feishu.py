@@ -344,4 +344,5 @@ class SyncPRToFeishu:
 
             except Exception as e:
                 print(f"Exception: {e}")
+                print(pr)
                 continue
