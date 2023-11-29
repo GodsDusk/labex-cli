@@ -2755,6 +2755,111 @@ class ParseSkills:
 
         return list(set(skills))
 
+    def __parse_matplotlib_skill(self, content):
+        skills = []
+
+        # Basic Concepts
+        if re.search(r"(import matplotlib|from matplotlib import)", content):
+            skills.append("matplotlib/importing_matplotlib")
+        if re.search(
+            r"matplotlib\.(figure|pyplot|axes)|from matplotlib\.figure import|from matplotlib\.pyplot import|from matplotlib\.axes import",
+            content,
+            re.IGNORECASE,
+        ):
+            skills.append("matplotlib/figures_axes")
+        if re.search(r"figure\(\s*size\s*=", content):
+            skills.append("matplotlib/figure_size_dpi")
+        if re.search(r"savefig\(", content):
+            skills.append("matplotlib/saving_figures")
+
+        # Plotting Data
+        if re.search(r"\.plot\(", content):
+            skills.append("matplotlib/line_plots")
+        if re.search(r"\.scatter\(", content):
+            skills.append("matplotlib/scatter_plots")
+        if re.search(r"\.bar\(", content):
+            skills.append("matplotlib/bar_charts")
+        if re.search(r"\.hist\(", content):
+            skills.append("matplotlib/histograms")
+        if re.search(r"\.boxplot\(", content):
+            skills.append("matplotlib/box_plots")
+        if re.search(r"(\.imshow\(|heatmap)", content):
+            skills.append("matplotlib/heatmaps")
+        if re.search(r"\.errorbar\(", content):
+            skills.append("matplotlib/error_bars")
+        if re.search(r"\.stackplot\(", content):
+            skills.append("matplotlib/stacked_plots")
+        if re.search(r"\.fill_between\(", content):
+            skills.append("matplotlib/fill_between")
+
+        # Advanced Plotting
+        if re.search(r"\.subplot\(", content):
+            skills.append("matplotlib/subplots")
+        if re.search(r"\.(twinx\(|twiny\()", content):
+            skills.append("matplotlib/secondary_axis")
+        if re.search(r"\.set_yscale\(['\"]log['\"]\)", content) or re.search(
+            r"\.set_xscale\(['\"]log['\"]\)", content
+        ):
+            skills.append("matplotlib/log_scale")
+        if re.search(r"\.polar\(", content):
+            skills.append("matplotlib/polar_charts")
+        if re.search(r"\.plot_surface\(", content) or re.search(
+            r"\.plot_wireframe\(", content
+        ):
+            skills.append("matplotlib/3d_plots")
+
+        # Plot Customization
+        if re.search(r"\.setp\(", content) or re.search(
+            r"(linestyle|linecolor)", content
+        ):
+            skills.append("matplotlib/line_styles_colors")
+        if re.search(r"(\.title\(|\.xlabel\(|\.ylabel\()", content):
+            skills.append("matplotlib/titles_labels")
+        if re.search(r"\.legend\(", content):
+            skills.append("matplotlib/legend_config")
+        if re.search(r"(\.xticks\(|\.yticks\()", content):
+            skills.append("matplotlib/axis_ticks")
+        if re.search(r"\.grid\(", content):
+            skills.append("matplotlib/grid_config")
+        if re.search(r"\.annotate\(", content):
+            skills.append("matplotlib/text_annotations")
+        if re.search(r"\.table\(", content):
+            skills.append("matplotlib/adding_tables")
+
+        # Specialized Plots
+        if re.search(r"\.pie\(", content):
+            skills.append("matplotlib/pie_charts")
+        if re.search(r"\.bubble\(", content):
+            skills.append("matplotlib/bubble_charts")
+        if re.search(r"\.violinplot\(", content):
+            skills.append("matplotlib/violin_plots")
+        if re.search(r"\.contour\(", content) or re.search(r"\.contourf\(", content):
+            skills.append("matplotlib/contour_plots")
+        if re.search(r"\.quiver\(", content):
+            skills.append("matplotlib/quiver_plots")
+        if re.search(r"\.streamplot\(", content):
+            skills.append("matplotlib/stream_plots")
+
+        # Interactive Features
+        if "interactive" in content or re.search(r"matplotlib\.widgets", content):
+            skills.append("matplotlib/interactive_backends")
+        if re.search(r"(widgets|slider)", content):
+            skills.append("matplotlib/widgets_sliders")
+
+        # Advanced Topics
+        if "backend" in content or re.search(r"matplotlib\.backends", content):
+            skills.append("matplotlib/custom_backends")
+        if "animation" in content or re.search(r"matplotlib\.animation", content):
+            skills.append("matplotlib/animation_creation")
+        if re.search(r"(event|connect\()", content):
+            skills.append("matplotlib/event_handling")
+
+        # Matplotlib Configurations
+        if "rcParams" in content or re.search(r"matplotlib\.rc", content):
+            skills.append("matplotlib/matplotlib_config")
+
+        return list(set(skills))
+
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
@@ -2794,3 +2899,5 @@ class ParseSkills:
             return self.__parse_mysql_skill(content)
         elif language == "pandas":
             return self.__parse_pandas_skill(content)
+        elif language == "matplotlib":
+            return self.__parse_matplotlib_skill(content)
