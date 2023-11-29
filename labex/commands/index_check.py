@@ -56,7 +56,7 @@ class CheckIndexNoSkills:
     def __init__(self) -> None:
         pass
 
-    def check_skills(self, base_dir: str) -> None:
+    def check_skills(self, base_dir: str, filter_skill: str) -> None:
         i = 0
         for path in Path(base_dir).rglob("index.json"):
             skilltree = str(path).split("/")[1]
@@ -72,6 +72,11 @@ class CheckIndexNoSkills:
                     if skill.startswith(f"{skilltree}/"):
                         is_valid = True
             if not is_valid:
-                print(f"[red]No {skilltree} in:[/red] {path}")
-                i += 1
+                if filter_skill == None:
+                    print(f"[red]No {skilltree} in:[/red] {path}")
+                    i += 1
+                else:
+                    if filter_skill == skilltree:
+                        print(f"[red]No {skilltree} in:[/red] {path}")
+                        i += 1
         print(f"Total files: {i}")

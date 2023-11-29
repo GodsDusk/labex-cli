@@ -207,11 +207,18 @@ check.add_command(schema)
     type=str,
     required=True,
     help="repo path, you must excute outside the repo, like '--path scenarios'",
-    metavar="<path>",
+    metavar="<repo-path>",
 )
-def noskill(path):
+@click.option(
+    "--filter-skill",
+    type=str,
+    required=True,
+    help="only check the skill you want, like '--filter-skill python",
+    metavar="<filter-skill>",
+)
+def noskill(path, filter_skill):
     """Check no skills in index.json"""
-    CheckIndexNoSkills().check_skills(path)
+    CheckIndexNoSkills().check_skills(path, filter_skill)
 
 
 check.add_command(noskill)
