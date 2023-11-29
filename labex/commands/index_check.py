@@ -50,3 +50,28 @@ class CheckIndexValidation:
         print(
             f"Total files validated: {i}, passed: [green]{i - error_counts}[/green], failed: [red]{error_counts}[/red]"
         )
+
+
+class CheckIndexNoSkills:
+    def __init__(self) -> None:
+        pass
+
+    def check_skills(self, base_dir: str) -> None:
+        i = 0
+        for path in Path(base_dir).rglob("index.json"):
+            skilltree = str(path).split("/")[1]
+            if skilltree == "javascript":
+                skilltree = "js"
+            is_valid = False
+            with open(path, "r") as j:
+                data = json.load(j)
+            steps = data["details"]["steps"]
+            for step in steps:
+                step_skills = step["skills"]
+                for skill in step_skills:
+                    if skill.startswith(f"{skilltree}/"):
+                        is_valid = True
+            if not is_valid:
+                print(f"[red]No {skilltree} in:[/red] {path}")
+                i += 1
+        print(f"Total files: {i}")

@@ -10,7 +10,7 @@ from .commands.lab_unverified import LabForTesting
 from .commands.lab_translate import Translator
 from .commands.lab_split import MDSplitter
 
-from .commands.index_check import CheckIndexValidation
+from .commands.index_check import CheckIndexValidation, CheckIndexNoSkills
 from .commands.index_update_title import UpdateIndexTitle
 from .commands.index_add_fee_type import SetFeeType
 from .commands.index_add_contributors import AddContributors
@@ -170,6 +170,15 @@ def idx():
 cli.add_command(idx)
 
 
+@click.group(context_settings=CONTEXT_SETTINGS)
+def check():
+    """CHECK INDEX.JSON COMMANDS GROUP"""
+    pass
+
+
+idx.add_command(check)
+
+
 @click.command(no_args_is_help=True)
 @click.option(
     "--instance",
@@ -178,7 +187,7 @@ cli.add_command(idx)
     help="index.json file path",
     metavar="<path>",
 )
-def check(instance):
+def schema(instance):
     """Check index.json based on schema.json
 
     - instance: index.json file path
@@ -189,7 +198,23 @@ def check(instance):
         CheckIndexValidation().validate_json(instance)
 
 
-idx.add_command(check)
+check.add_command(schema)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    required=True,
+    help="repo path, you must excute outside the repo, like '--path scenarios'",
+    metavar="<path>",
+)
+def noskill(path):
+    """Check no skills in index.json"""
+    CheckIndexNoSkills().check_skills(path)
+
+
+check.add_command(noskill)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
