@@ -208,11 +208,12 @@ class GitHub:
         approved_by = []
         changes_requested_by = []
         for review in response.json():
-            if review["state"] == "APPROVED":
+            review_state = review.get("state", "NONE")
+            if review_state == "APPROVED":
                 approved_by.append(review["user"]["login"])
-            elif review["state"] == "CHANGES_REQUESTED":
+            elif review_state == "CHANGES_REQUESTED":
                 changes_requested_by.append(review["user"]["login"])
-        return list(set(approved_by)), list(set(changes_requested_by))
+        return list(set(approved_by)), list(set(changes_requested_by)), review_state
 
     @retry(stop_max_attempt_number=2)
     def get_issues_list(self, repo_name: str) -> list:

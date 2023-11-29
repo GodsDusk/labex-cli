@@ -120,7 +120,7 @@ class SyncPRToFeishu:
                 ###################
                 # STEP1 解析 PR 数据
                 ###################
-
+                print(pr)
                 pr_number = pr["number"]
                 pr_user = pr["user"]["login"]
                 pr_state = pr["state"]
@@ -162,20 +162,16 @@ class SyncPRToFeishu:
                             f"[yellow]➜ SKIPPED:[/yellow] Multiple ({index_json}) index.json found in {pr_number}, comment to {pr_user}"
                         )
                         continue
-
                 ###################
                 # STEP2 更新 PR 状态
                 ###################
-
                 # 判断 PR 是否已经测试完成
                 if "Test Completed" not in pr_labels_list:
                     print(f"[yellow]➜ SKIPPED:[/yellow] PR is not tested completed.")
                     continue
-
                 # 从 PR 描述中获取 issue id
                 pr_body = pr["body"]
                 issue_id = self.__get_pr_assign_issue_id(pr_body)
-
                 # 判断 PR 是否正确关联了 issue 或者选择了 noissue
                 if issue_id == 0 and "noissue" not in pr_labels_list:
                     comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue, 无法分配 Reviewer。请你在 PR 描述中按要求添加, 如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue, 请在 Labels 中选择 `noissue`, 系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
@@ -189,9 +185,7 @@ class SyncPRToFeishu:
                         f"[yellow]➜ SKIPPED:[/yellow] No issue id found in {pr_number}, comment to {pr_user}"
                     )
                     continue
-
                 # 如果检查通过, 则更新 PR 状态
-
                 # STEP1 更新 Milestone
                 # 获取已经存在的 milestone
                 pr_milestone = pr.get("milestone")
@@ -226,7 +220,6 @@ class SyncPRToFeishu:
                         f"[green]↑ UPDATED:[/green] PR milestone to {date_milestone_str}, {pr_milestone_number}"
                     )
                 # STEP2 为 PR 添加 Reviewer
-
                 # 如果 issue_id 不为 0, 则获取 issue user
                 if issue_id != 0:
                     issue = self.github.get_issue(repo_name, issue_id)
@@ -234,14 +227,13 @@ class SyncPRToFeishu:
                 # 如果 issue_id 为 0, 则将 issue_user 设置为 huhuhang
                 else:
                     issue_user = "huhuhang"
-
                 # 选择设置 reviewer
                 # 一般情况下, 如果 issue user 为 reviewer
                 reviewer = issue_user
                 # 如果 issue user 不在 collaborators 里, 则设置 reviewer 为 huhuhang
                 if issue_user not in collaborators:
                     reviewer = "huhuhang"
-                # 检查 issue user 是否和 pr user 相同，则添加 huhuhang 为 reviewer
+                # 如果 issue user 和 pr user 相同，则添加 huhuhang 为 reviewer
                 if issue_user == pr_user:
                     reviewer = "huhuhang"
                 # 准备更新 assignees
@@ -263,20 +255,46 @@ class SyncPRToFeishu:
                     comment = f"Hi, @{pr_user} \n\n系统已将 @{reviewer} 自动分配为 Reviewer。一般情况下，@{reviewer} 会在 2 个工作日内完成 Review, 并与你沟通。如果一直没有进展，请及时通过评论或微信群与 @{reviewer} 联系确认。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
                     self.github.comment_pr(repo_name, pr_number, comment)
                     print(f"[green]↑ UPDATED:[/green] {reviewer} added as a reviewer.")
-
+                # 添加 Final Reviewer
+                # 获取 PR 的 Review 状态
+                (
+                    approved_by,
+                    changes_requested_by,
+                    review_state,
+                ) = self.github.pr_reviews(repo_name, pr_number)
+                if len(approved_by) == 0:
+                    print(
+                        f"[yellow]➜ SKIPPED:[/yellow] pr has not been approved, skip add final reviewer."
+                    )
+                else:
+                    final_reviewer = "huhuhang"
+                    # 如果 final_reviewer 在 assignees 里
+                    if final_reviewer in assignees_list:
+                        print(
+                            f"[yellow]➜ SKIPPED:[/yellow] pr has been approved, {final_reviewer} already added as a final reviewer."
+                        )
+                    else:
+                        payloads = {"assignees": [final_reviewer]}
+                        self.github.patch_pr(
+                            repo_name,
+                            pr_number,
+                            payloads,
+                        )
+                        # 添加评论通知 huhuhang
+                        comment = f"Hi, @{pr_user} \n\n系统已将 @{final_reviewer} 自动分配为 Final Reviewer。一般情况下，@{final_reviewer} 会在 2 个工作日内完成 Review, 并与你沟通。如果一直没有进展，请及时通过评论或微信群与 @{final_reviewer} 联系确认。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
+                        self.github.comment_pr(repo_name, pr_number, comment)
+                        print(
+                            f"[green]↑ UPDATED:[/green] pr has been approved, {reviewer} added as a final reviewer."
+                        )
                 #######################
                 # STEP3 更新 Feishu 记录
                 #######################
-
                 # 解析 index.json
                 lab_title = index_json.get("title")
                 lab_type = index_json.get("type")
                 lab_steps = index_json.get("details").get("steps")
                 pr_title = pr["title"]
                 pr_html_url = pr["html_url"]
-                approved_by, changes_requested_by = self.github.pr_reviews(
-                    repo_name, pr_number
-                )
                 # created at
                 created_at = self.__unix_ms_timestamp(pr["created_at"])
                 updated_at = self.__unix_ms_timestamp(pr["updated_at"])
@@ -297,6 +315,7 @@ class SyncPRToFeishu:
                         "REPO_NAME": repo_name,
                         "ASSIGNEES": assignees_list,
                         "MILESTONE": date_milestone_str,
+                        "REVIEW_STATE": review_state,
                         "CHANGES_REQUESTED": changes_requested_by,
                         "APPROVED": approved_by,
                         "CREATED_AT": created_at,
