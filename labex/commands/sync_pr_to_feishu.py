@@ -120,7 +120,6 @@ class SyncPRToFeishu:
                 ###################
                 # STEP1 解析 PR 数据
                 ###################
-                print(pr)
                 pr_number = pr["number"]
                 pr_user = pr["user"]["login"]
                 pr_state = pr["state"]
