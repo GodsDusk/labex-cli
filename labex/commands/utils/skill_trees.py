@@ -24,6 +24,39 @@ class ParseSkills:
             skills.append("python/comments")
         if re.search(r"\bint\(.+\)|\bfloat\(.+\)|\bstr\(.+\)", content):
             skills.append("python/type_conversion")
+        # Lists
+        if re.search(r"\[.*\]", content):
+            skills.append("python/lists")
+
+        # Tuples
+        if re.search(r"\(.*\)", content) or re.search(r"\btuple\b", content):
+            skills.append("python/tuples")
+
+        # Dictionaries
+        if re.search(r"\{.*:.*\}", content):
+            skills.append("python/dictionaries")
+
+        # Sets
+        if re.search(r"\{.*\}", content) and not re.search(r"\{.*:.*\}", content):
+            skills.append("python/sets")
+
+        # Polymorphism
+        if (
+            re.search(r"\bclass\b", content)
+            and re.search(r"\bdef\b.*\bself\b", content)
+            and re.search(r"\bdef\s+__\w+__\b", content)
+        ):
+            skills.append("python/polymorphism")
+
+        # Python Shell
+        if re.search(r"^\s*>>> |\s*\.\.\. ", content, re.MULTILINE):
+            skills.append("python/python_shell")
+
+        # IPython Shell
+        if re.search(
+            r"^\s*In \[\d+\]: |\s*Out\[\d+\]: |^\s*%[a-zA-Z]+", content, re.MULTILINE
+        ):
+            skills.append("python/python_shell")
 
         # Control structures
         if re.search(r"\bif\b|\belif\b|\belse\b", content):
@@ -139,25 +172,177 @@ class ParseSkills:
 
         # Standard libraries
         standard_libraries = [
-            'os', 'sys', 'math', 'datetime', 'json', 'http', 'urllib', 're', 
-            'subprocess', 'multiprocessing', 'threading', 'collections', 
-            'itertools', 'functools', 'random', 'pickle', 'socket', 'struct', 
-            'hashlib', 'tempfile', 'glob', 'shutil', 'logging', 'argparse', 
-            'unittest', 'pdb', 'profile', 'time', 'csv', 'xml', 'html', 'ftplib', 
-            'http', 'io', 'zipfile', 'sqlite3', 'xmlrpc', 'configparser', 
-            'contextlib', 'queue', 'weakref', 'base64', 'binascii', 'errno', 
-            'gettext', 'locale', 'string', 'textwrap', 'unicodedata', 'stringprep', 
-            'calendar', 'codecs', 'dis', 'inspect', 'ast', 'symtable', 'token', 
-            'keyword', 'tokenize', 'tabnanny', 'pyclbr', 'pydoc', 'doctest', 
-            'trace', 'tracemalloc', 'importlib', 'pkgutil', 'modulefinder', 
-            'runpy', 'parser', 'platform', 'errno', 'ctypes', 'select', 'asyncio', 
-            'ssl', 'email', 'json', 'mailcap', 'mailbox', 'mimetypes', 'smtplib', 
-            'uuid', 'cgi', 'cgitb', 'wsgiref', 'xml', 'xmlrpc', 'webbrowser', 
-            'cmd', 'shlex'
+            "os",
+            "sys",
+            "math",
+            "datetime",
+            "json",
+            "http",
+            "urllib",
+            "re",
+            "subprocess",
+            "multiprocessing",
+            "threading",
+            "collections",
+            "itertools",
+            "functools",
+            "random",
+            "pickle",
+            "socket",
+            "struct",
+            "hashlib",
+            "tempfile",
+            "glob",
+            "shutil",
+            "logging",
+            "argparse",
+            "unittest",
+            "pdb",
+            "profile",
+            "time",
+            "csv",
+            "xml",
+            "html",
+            "ftplib",
+            "http",
+            "io",
+            "zipfile",
+            "sqlite3",
+            "xmlrpc",
+            "configparser",
+            "contextlib",
+            "queue",
+            "weakref",
+            "base64",
+            "binascii",
+            "errno",
+            "gettext",
+            "locale",
+            "string",
+            "textwrap",
+            "unicodedata",
+            "stringprep",
+            "calendar",
+            "codecs",
+            "dis",
+            "inspect",
+            "ast",
+            "symtable",
+            "token",
+            "keyword",
+            "tokenize",
+            "tabnanny",
+            "pyclbr",
+            "pydoc",
+            "doctest",
+            "trace",
+            "tracemalloc",
+            "importlib",
+            "pkgutil",
+            "modulefinder",
+            "runpy",
+            "parser",
+            "platform",
+            "errno",
+            "ctypes",
+            "select",
+            "asyncio",
+            "ssl",
+            "email",
+            "json",
+            "mailcap",
+            "mailbox",
+            "mimetypes",
+            "smtplib",
+            "uuid",
+            "cgi",
+            "cgitb",
+            "wsgiref",
+            "xml",
+            "xmlrpc",
+            "webbrowser",
+            "cmd",
+            "shlex",
         ]
-        if any(re.search(r'\b{}\b'.format(lib), content) for lib in standard_libraries):
+        if any(re.search(r"\b{}\b".format(lib), content) for lib in standard_libraries):
             skills.append("python/standard_libraries")
 
+        # Built-in functions
+        built_in_functions = [
+            "abs",
+            "all",
+            "any",
+            "ascii",
+            "bin",
+            "bool",
+            "bytearray",
+            "bytes",
+            "callable",
+            "chr",
+            "classmethod",
+            "compile",
+            "complex",
+            "delattr",
+            "dict",
+            "dir",
+            "divmod",
+            "enumerate",
+            "eval",
+            "exec",
+            "filter",
+            "float",
+            "format",
+            "frozenset",
+            "getattr",
+            "globals",
+            "hasattr",
+            "hash",
+            "help",
+            "hex",
+            "id",
+            "input",
+            "int",
+            "isinstance",
+            "issubclass",
+            "iter",
+            "len",
+            "list",
+            "locals",
+            "map",
+            "max",
+            "memoryview",
+            "min",
+            "next",
+            "object",
+            "oct",
+            "open",
+            "ord",
+            "pow",
+            "print",
+            "property",
+            "range",
+            "repr",
+            "reversed",
+            "round",
+            "set",
+            "setattr",
+            "slice",
+            "sorted",
+            "staticmethod",
+            "str",
+            "sum",
+            "super",
+            "tuple",
+            "type",
+            "vars",
+            "zip",
+            "__import__",
+        ]
+
+        if any(
+            re.search(r"\b{}\b".format(func), content) for func in built_in_functions
+        ):
+            skills.append("python/build_in_functions")
 
         return list(set(skills))
 
