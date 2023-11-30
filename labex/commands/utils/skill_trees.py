@@ -2560,182 +2560,344 @@ class ParseSkills:
 
     def __parse_java_skill(self, content):
         skills = []
-        # java/method_overriding
-        if "@Override" in content:
-            skills.append("java/method_overriding")
-        # java/annotation
-        if "@" in content:
-            skills.append("java/annotation")
-        # java/net
-        if "net." in content:
-            skills.append("java/net")
-        # java/reflect
-        if "reflect." in content:
-            skills.append("java/reflect")
-        # java/stream
-        if "stream." in content:
-            skills.append("java/stream")
-        # java/xml_dom4j
-        if "dom4j." in content:
-            skills.append("java/xml_dom4j")
-        # java/abstraction
-        if "abstract" in content:
-            skills.append("java/abstraction")
-        # java/arraylist
-        if "ArrayList" in content:
-            skills.append("java/arraylist")
-        # java/classes_objects
-        if "class " in content:
-            skills.append("java/classes_objects")
-        # java/date
-        if "date." in content:
-            skills.append("java/date")
-        # java/enums
-        if "enum " in content:
-            skills.append("java/enums")
-        # java/exceptions
-        if "Exception" in content:
-            skills.append("java/exceptions")
-        # java/hashmap
-        if "HashMap" in content:
-            skills.append("java/hashmap")
-        # java/hashset
-        if "HashSet" in content:
-            skills.append("java/hashset")
-        # java/inheritance
-        if "extends " in content:
-            skills.append("java/inheritance")
-        # java/interface
-        if "interface " in content:
-            skills.append("java/interface")
-        # java/iterator
-        if "Iterator" in content:
-            skills.append("java/iterator")
-        # java/linkedlist
-        if "LinkedList" in content:
-            skills.append("java/linkedlist")
-        # java/packages_api
-        if "package " in content:
-            skills.append("java/packages_api")
-        # java/regex
-        if "regex." in content:
-            skills.append("java/regex")
-        # java/threads
-        if "Thread" in content:
-            skills.append("java/threads")
-        # java/user_input
-        if "Scanner" in content:
-            skills.append("java/user_input")
-        # java/wrapper_classes
-        if (
-            "intValue(" in content
-            or "doubleValue(" in content
-            or "booleanValue(" in content
-            or "byteValue(" in content
-            or "shortValue(" in content
-            or "longValue(" in content
-            or "floatValue(" in content
-            or "charValue(" in content
-        ):
-            skills.append("java/wrapper_classes")
-        # java/files
-        if "File" in content:
-            skills.append("java/files")
-        # java/io
-        if "io." in content:
-            skills.append("java/io")
-        # java/nio
-        if "nio." in content:
-            skills.append("java/nio")
-        # java/create_write_files
-        if "File" in content and ".createNewFile(" in content:
-            skills.append("java/create_write_files")
-        # java/delete_files
-        if "File" in content and ".delete(" in content:
-            skills.append("java/delete_files")
-        # java/read_files
-        if "File" in content and ".read(" in content:
-            skills.append("java/read_files")
-        # java/identifier
-        if "identifier" in content:
+
+        # Identifier
+        if re.search(r"\b[a-zA-Z_$][a-zA-Z\d_$]*\b", content):
             skills.append("java/identifier")
-        # java/sorting
-        if "sort(" in content:
-            skills.append("java/sorting")
-        # java/stringbuffer_stringbuilder
-        if "StringBuffer" in content or "StringBuilder" in content:
-            skills.append("java/stringbuffer_stringbuilder")
-        # java/working
-        if "working" in content:
-            skills.append("java/working")
-        # java/arrays
-        if "[]" in content:
-            skills.append("java/arrays")
-        # java/booleans
-        if "boolean" in content:
-            skills.append("java/booleans")
-        # java/break_continue
-        if "break" in content or "continue" in content:
-            skills.append("java/break_continue")
-        # java/comments
-        if "//" in content or "/*" in content:
-            skills.append("java/comments")
-        # java/data_types
-        if (
-            "byte" in content
-            or "short" in content
-            or "int" in content
-            or "long" in content
-            or "float" in content
-            or "double" in content
-            or "char" in content
-            or "boolean" in content
-        ):
+
+        # Data Types
+        data_types_pattern = (
+            r"\b(int|String|float|double|boolean|char|long|short|byte)\b"
+        )
+        if re.search(data_types_pattern, content):
             skills.append("java/data_types")
-        # java/for_loop
-        if "for (" in content:
-            skills.append("java/for_loop")
-        # java/if_else
-        if "if (" in content:
-            skills.append("java/if_else")
-        # java/math
-        if "Math." in content:
-            skills.append("java/math")
-        # java/operators
-        if (
-            "+" in content
-            or "-" in content
-            or "*" in content
-            or "/" in content
-            or "%" in content
-            or "=" in content
-            or "++" in content
-            or "--" in content
+
+        # Operators
+        if re.search(
+            r"[+|\-|*|/|%|++|--|==|!=|>|<|>=|<=|&&|\|\||!|=|+=|-=|\*=|/=|%=|&=|\|=|^=|>>=|<<=|>>>|<<<]",
+            content,
         ):
             skills.append("java/operators")
-        # java/output
-        if "System.out.println(" in content:
-            skills.append("java/output")
-        # java/strings
-        if "String " in content:
-            skills.append("java/strings")
-        # java/switch
-        if "switch (" in content:
-            skills.append("java/switch")
-        # java/variables
-        if "var " in content:
+
+        # Booleans
+        if re.search(r"\b(true|false)\b", content):
+            skills.append("java/booleans")
+
+        # Variables
+        if re.search(
+            r"\b(int|String|float|double|boolean|char|long|short|byte)\s+\w+\s*=",
+            content,
+        ):
             skills.append("java/variables")
-        # java/while_loop
-        if "while (" in content:
+
+        # If...Else
+        if re.search(r"\bif\s*\(.*?\)\s*\{.*?\}|\belse\s*\{", content, re.DOTALL):
+            skills.append("java/if_else")
+
+        # Switch
+        if re.search(r"\bswitch\s*\(.*?\)\s*\{", content):
+            skills.append("java/switch")
+
+        # For Loop
+        if re.search(r"\bfor\s*\(.*?;.*?;.*?\)\s*\{", content, re.DOTALL):
+            skills.append("java/for_loop")
+
+        # While Loop
+        if re.search(r"\bwhile\s*\(.*?\)\s*\{", content):
             skills.append("java/while_loop")
-        # java/collections_methods
-        if "Collections." in content:
+
+        # Break/Continue
+        if re.search(r"\b(break|continue);", content):
+            skills.append("java/break_continue")
+
+        # Comments
+        if re.search(r"//.*?$|/\*[\s\S]*?\*/", content, re.MULTILINE):
+            skills.append("java/comments")
+
+        # Output (System.out.println or System.out.print)
+        if re.search(r"System\.out\.(println|print)\(.*?\)", content):
+            skills.append("java/output")
+
+        # Type Casting
+        if re.search(
+            r"\(\s*(int|String|float|double|boolean|char|long|short|byte)\s*\)", content
+        ):
+            skills.append("java/type_casting")
+
+        # Math
+        if re.search(r"\bMath\.", content):
+            skills.append("java/math")
+
+        # Strings
+        if re.search(r'".*?"', content):
+            skills.append("java/strings")
+
+        # StringBuffer/StringBuilder
+        if re.search(r"\b(StringBuffer|StringBuilder)\b", content):
+            skills.append("java/stringbuffer_stringbuilder")
+
+        # RegEx
+        if re.search(r"\bPattern\b|\bMatcher\b", content):
+            skills.append("java/regex")
+
+        # Arrays
+        if re.search(r"\b\w+\[\]\s+\w+", content):
+            skills.append("java/arrays")
+
+        # Arrays Methods
+        if re.search(
+            r"\b(Arrays\.(sort|binarySearch|equals|fill|toString|copyOf|copyOfRange))\b",
+            content,
+        ):
+            skills.append("java/arrays_methods")
+
+        # Sorting
+        if re.search(r"\b(Arrays\.sort|Collections\.sort)\b", content):
+            skills.append("java/sorting")
+
+        # Collections Methods
+        if re.search(
+            r"\b(Collections\.(sort|binarySearch|reverse|shuffle|max|min))\b", content
+        ):
             skills.append("java/collections_methods")
-        # java/math_methods
-        if "Math." in content:
+
+        # Classes/Objects
+        if re.search(r"\bclass\s+\w+", content):
+            skills.append("java/classes_objects")
+
+        # Class Attributes
+        # Note: This is a rough approximation, might include variables outside class scope
+        if re.search(
+            r"\b(private|protected|public|static|final)\s+\w+\s+\w+;", content
+        ):
+            skills.append("java/class_attributes")
+
+        # Class Methods
+        # Note: This is a rough approximation, might include methods outside class scope
+        if re.search(
+            r"\b(private|protected|public|static|final)\s+\w+\s+\w+\(.*?\)\s*\{",
+            content,
+        ):
+            skills.append("java/class_methods")
+
+        # Constructors
+        if re.search(r"\bpublic\s+\w+\(.*?\)\s*\{", content):
+            skills.append("java/constructors")
+
+        # Modifiers
+        if re.search(
+            r"\b(public|protected|private|static|final|abstract|synchronized|volatile|transient|native|strictfp)\b",
+            content,
+        ):
+            skills.append("java/modifiers")
+
+        # Packages / API
+        # Note: This is a broad category and might require more specific patterns
+        if re.search(r"\bimport\s+\w+(\.\w+)*;", content):
+            skills.append("java/packages_api")
+
+        # User Input (Scanner class usage)
+        if re.search(r"\bScanner\b", content):
+            skills.append("java/user_input")
+
+        # Date
+        if re.search(r"\bDate\b|\bCalendar\b|\bLocalDate\b|\bLocalDateTime\b", content):
+            skills.append("java/date")
+
+        # OOP Concepts (Inheritance, Polymorphism, Encapsulation, Abstraction)
+        # Note: Accurately identifying these concepts requires more than regex matching.
+        #       The following are very basic and may not cover all cases.
+        if re.search(r"\bextends\b", content):
+            skills.append("java/inheritance")
+        if re.search(r"\boverride\b", content):
+            skills.append("java/polymorphism")
+        if re.search(r"\bprivate\s+\w+", content):
+            skills.append("java/encapsulation")
+        # Abstraction is difficult to detect via regex alone
+
+        # Interface
+        if re.search(r"\binterface\b", content):
+            skills.append("java/interface")
+
+        # Enums
+        if re.search(r"\benum\b", content):
+            skills.append("java/enums")
+
+        # Exceptions
+        if re.search(r"\btry\s*\{.*?\}\s*catch\s*\(.*?\)\s*\{", content, re.DOTALL):
+            skills.append("java/exceptions")
+
+        # Wrapper Classes
+        if re.search(
+            r"\b(Integer|Float|Double|Boolean|Character|Long|Short|Byte)\b", content
+        ):
+            skills.append("java/wrapper_classes")
+
+        # ArrayList
+        if re.search(r"\bArrayList\b", content):
+            skills.append("java/arraylist")
+
+        # LinkedList
+        if re.search(r"\bLinkedList\b", content):
+            skills.append("java/linkedlist")
+
+        # HashMap
+        if re.search(r"\bHashMap\b", content):
+            skills.append("java/hashmap")
+
+        # HashSet
+        if re.search(r"\bHashSet\b", content):
+            skills.append("java/hashset")
+
+        # Iterator
+        if re.search(r"\bIterator\b", content):
+            skills.append("java/iterator")
+
+        # Inner Classes
+        if re.search(r"class\s+\w+\s*\{.*?class\s+\w+", content, re.DOTALL):
+            skills.append("java/inner_classes")
+
+        # Annotation
+        if re.search(r"@\w+", content):
+            skills.append("java/annotation")
+
+        # Generics
+        if re.search(r"\b\w+<\w+>", content):
+            skills.append("java/generics")
+
+        # Format
+        # Note: This is a broad category and might require more specific patterns
+        if re.search(r"String\.format|System\.out\.printf", content):
+            skills.append("java/format")
+
+        # Reflect
+        if re.search(r"\bjava\.lang\.reflect\b", content):
+            skills.append("java/reflect")
+
+        # Serialization
+        if re.search(r"\bimplements Serializable\b", content):
+            skills.append("java/serialization")
+
+        # Method Overloading (尝试匹配可能的方法重载情况)
+        # 这个正则表达式查找相同类中的相同方法名但参数不同的情况
+        # 注意：这可能不会完全准确，因为它依赖于方法的命名和格式化
+        method_pattern = (
+            r"(public|private|protected)?\s+(static)?\s*\w+\s+(\w+)\s*\((.*?)\)\s*\{"
+        )
+        methods = re.findall(method_pattern, content)
+        method_names = {}
+
+        for access, static, name, args in methods:
+            args_count = len(args.split(","))
+            if name not in method_names:
+                method_names[name] = {args_count}
+            else:
+                method_names[name].add(args_count)
+
+        for name, arg_counts in method_names.items():
+            if len(arg_counts) > 1:
+                skills.append("java/method_overloading")
+                break
+
+        # Note: Difficult to accurately identify with regex
+        # Method Overriding (可能需要更复杂的逻辑来确定是否真的是方法覆盖)
+        # 这里的正则表达式仅尝试匹配可能表示覆盖的方法声明
+        if re.search(r"@Override\s+public\s+\w+\s+\w+\(.*?\)", content):
+            skills.append("java/method_overriding")
+
+        # Recursion (递归通常表现为函数内部调用自己)
+        if re.search(r"\b(\w+)\s*\([^)]*\)\s*\{[^}]*\1\s*\(", content):
+            skills.append("java/recursion")
+
+        # Scope (捕获不同类型的作用域声明，如局部变量、循环内变量等)
+        if re.search(
+            r"\bfor\s*\(|\bwhile\s*\(|\bif\s*\(|\{[^}]*\bint\b|\{[^}]*\bString\b",
+            content,
+        ):
+            skills.append("java/scope")
+
+        # Lambda (匹配 Lambda 表达式的基本模式)
+        if re.search(r"\([^)]*\)\s*->", content):
+            skills.append("java/lambda")
+
+        # Files (匹配文件操作相关的类或方法)
+        if re.search(
+            r"\bFile\b|\bFileReader\b|\bFileWriter\b|\bFileInputStream\b|\bFileOutputStream\b",
+            content,
+        ):
+            skills.append("java/files")
+
+        # Create/Write Files (检查文件创建和写入相关的代码)
+        if re.search(r"new\s+FileOutputStream|new\s+FileWriter", content):
+            skills.append("java/create_write_files")
+
+        # Read Files (匹配文件读取相关的代码)
+        if re.search(r"new\s+FileInputStream|new\s+FileReader", content):
+            skills.append("java/read_files")
+
+        # Delete Files (匹配文件删除的代码)
+        if re.search(r"\.delete\(\)", content):
+            skills.append("java/delete_files")
+
+        # IO (捕获输入输出流相关的代码)
+        if re.search(
+            r"\bInputStream\b|\bOutputStream\b|\bReader\b|\bWriter\b", content
+        ):
+            skills.append("java/io")
+
+        # Stream (流相关的操作)
+        if re.search(r"\.stream\(\)|\.parallelStream\(\)", content):
+            skills.append("java/stream")
+
+        # NIO (新输入输出，java.nio 包的使用)
+        if re.search(r"\bjava\.nio\b", content):
+            skills.append("java/nio")
+
+        # XML/Dom4j (匹配 XML 或 Dom4j 相关的代码)
+        if re.search(r"\bDocument\b|\bElement\b|\bSAXReader\b", content):
+            skills.append("java/xml_dom4j")
+
+        # Math Methods (数学函数和操作)
+        if re.search(r"\bMath\.\w+\(", content):
             skills.append("java/math_methods")
-        if "System." in content:
+
+        # Object Methods (匹配常用的 Object 类方法)
+        if re.search(r"\bequals\(|\bhashCode\(|\btoString\(", content):
+            skills.append("java/object_methods")
+
+        # String Methods (字符串操作的方法)
+        if re.search(
+            r"\bString\s+\w+\s*=|\b\w+\.length\(\)|\b\w+\.charAt\(|\b\w+\.substring\(",
+            content,
+        ):
+            skills.append("java/string_methods")
+
+        # System Methods (System 类相关的方法调用)
+        if re.search(r"\bSystem\.out\.print|System\.in|System\.exit\(", content):
             skills.append("java/system_methods")
+
+        # Threads (线程相关的代码)
+        if re.search(r"\bThread\b|\bRunnable\b|\bstart\(\)", content):
+            skills.append("java/threads")
+
+        # Working (可能是关于多线程或并发的工作，但这需要更明确的上下文来确定)
+        # 这里简单匹配线程和并发相关的关键字
+        if re.search(r"\bThread\b|\bRunnable\b|\bExecutorService\b", content):
+            skills.append("java/working")
+
+        # Net (网络编程相关的代码)
+        if re.search(r"\bSocket\b|\bServerSocket\b|\bURLConnection\b", content):
+            skills.append("java/net")
+
+        # OOP Concepts
+        if re.search(r"\bclass\b|\bextends\b|\bimplements\b|\bnew\b", content):
+            skills.append("java/oop")
+
+        # Abstraction
+        if re.search(r"\babstract class\b|\binterface\b", content):
+            skills.append("java/abstraction")
+
+        # 这里可以继续添加其他技能点的匹配规则
 
         return list(set(skills))
 
