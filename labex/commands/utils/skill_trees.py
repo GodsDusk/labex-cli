@@ -25,19 +25,25 @@ class ParseSkills:
         if re.search(r"\bint\(.+\)|\bfloat\(.+\)|\bstr\(.+\)", content):
             skills.append("python/type_conversion")
         # Lists
-        if re.search(r"\[.*\]", content):
+        if re.search(r"\blist\(|\b\[\]", content) or re.search(r"\[.*\]", content):
             skills.append("python/lists")
 
         # Tuples
-        if re.search(r"\(.*\)", content) or re.search(r"\btuple\b", content):
+        if (
+            re.search(r"\([^,]*,[^)]*\)", content)
+            or re.search(r"\w+\s*,\s*[^)]+", content)
+            or re.search(r"\btuple\b", content)
+        ):
             skills.append("python/tuples")
 
         # Dictionaries
-        if re.search(r"\{.*:.*\}", content):
+        if re.search(r"\{[^}\n]*:.*?\}", content):
             skills.append("python/dictionaries")
 
         # Sets
-        if re.search(r"\{.*\}", content) and not re.search(r"\{.*:.*\}", content):
+        if re.search(r"\{[^}\n]*\}", content) and not re.search(
+            r"\{[^}\n]*:.*?\}", content
+        ):
             skills.append("python/sets")
 
         # Polymorphism
@@ -339,8 +345,9 @@ class ParseSkills:
             "__import__",
         ]
 
+        # Built-in functions
         if any(
-            re.search(r"\b{}\b".format(func), content) for func in built_in_functions
+            re.search(r"\b{}\(".format(func), content) for func in built_in_functions
         ):
             skills.append("python/build_in_functions")
 
