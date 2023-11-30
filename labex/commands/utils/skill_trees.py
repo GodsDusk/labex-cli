@@ -24,13 +24,15 @@ class ParseSkills:
             skills.append("python/comments")
         if re.search(r"\bint\(.+\)|\bfloat\(.+\)|\bstr\(.+\)", content):
             skills.append("python/type_conversion")
-        
+
         # Lists - 改进以避免将空方括号误识别为列表
         if re.search(r"\blist\s*\(|\[\s*[^]]*\]", content):
             skills.append("python/lists")
 
         # Tuples - 改进以避免将函数调用误识别为元组
-        if re.search(r"\([^,)]+,\s*[^)]*\)", content) or re.search(r"\btuple\s*\(", content):
+        if re.search(r"\([^,)]+,\s*[^)]*\)", content) or re.search(
+            r"\btuple\s*\(", content
+        ):
             skills.append("python/tuples")
 
         # Dictionaries - 更精确地匹配字典结构
@@ -38,7 +40,9 @@ class ParseSkills:
             skills.append("python/dictionaries")
 
         # Sets - 改进以区分集合和字典
-        if re.search(r"\{[^}:]+\}", content) and not re.search(r"\{[^}:]*:[^}]*\}", content):
+        if re.search(r"\{[^}:]+\}", content) and not re.search(
+            r"\{[^}:]*:[^}]*\}", content
+        ):
             skills.append("python/sets")
 
         # Polymorphism
@@ -345,6 +349,136 @@ class ParseSkills:
             re.search(r"\b{}\(".format(func), content) for func in built_in_functions
         ):
             skills.append("python/build_in_functions")
+
+        return list(set(skills))
+
+    def __parse_linux_skill(self, content):
+        skills = []
+
+        # 定义每个 SKILL ID 的匹配规则
+        skill_patterns = {
+            "linux/echo": r"\becho\b",
+            "linux/clear": r"\bclear\b",
+            "linux/ls": r"\bls\b",
+            "linux/cd": r"\bcd\b",
+            "linux/pwd": r"\bpwd\b",
+            "linux/mkdir": r"\bmkdir\b",
+            "linux/touch": r"\btouch\b",
+            "linux/cp": r"\bcp\b",
+            "linux/mv": r"\bmv\b",
+            "linux/rm": r"\brm\b",
+            "linux/ln": r"\bln\b",
+            "linux/cat": r"\bcat\b",
+            "linux/head": r"\bhead\b",
+            "linux/tail": r"\btail\b",
+            "linux/wc": r"\bwc\b",
+            "linux/cut": r"\bcut\b",
+            "linux/less": r"\bless\b",
+            "linux/more": r"\bmore\b",
+            "linux/chown": r"\bchown\b",
+            "linux/chmod": r"\bchmod\b",
+            "linux/wildcard_character": r"[\*\?]",  # 匹配星号或问号
+            "linux/find": r"\bfind\b",
+            "linux/locate": r"\blocate\b",
+            "linux/which": r"\bwhich\b",
+            "linux/whereis": r"\bwhereis\b",
+            "linux/grep": r"\bgrep\b",
+            "linux/sed": r"\bsed\b",
+            "linux/awk": r"\bawk\b",
+            "linux/sort": r"\bsort\b",
+            "linux/uniq": r"\buniq\b",
+            "linux/tr": r"\btr\b",
+            "linux/col": r"\bcol\b",
+            "linux/paste": r"\bpaste\b",
+            "linux/join": r"\bjoin\b",
+            "linux/diff": r"\bdiff\b",
+            "linux/comm": r"\bcomm\b",
+            "linux/patch": r"\bpatch\b",
+            "linux/vim": r"\bvim\b",
+            "linux/vimdiff": r"\bvimdiff\b",
+            "linux/nano": r"\bnano\b",
+            "linux/gedit": r"\bgedit\b",
+            "linux/tar": r"\btar\b",
+            "linux/zip": r"\bzip\b",
+            "linux/unzip": r"\bunzip\b",
+            "linux/bc": r"\bbc\b",
+            "linux/logical": r"(&&|\|\|)",
+            "linux/column": r"\bcolumn\b",
+            "linux/test": r"\btest\b",
+            "linux/xargs": r"\bxargs\b",
+            "linux/tree": r"\btree\b",
+            "linux/help": r"\bhelp\b",
+            "linux/man": r"\bman\b",
+            "linux/nl": r"\bnl\b",
+            "linux/read": r"\bread\b",
+            "linux/printf": r"\bprintf\b",
+            "linux/sleep": r"\bsleep\b",
+            "linux/declare": r"\bdeclare\b",
+            "linux/source": r"(\bsource\b)",
+            "linux/exit": r"\bexit\b",
+            "linux/ssh": r"\bssh\b",
+            "linux/telnet": r"\btelnet\b",
+            "linux/scp": r"\bscp\b",
+            "linux/sftp": r"\bsftp\b",
+            "linux/ftp": r"\bftp\b",
+            "linux/nc": r"\bnc\b",
+            "linux/ifconfig": r"\bifconfig\b",
+            "linux/netstat": r"\bnetstat\b",
+            "linux/ping": r"\bping\b",
+            "linux/ip": r"\bip\b",
+            "linux/useradd": r"\buseradd\b",
+            "linux/userdel": r"\buserdel\b",
+            "linux/usermod": r"\busermod\b",
+            "linux/passwd": r"\bpasswd\b",
+            "linux/sudo": r"\bsudo\b",
+            "linux/su": r"\bsu\b",
+            "linux/groups": r"\bgroups\b",
+            "linux/groupadd": r"\bgroupadd\b",
+            "linux/groupdel": r"\bgroupdel\b",
+            "linux/chgrp": r"\bchgrp\b",
+            "linux/whoami": r"\bwhoami\b",
+            "linux/who": r"\bwho\b",
+            "linux/env": r"\benv\b",
+            "linux/id": r"\bid\b",
+            "linux/set": r"\bset\b",
+            "linux/export": r"\bexport\b",
+            "linux/unset": r"\bunset\b",
+            "linux/df": r"\bdf\b",
+            "linux/du": r"\bdu\b",
+            "linux/mount": r"\bmount\b",
+            "linux/watch": r"\bwatch\b",
+            "linux/crontab": r"\bcrontab\b",
+            "linux/uname": r"\buname\b",
+            "linux/hostname": r"\bhostname\b",
+            "linux/ps": r"\bps\b",
+            "linux/top": r"\btop\b",
+            "linux/free": r"\bfree\b",
+            "linux/date": r"\bdate\b",
+            "linux/time": r"\btime\b",
+            "linux/dd": r"\bdd\b",
+            "linux/service": r"\bservice\b",
+            "linux/curl": r"\bcurl\b",
+            "linux/wget": r"\bwget\b",
+            "linux/apt": r"\bapt\b",
+            "linux/pip": r"\bpip\b",
+            "linux/yum": r"\byum\b",
+            "linux/jobs": r"\bjobs\b",
+            "linux/bg_running": r"&\s*$",
+            "linux/fg": r"\bfg\b",
+            "linux/kill": r"\bkill\b",
+            "linux/killall": r"\bkillall\b",
+            "linux/pkill": r"\bpkill\b",
+            "linux/wait": r"\bwait\b",
+            "linux/bg_process": r"\b&\s",
+            "linux/tee": r"\btee\b",
+            "linux/pipeline": r"\|",
+            "linux/redirect": r"(\>|\<|\>\>|2\>|\&\>)",
+        }
+
+        # 检查每个 SKILL ID 是否出现在内容中
+        for skill, pattern in skill_patterns.items():
+            if re.search(pattern, content):
+                skills.append(skill)
 
         return list(set(skills))
 
@@ -2993,6 +3127,8 @@ class ParseSkills:
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
+        elif language == "linux":
+            return self.__parse_linux_skill(content)
         elif language == "tkinter":
             return self.__parse_tkinter_skill(content)
         elif language == "sklearn":
