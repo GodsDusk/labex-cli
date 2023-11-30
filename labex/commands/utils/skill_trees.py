@@ -24,26 +24,21 @@ class ParseSkills:
             skills.append("python/comments")
         if re.search(r"\bint\(.+\)|\bfloat\(.+\)|\bstr\(.+\)", content):
             skills.append("python/type_conversion")
-        # Lists
-        if re.search(r"\blist\(|\b\[\]", content) or re.search(r"\[.*\]", content):
+        
+        # Lists - 改进以避免将空方括号误识别为列表
+        if re.search(r"\blist\s*\(|\[\s*[^]]*\]", content):
             skills.append("python/lists")
 
-        # Tuples
-        if (
-            re.search(r"\([^,]*,[^)]*\)", content)
-            or re.search(r"\w+\s*,\s*[^)]+", content)
-            or re.search(r"\btuple\b", content)
-        ):
+        # Tuples - 改进以避免将函数调用误识别为元组
+        if re.search(r"\([^,)]+,\s*[^)]*\)", content) or re.search(r"\btuple\s*\(", content):
             skills.append("python/tuples")
 
-        # Dictionaries
-        if re.search(r"\{[^}\n]*:.*?\}", content):
+        # Dictionaries - 更精确地匹配字典结构
+        if re.search(r"\{[^}:]*:[^}]*\}", content):
             skills.append("python/dictionaries")
 
-        # Sets
-        if re.search(r"\{[^}\n]*\}", content) and not re.search(
-            r"\{[^}\n]*:.*?\}", content
-        ):
+        # Sets - 改进以区分集合和字典
+        if re.search(r"\{[^}:]+\}", content) and not re.search(r"\{[^}:]*:[^}]*\}", content):
             skills.append("python/sets")
 
         # Polymorphism
