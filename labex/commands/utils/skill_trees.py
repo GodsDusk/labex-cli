@@ -6,215 +6,158 @@ class ParseSkills:
         pass
 
     def __parse_python_skill(self, content):
-        build_in_functions = [
-            "abs(",
-            "enumerate(",
-            "float(",
-            "input(",
-            "int(",
-            "len(",
-            "map(",
-            "max(",
-            "min(",
-            "next(",
-            "open(",
-            "print(",
-            "round(",
-            "sorted(",
-            "str(",
-            "sum(",
-            "zip(",
-            "type(",
-            "super(",
-            "id(",
-            "filter(",
-            "ord(",
-            "reversed(",
-            "bytes(",
-            "assert(",
-            "encode(",
-            "isinstance(",
-            "all(",
-            "bin(",
-            "any(",
-            "hex(",
-            "divmod(",
-            "chr(",
-            "slice(",
-            "strip(",
-        ]
-
-        librarys = [
-            "re",
-            "os",
-            "glob",
-            "argparse",
-            "math",
-            "datetime",
-            "sys",
-            "multiprocessing",
-            "unittest",
-            "sqlite3",
-            "logging",
-            "copy",
-            "collections",
-            "itertools",
-            "typing",
-            "threading",
-            "time",
-            "webbrowser",
-            "pygame",
-            "random",
-            "zlib",
-            "textwrap",
-            "calendar",
-            "functools",
-            "operator",
-            "enum",
-            "dateutil",
-            "secrets",
-            "io",
-            "pathlib",
-            "dask",
-            "tkinter",
-            "ctypes",
-            "requests",
-            "pytz",
-            "tqdm",
-            "bitstring",
-            "numpy",
-            "pandas",
-            "matplotlib",
-            "flask",
-            "pyarrow",
-            "scipy",
-            "beautifulsoup",
-            "seaborn",
-            "sklearn",
-            "basic_units",
-            "pil",
-        ]
-
         skills = []
-        # python/if_else
-        if "if " in content and "else" in content:
-            skills.append("python/if_else")
-        # python/python_interpreter
-        if "python3" in content:
-            skills.append("python/python_interpreter")
-        # python/python_scripts
-        if ".py" in content:
-            skills.append("python/python_scripts")
-        # python/math_operator
-        if (
-            " + " in content
-            or " - " in content
-            or " * " in content
-            or " / " in content
-            or " % " in content
-            or " ** " in content
-            or " // " in content
-        ):
-            skills.append("python/math_operator")
-        # python/assignment
-        if " = " in content:
-            skills.append("python/assignment")
-        # python/variables
-        if "int(" in content or "float(" in content or "str(" in content:
-            skills.append("python/variables")
-        # python/ipython
-        if "ipython" in content:
-            skills.append("python/ipython")
-        # python/del
-        if "del " in content:
-            skills.append("python/del")
-        # python/function_basic
-        if "def " in content:
-            skills.append("python/function_basic")
-        # python/args_and_kwargs
-        if "*args" in content or "**kwargs" in content:
-            skills.append("python/args_and_kwargs")
-        # python/lambda_function
-        if "lambda " in content:
-            skills.append("python/lambda_function")
-        # python/local_and_global
-        if "global " in content:
-            skills.append("python/local_and_global")
-        # python/yield_values
-        if "yield " in content:
-            skills.append("python/yield_values")
-        # python/comparison
-        if (
-            " == " in content
-            or " != " in content
-            or " < " in content
-            or " > " in content
-        ):
-            skills.append("python/comparison")
-        # python/boolean
-        if " True" in content or " False" in content:
-            skills.append("python/boolean")
-        # python/switch_case
-        if "switch " in content and "case " in content:
-            skills.append("python/switch_case")
-        # python/while_loop
-        if "while " in content:
-            skills.append("python/while_loop")
-        # python/range
-        if "range(" in content:
-            skills.append("python/range")
-        # python/walrus
-        if ":=" in content:
-            skills.append("python/walrus")
-        # python/data_types
-        if "list(" in content or "tuple(" in content or "dict(" in content:
-            skills.append("python/data_types")
-        # python/list
-        if "append(" in content or "pop(" in content or "remove(" in content:
-            skills.append("python/list")
-        # python/tuple
-        if "tuple(" in content:
-            skills.append("python/tuple")
-        # python/dict
-        if "dict(" in content:
-            skills.append("python/dict")
-        # python/set
-        if "set(" in content:
-            skills.append("python/set")
-        # python/virtual_environments
-        if "virtualenv" in content:
-            skills.append("python/virtual_environments")
-        # python/pypi
-        if "pip install " in content:
-            skills.append("python/pypi")
-        # python/conda
-        if "conda install " in content:
-            skills.append("python/conda")
-        # python/try_except
-        if "try:" in content and "except" in content:
-            skills.append("python/try_except")
-        # python/syntax_errors
-        if "SyntaxError" in content:
-            skills.append("python/syntax_errors")
-        # python/raise_errors
-        if "raise " in content:
-            skills.append("python/raise_errors")
-        # python/class
-        if "class " in content:
-            skills.append("python/class")
-        # python/attributes
-        if "self." in content:
-            skills.append("python/attributes")
-        # python/inheritance
-        if "super(" in content:
-            skills.append("python/inheritance")
 
-        for function in build_in_functions:
-            if function in content:
-                skills.append(f"python/{function[:-1]}")
-        for library in librarys:
-            if f"import {library}" in content or f"from {library}" in content:
-                skills.append(f"python/{library}")
+        # Data types and variables
+        if re.search(
+            r"\bint\b|\bfloat\b|\bcomplex\b|\bstr\b|\bbool\b|\blist\b|\btuple\b|\bdict\b|\bset\b",
+            content,
+        ):
+            skills.append("python/variables_data_types")
+        if re.search(r"\bint\b|\bfloat\b|\bcomplex\b", content):
+            skills.append("python/numeric_types")
+        if re.search(r"\bstr\b", content):
+            skills.append("python/strings")
+        if re.search(r"\bTrue\b|\bFalse\b", content):
+            skills.append("python/booleans")
+        if re.search(r"#", content):
+            skills.append("python/comments")
+        if re.search(r"\bint\(.+\)|\bfloat\(.+\)|\bstr\(.+\)", content):
+            skills.append("python/type_conversion")
+
+        # Control structures
+        if re.search(r"\bif\b|\belif\b|\belse\b", content):
+            skills.append("python/conditional_statements")
+        if re.search(r"\bfor\b", content):
+            skills.append("python/for_loops")
+        if re.search(r"\bwhile\b", content):
+            skills.append("python/while_loops")
+        if re.search(r"\bbreak\b|\bcontinue\b", content):
+            skills.append("python/break_continue")
+
+        # Comprehensions and collections
+        if re.search(r"\[.+\s+for\s+.+\s+in\s+.+\]", content):
+            skills.append("python/list_comprehensions")
+        if re.search(r"\blist\b|\btuple\b|\bset\b|\bdict\b", content):
+            skills.append("python/data_collections")
+
+        # Functions and scope
+        if re.search(r"\bdef\b", content):
+            skills.append("python/function_definition")
+        if re.search(r"\blambda\b", content):
+            skills.append("python/lambda_functions")
+        if re.search(r"\bglobal\b|\bnonlocal\b", content):
+            skills.append("python/scope")
+        if re.search(r"\bdef\b.*\breturn\b", content):
+            skills.append("python/arguments_return")
+        if re.search(r"\bdef\b.*\=", content):
+            skills.append("python/default_arguments")
+        if re.search(r"\bdef\b.*\*\w+", content):
+            skills.append("python/keyword_arguments")
+        if re.search(r"\bdef\b.*\*\*[^*]", content):
+            skills.append("python/keyword_arguments")
+        if re.search(r"\brecursion\b|\bdef\b.*\bdef\b", content):
+            skills.append("python/recursion")
+
+        # Error handling
+        if re.search(r"\btry\b|\bexcept\b", content):
+            skills.append("python/catching_exceptions")
+        if re.search(r"\braise\b", content):
+            skills.append("python/raising_exceptions")
+        if re.search(r"\bassert\b", content):
+            skills.append("python/custom_exceptions")
+        if re.search(r"\bfinally\b", content):
+            skills.append("python/finally_block")
+
+        # Files and I/O
+        if re.search(r"\bopen\b", content):
+            skills.append("python/file_opening_closing")
+        if re.search(r"\bwith\b", content):
+            skills.append("python/with_statement")
+        if re.search(r"\b.read\b|\b.write\b", content):
+            skills.append("python/file_reading_writing")
+        if re.search(r"\bfile\b.*\bopen\b|\bfile\b.*\bclose\b", content):
+            skills.append("python/file_operations")
+
+        # Iterators and Generators
+        if re.search(r"\biter\b|\bnext\b", content):
+            skills.append("python/iterators")
+        if re.search(r"\byield\b", content):
+            skills.append("python/generators")
+
+        # Object-oriented programming
+        if re.search(r"\bclass\b", content):
+            skills.append("python/classes_objects")
+        if re.search(r"\b__init__\b", content):
+            skills.append("python/constructor")
+        if re.search(r"\bclass\b.*\bclass\b", content):
+            skills.append("python/inheritance")
+        if re.search(r"\bdef\b.*\bself\b", content):
+            skills.append("python/encapsulation")
+        if re.search(r"\b@classmethod\b|\b@staticmethod\b", content):
+            skills.append("python/class_static_methods")
+
+        # Advanced concepts
+        if re.search(r"\b@\w+", content):
+            skills.append("python/decorators")
+        if re.search(r"\b__enter__\b|\b__exit__\b", content):
+            skills.append("python/context_managers")
+        if re.search(r"\bimport\b.*\bre\b|\bre\.\w+", content):
+            skills.append("python/regular_expressions")
+        if re.search(r"\bthreading\b|\bmultiprocessing\b", content):
+            skills.append("python/threading_multiprocessing")
+        if re.search(r"\bmath\b|\brandom\b", content):
+            skills.append("python/math_random")
+        if re.search(r"\bdatetime\b", content):
+            skills.append("python/date_time")
+        if re.search(r"\bjson\b|\bpickle\b|\bmarshal\b", content):
+            skills.append("python/data_serialization")
+        if re.search(r"\bos\b|\bsys\b", content):
+            skills.append("python/os_system")
+        if re.search(r"\bsocket\b", content):
+            skills.append("python/socket_programming")
+        if re.search(r"\brequests\b|\bhttp.client\b", content):
+            skills.append("python/http_requests")
+        if re.search(r"\bsocket\b", content):
+            skills.append("python/networking_protocols")
+        if re.search(r"\bnumpy\b|\bscipy\b|\bpandas\b", content):
+            skills.append("python/numerical_computing")
+        if re.search(r"\bpandas\b", content):
+            skills.append("python/data_analysis")
+        if re.search(r"\bmatplotlib\b|\bseaborn\b", content):
+            skills.append("python/data_visualization")
+        if re.search(r"\bsklearn\b|\btensorflow\b|\bkeras\b|\bpytorch\b", content):
+            skills.append("python/machine_learning")
+
+        # Modules and Packages
+        if re.search(r"\bimport\b", content):
+            skills.append("python/importing_modules")
+        if re.search(r"\bfrom\b.*\bimport\b", content):
+            skills.append("python/using_packages")
+        if re.search(r"\b__name__\s*==\s*\'__main__\'\b", content):
+            skills.append("python/creating_modules")
+
+        # Standard libraries
+        standard_libraries = [
+            'os', 'sys', 'math', 'datetime', 'json', 'http', 'urllib', 're', 
+            'subprocess', 'multiprocessing', 'threading', 'collections', 
+            'itertools', 'functools', 'random', 'pickle', 'socket', 'struct', 
+            'hashlib', 'tempfile', 'glob', 'shutil', 'logging', 'argparse', 
+            'unittest', 'pdb', 'profile', 'time', 'csv', 'xml', 'html', 'ftplib', 
+            'http', 'io', 'zipfile', 'sqlite3', 'xmlrpc', 'configparser', 
+            'contextlib', 'queue', 'weakref', 'base64', 'binascii', 'errno', 
+            'gettext', 'locale', 'string', 'textwrap', 'unicodedata', 'stringprep', 
+            'calendar', 'codecs', 'dis', 'inspect', 'ast', 'symtable', 'token', 
+            'keyword', 'tokenize', 'tabnanny', 'pyclbr', 'pydoc', 'doctest', 
+            'trace', 'tracemalloc', 'importlib', 'pkgutil', 'modulefinder', 
+            'runpy', 'parser', 'platform', 'errno', 'ctypes', 'select', 'asyncio', 
+            'ssl', 'email', 'json', 'mailcap', 'mailbox', 'mimetypes', 'smtplib', 
+            'uuid', 'cgi', 'cgitb', 'wsgiref', 'xml', 'xmlrpc', 'webbrowser', 
+            'cmd', 'shlex'
+        ]
+        if any(re.search(r'\b{}\b'.format(lib), content) for lib in standard_libraries):
+            skills.append("python/standard_libraries")
+
 
         return list(set(skills))
 
