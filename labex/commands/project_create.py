@@ -417,6 +417,15 @@ class CreateProject:
             if "Jquery" in skills:
                 skills.remove("Jquery")
                 skills.append("jQuery")
+            if "Html" in skills:
+                skills.remove("Html")
+                skills.append("HTML")
+            if "Css" in skills:
+                skills.remove("Css")
+                skills.append("CSS")
+            if "Opencv" in skills:
+                skills.remove("Opencv")
+                skills.append("OpenCV")
             course_config = {
                 "name": title,
                 "description": description,

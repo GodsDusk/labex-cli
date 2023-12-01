@@ -3317,7 +3317,7 @@ class ParseSkills:
             return self.__parse_css_skill(content)
         elif language == "jquery":
             return self.__parse_jquery_skill(content)
-        elif language == "javascript":
+        elif language == "javascript" or "js":
             return self.__parse_javascript_skill(content)
         elif language == "react":
             return self.__parse_react_skill(content)

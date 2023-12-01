@@ -26,7 +26,7 @@ class AddSkills:
             "jenkins": ["bash", "shell"],
             "html": ["html"],
             "css": ["css"],
-            "javascript": ["js", "javascript"],
+            "js": ["js", "javascript"],
             "react": ["js", "javascript"],
             "jquery": ["js", "javascript"],
             "java": ["java"],
