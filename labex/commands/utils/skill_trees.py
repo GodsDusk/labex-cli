@@ -2092,7 +2092,7 @@ class ParseSkills:
         # css/grid_layout
         if "grid-" in content:
             skills.append("css/grid_layout")
-        # css/pseudo-classes
+        # css/pseudo_classes
         if (
             ":hover" in content
             or ":active" in content
@@ -2115,10 +2115,10 @@ class ParseSkills:
             or ":disabled" in content
             or ":checked" in content
         ):
-            skills.append("css/pseudo-classes")
-        # css/pseudo-elements
+            skills.append("css/pseudo_classes")
+        # css/pseudo_elements
         if "::" in content:
-            skills.append("css/pseudo-elements")
+            skills.append("css/pseudo_elements")
         # css/backgrounds
         if "background" in content:
             skills.append("css/backgrounds")
