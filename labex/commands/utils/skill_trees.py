@@ -585,60 +585,92 @@ class ParseSkills:
 
     def __parse_shell_skill(self, content):
         skills = []
-        # shell/if_else
-        if "if" in content and "else" in content:
+
+        # Basic Syntax and Structure
+        if re.search(r"^\s*#!", content, re.MULTILINE):
+            skills.append("shell/shebang")
+        if re.search(r"#", content):
+            skills.append("shell/comments")
+        if re.search(r'["\']', content):
+            skills.append("shell/quoting")
+
+        # Variable Handling
+        if re.search(r"\b[A-Za-z_][A-Za-z0-9_]*\s*=", content):
+            skills.append("shell/variables_decl")
+        if re.search(r"\$[A-Za-z_][A-Za-z0-9_]*", content):
+            skills.append("shell/variables_usage")
+        if re.search(r"\$\{[^}]*\}", content):
+            skills.append("shell/param_expansion")
+        if re.search(r"\$\([^\)]*\)", content):
+            skills.append("shell/cmd_substitution")
+        if re.search(r"\b[A-Za-z_][A-Za-z0-9_]*\s*=\s*\(", content):
+            skills.append("shell/arrays")
+        if re.search(r"\bdeclare\s+-A\b", content):
+            skills.append("shell/assoc_arrays")
+
+        # Control Flow
+        if re.search(r"\bif\b", content):
             skills.append("shell/if_else")
-        # shell/case_esac
-        if "case" in content and "esac" in content:
-            skills.append("shell/case_esac")
-        # shell/while_loop
-        if "while" in content:
-            skills.append("shell/while_loop")
-        # shell/break
-        if "break" in content:
-            skills.append("shell/break")
-        # shell/for_loop
-        if "for" in content:
-            skills.append("shell/for_loop")
-        # shell/function_return_values
-        if "return" in content:
-            skills.append("shell/function_return_values")
-        # shell/function_basic
-        if "function" in content:
-            skills.append("shell/function_basic")
-        # shell/function_arguments
-        if "$1" in content:
-            skills.append("shell/function_arguments")
-        # shell/variable_substitution
-        if "${" in content:
-            skills.append("shell/variable_substitution")
-        # shell/string_operator
-        if "==" in content or "!=" in content:
-            skills.append("shell/string_operator")
-        # shell/boolean_operator
-        if "&&" in content or "||" in content:
-            skills.append("shell/boolean_operator")
-        # shell/file_test_operator
-        if "-f" in content or "-d" in content:
-            skills.append("shell/file_test_operator")
-        # shell/relational_operator
-        if "-eq" in content or "-ne" in content:
-            skills.append("shell/relational_operator")
-        # shell/arithmetic_operator
-        if "$((" in content:
-            skills.append("shell/arithmetic_operator")
-        # shell/local_variables
-        if "local" in content:
-            skills.append("shell/local_variables")
-        # shell/special_variables
-        if "$#" in content:
-            skills.append("shell/special_variables")
-        # shell/input_redirection
-        if " < " in content:
-            skills.append("shell/input_redirection")
-        # shell/output_redirection
-        if " > " in content:
-            skills.append("shell/output_redirection")
+        if re.search(r"\bcase\b", content):
+            skills.append("shell/case")
+        if re.search(r"\bfor\b", content):
+            skills.append("shell/for_loops")
+        if re.search(r"\bwhile\b", content):
+            skills.append("shell/while_loops")
+        if re.search(r"\buntil\b", content):
+            skills.append("shell/until_loops")
+        if re.search(r"\[\[.*\]\]|\[.*\]", content):
+            skills.append("shell/cond_expr")
+        if re.search(r"\bexit\b|\breturn\b", content):
+            skills.append("shell/exit_status")
+
+        # Functions and Scope
+        if re.search(r"\bfunction\b", content):
+            skills.append("shell/func_def")
+        if re.search(r"\blocal\b", content):
+            skills.append("shell/scope_vars")
+
+        # Advanced Scripting Concepts
+        if re.search(r"\(\(", content):
+            skills.append("shell/arith_expansion")
+        if re.search(r"\>\|?|\|>|<\(|<<", content):
+            skills.append("shell/adv_redirection")
+        if re.search(r"<<<", content):
+            skills.append("shell/here_strings")
+
+        # System Interaction and Configuration
+        if re.search(r"\btrap\b", content):
+            skills.append("shell/trap_statements")
+        if re.search(r"\bset\b|\bshopt\b", content):
+            skills.append("shell/shell_options")
+        if re.search(r"\bjobs\b|\bfg\b|\bbg\b", content):
+            skills.append("shell/signal_handling")
+        if re.search(r"\*|\?|\[", content):
+            skills.append("shell/globbing_expansion")
+
+        # Subshells and Command Groups
+        if re.search(r"\([^)]*\)", content):
+            skills.append("shell/subshells")
+
+        # String Manipulation
+        if re.search(r"\$\{[^}]*\}", content) or re.search(
+            r"\b[A-Za-z_][A-Za-z0-9_]*\s*\+=\s*", content
+        ):
+            skills.append("shell/str_manipulation")
+
+        # Arithmetic Operations
+        if re.search(r"\b[0-9]+(\s*[\+\-\*/]\s*[0-9]+)+", content) or re.search(
+            r"\$\(\s*[0-9]+ \s*[\+\-\*/] \s*[0-9]+\s*\)", content
+        ):
+            skills.append("shell/arith_ops")
+
+        # Reading Input
+        if re.search(r"\bread\b", content):
+            skills.append("shell/read_input")
+
+        # Exit Status Checks
+        if re.search(r"\$\?", content):
+            skills.append("shell/exit_status_checks")
 
         return list(set(skills))
 
@@ -3286,6 +3318,90 @@ class ParseSkills:
 
         return list(set(skills))
 
+    def __parse_numpy_skill(self, content):
+        skills = []
+
+        # Array Basics
+        if re.search(r"np\.array\(\[[^\[\]]*\]\)", content):  # Matches 1D arrays
+            skills.append("numpy/1d_array")
+        if re.search(r"np\.array\(\[\[", content):  # Matches multi-dimensional arrays
+            skills.append("numpy/multi_array")
+        if re.search(
+            r"np\.array\(", content
+        ):  # General array creation, could be 1D or multi-dimensional
+            skills.append("numpy/data_array")
+        if re.search(r"\.shape\b", content):
+            skills.append("numpy/shape_dim")
+        if re.search(r"\.dtype\b", content):
+            skills.append("numpy/data_type")
+        if re.search(r"\.(ndim|size|itemsize|nbytes)\b", content):
+            skills.append("numpy/attr")
+
+        # Indexing and Slicing
+        if re.search(r"\[\s*\d+\s*\]", content):  # Basic indexing
+            skills.append("numpy/basic_idx")
+        if re.search(r"\[\s*:\s*\]", content):  # Slicing
+            skills.append("numpy/slice")
+        if re.search(r"\[.*?\]", content):  # Boolean or fancy indexing
+            skills.append("numpy/bool_idx")
+            skills.append("numpy/fancy_idx")
+
+        # Array Manipulation
+        if re.search(r"np\.reshape|\.reshape\b", content):
+            skills.append("numpy/reshape")
+        if re.search(r"np\.transpose|\.T\b", content):
+            skills.append("numpy/transpose")
+        if re.search(r"np\.(concatenate|stack|vstack|hstack)\b", content):
+            skills.append("numpy/merge")
+        if re.search(r"np\.(split|vsplit|hsplit)\b", content):
+            skills.append("numpy/split")
+        if re.search(r"np\.(tile|repeat)\b", content):
+            skills.append("numpy/expand")
+
+        # Math and Statistics
+        if re.search(
+            r"np\.(sum|mean|median|max|min|std|var|add|subtract|multiply|divide)\b",
+            content,
+        ):
+            skills.append("numpy/math_ops")
+        if re.search(r"np\.linalg\.", content):  # Linear algebra
+            skills.append("numpy/lin_alg")
+        if re.search(r"np\.random\.", content):  # Random numbers
+            skills.append("numpy/rand_num")
+        # Adding specific patterns for statistical analysis
+        if re.search(r"np\.(sum|mean|median|max|min|std|var)\b", content):
+            skills.append("numpy/stats")
+
+        # Advanced Features
+        if re.search(
+            r"np\.broadcast", content
+        ):  # Broadcasting, tricky to match precisely
+            skills.append("numpy/broadcast")
+        if re.search(
+            r"np\.(sort|argsort|searchsorted|where)\b", content
+        ):  # Sort and search
+            skills.append("numpy/sort_search")
+        if re.search(
+            r"np\.ufunc", content
+        ):  # Universal functions, tricky to match precisely
+            skills.append("numpy/ufuncs")
+
+        # File Input/Output
+        if re.search(r"np\.(loadtxt|savetxt)\b", content):
+            skills.append("numpy/text_io")
+        if re.search(r"np\.(load|save|savez)\b", content):
+            skills.append("numpy/bin_io")
+
+        # Special Techniques
+        if re.search(r"np\.(datetime64|timedelta64)\b", content):
+            skills.append("numpy/datetime")
+        if re.search(r"np\.ma\.", content):  # Masked arrays
+            skills.append("numpy/mask_array")
+        if re.search(r"np\.dtype\(\[", content):  # Structured arrays
+            skills.append("numpy/struct_array")
+
+        return list(set(skills))
+
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
@@ -3317,7 +3433,7 @@ class ParseSkills:
             return self.__parse_css_skill(content)
         elif language == "jquery":
             return self.__parse_jquery_skill(content)
-        elif language == "javascript" or "js":
+        elif language == "javascript" or language == "js":
             return self.__parse_javascript_skill(content)
         elif language == "react":
             return self.__parse_react_skill(content)
@@ -3329,3 +3445,5 @@ class ParseSkills:
             return self.__parse_pandas_skill(content)
         elif language == "matplotlib":
             return self.__parse_matplotlib_skill(content)
+        elif language == "numpy":
+            return self.__parse_numpy_skill(content)

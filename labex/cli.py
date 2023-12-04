@@ -10,7 +10,11 @@ from .commands.lab_unverified import LabForTesting
 from .commands.lab_translate import Translator
 from .commands.lab_split import MDSplitter
 
-from .commands.index_check import CheckIndexValidation, CheckIndexNoSkills
+from .commands.index_check import (
+    CheckIndexValidation,
+    CheckIndexNoSkills,
+    CheckLabDictinary,
+)
 from .commands.index_update_title import UpdateIndexTitle
 from .commands.index_add_fee_type import SetFeeType
 from .commands.index_add_contributors import AddContributors
@@ -222,6 +226,22 @@ def noskill(path, filter_skill):
 
 
 check.add_command(noskill)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--path",
+    type=str,
+    required=True,
+    help="repo path, you must excute outside the repo, like '--path scenarios'",
+    metavar="<repo-path>",
+)
+def labdir(path):
+    """Check lab was placed in the wrong folder."""
+    CheckLabDictinary().check_lab_dir(path)
+
+
+check.add_command(labdir)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)

@@ -27,6 +27,7 @@ class AddSkills:
             "html": ["html"],
             "css": ["css"],
             "js": ["js", "javascript"],
+            "javascript": ["js", "javascript"],
             "react": ["js", "javascript"],
             "jquery": ["js", "javascript"],
             "java": ["java"],

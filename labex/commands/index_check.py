@@ -80,3 +80,31 @@ class CheckIndexNoSkills:
                         print(f"[red]No {skilltree} in:[/red] {path}")
                         i += 1
         print(f"Total files: {i}")
+
+
+class CheckLabDictinary:
+    def __init__(self) -> None:
+        pass
+
+    def check_lab_dir(self, base_dir: str) -> None:
+        i = 0
+        for path in Path(base_dir).rglob("index.json"):
+            with open(path, "r") as j:
+                data = json.load(j)
+            lab_skills = []
+            for step in data["details"]["steps"]:
+                lab_skills.extend(step["skills"])
+            lab_skill_trees = [skill.split("/")[0] for skill in lab_skills]
+            lab_skill_trees = list(set(lab_skill_trees))
+            # replace js with javascript
+            if "js" in lab_skill_trees:
+                lab_skill_trees.remove("js")
+                lab_skill_trees.append("javascript")
+            check_status = False
+            for lab_skill_tree in lab_skill_trees:
+                path_skill_tree = str(path).split("/")
+                if lab_skill_tree in path_skill_tree:
+                    check_status = True
+            if not check_status:
+                print(f"[red]Wrong Dir:[/red] {path}")
+                i += 1
