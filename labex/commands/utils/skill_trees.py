@@ -951,9 +951,6 @@ class ParseSkills:
         # django/django_urls
         if "django.urls" in content:
             skills.append("django/django_urls")
-        # django/django_utils
-        if "django.utils" in content:
-            skills.append("django/django_utils")
         # django/validators
         if "django.core.validators" in content:
             skills.append("django/validators")
@@ -3513,6 +3510,9 @@ class ParseSkills:
             skills.append("sql/information_schema")
         if re.search(r"\bEXPLAIN\b", content, re.IGNORECASE):
             skills.append("sql/explain")
+
+        if re.search(r"\bWHERE\b|\bJOIN\b|\bORDER BY\b", content, re.IGNORECASE):
+            skills.append("sql/using_indexes")
 
         return list(set(skills))
 
