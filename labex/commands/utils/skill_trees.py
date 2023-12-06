@@ -3402,6 +3402,120 @@ class ParseSkills:
 
         return list(set(skills))
 
+    import re
+
+    def __parse_sql_skill(self, content):
+        skills = []
+
+        # Basic SQL Commands
+        if re.search(r"\bSELECT\b", content, re.IGNORECASE):
+            skills.append("sql/select")
+        if re.search(r"\bINSERT INTO\b", content, re.IGNORECASE):
+            skills.append("sql/insert")
+        if re.search(r"\bUPDATE\b", content, re.IGNORECASE):
+            skills.append("sql/update")
+        if re.search(r"\bDELETE\b", content, re.IGNORECASE):
+            skills.append("sql/delete")
+        if re.search(r"\bCREATE TABLE\b", content, re.IGNORECASE):
+            skills.append("sql/create_table")
+        if re.search(r"\bALTER TABLE\b", content, re.IGNORECASE):
+            skills.append("sql/alter_table")
+        if re.search(r"\bDROP TABLE\b", content, re.IGNORECASE):
+            skills.append("sql/drop_table")
+        if re.search(r"\bTRUNCATE TABLE\b", content, re.IGNORECASE):
+            skills.append("sql/truncate_table")
+
+        # Data Manipulation and Querying
+        if re.search(r"\bWHERE\b", content, re.IGNORECASE):
+            skills.append("sql/where")
+        if re.search(r"\bIN\b", content, re.IGNORECASE):
+            skills.append("sql/in")
+        if re.search(r"\bORDER BY\b", content, re.IGNORECASE):
+            skills.append("sql/order_by")
+        if re.search(r"\bGROUP BY\b", content, re.IGNORECASE):
+            skills.append("sql/group_by")
+        if re.search(r"\bHAVING\b", content, re.IGNORECASE):
+            skills.append("sql/having")
+        if re.search(r"\bUNION\b", content, re.IGNORECASE):
+            skills.append("sql/union")
+        if re.search(r"\bLIKE\b", content, re.IGNORECASE):
+            skills.append("sql/like")
+        if re.search(r"\bBETWEEN\b", content, re.IGNORECASE):
+            skills.append("sql/between")
+        if re.search(r"\b(EXISTS|NOT EXISTS)\b", content, re.IGNORECASE):
+            skills.append("sql/exists")
+        if re.search(r"\bSUBSELECT\b|\bSUBQUERY\b", content, re.IGNORECASE):
+            skills.append("sql/subqueries")
+        if re.search(r"\bMERGE\b", content, re.IGNORECASE):
+            skills.append("sql/merge")
+        if re.search(r"OVER\s*\(", content, re.IGNORECASE):
+            skills.append("sql/window_functions")
+
+        # Data Definition and Integrity
+        if re.search(
+            r"\b(INT|VARCHAR|CHAR|TEXT|DATE|TIME|DATETIME|TIMESTAMP|FLOAT|DOUBLE|DECIMAL|NUMERIC|BOOLEAN|BLOB|BINARY|VARBINARY|BIGINT|SMALLINT|TINYINT|GEOMETRY|JSON)\b",
+            content,
+            re.IGNORECASE,
+        ):
+            skills.append("sql/data_types")
+        if re.search(
+            r"\b(PRIMARY KEY|FOREIGN KEY|UNIQUE|CHECK|NOT NULL|DEFAULT|INDEX)\b",
+            content,
+            re.IGNORECASE,
+        ):
+            skills.append("sql/constraints")
+        if re.search(r"\bNORMALIZATION\b", content, re.IGNORECASE):
+            skills.append("sql/normalization")
+
+        # Advanced Data Operations
+        if re.search(r"\bJOIN\b", content, re.IGNORECASE):
+            skills.append("sql/join")
+        if re.search(r"\bVIEW\b", content, re.IGNORECASE):
+            skills.append("sql/views")
+        if re.search(r"\bPROCEDURE\b", content, re.IGNORECASE):
+            skills.append("sql/stored_procedures")
+        if re.search(r"\bCAST\b", content, re.IGNORECASE):
+            skills.append("sql/cast")
+        if re.search(r"\bCONVERT\b", content, re.IGNORECASE):
+            skills.append("sql/convert")
+        if re.search(
+            r"\b(CONCAT|SUBSTRING|TRIM|LENGTH|LOWER|UPPER|REPLACE|LTRIM|RTRIM)\b",
+            content,
+            re.IGNORECASE,
+        ):
+            skills.append("sql/string_functions")
+        if re.search(
+            r"\b(SUM|AVG|COUNT|MAX|MIN|ROUND|CEIL|CEILING|FLOOR|ABS|MOD|POWER|SQRT|SIGN|LOG|EXP|ACOS|ASIN|ATAN|ATAN2|COS|SIN|TAN)\b",
+            content,
+            re.IGNORECASE,
+        ):
+            skills.append("sql/numeric_functions")
+        if re.search(
+            r"\b(CURDATE|CURTIME|NOW|DATE_ADD|DATE_SUB|DATEDIFF|DAY|MONTH|YEAR|HOUR|MINUTE|SECOND)\b",
+            content,
+            re.IGNORECASE,
+        ):
+            skills.append("sql/date_time_functions")
+
+        # Database Management and Optimization
+        if re.search(r"\bTRANSACTION\b", content, re.IGNORECASE):
+            skills.append("sql/transaction_control")
+        if re.search(r"\bGRANT\b|\bREVOKE\b", content, re.IGNORECASE):
+            skills.append("sql/security_permissions")
+        if re.search(r"\bINDEX\b", content, re.IGNORECASE):
+            skills.append("sql/creating_indexes")
+        # Detecting "using indexes" might be complex and context-dependent
+        if re.search(
+            r"\bINFORMATION_SCHEMA\b|\bINFORMATION_SCHEMA\.COLUMNS\b",
+            content,
+            re.IGNORECASE,
+        ):
+            skills.append("sql/information_schema")
+        if re.search(r"\bEXPLAIN\b", content, re.IGNORECASE):
+            skills.append("sql/explain")
+
+        return list(set(skills))
+
     def parse(self, language: str, content: str):
         if language == "python":
             return self.__parse_python_skill(content)
@@ -3447,3 +3561,5 @@ class ParseSkills:
             return self.__parse_matplotlib_skill(content)
         elif language == "numpy":
             return self.__parse_numpy_skill(content)
+        elif language == "sql":
+            return self.__parse_sql_skill(content)

@@ -36,6 +36,7 @@ class AddSkills:
             "go": ["go"],
             "rust": ["rust"],
             "mysql": ["sql", "mysql", "bash", "shell"],
+            "sql": ["sql", "mysql", "bash", "shell"],
         }
         self.parse_skills = ParseSkills()
 
