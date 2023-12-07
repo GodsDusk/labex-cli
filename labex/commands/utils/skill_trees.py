@@ -2136,345 +2136,91 @@ class ParseSkills:
 
     def __parse_javascript_skill(self, content):
         skills = []
-        document_group = {
-            "appendChild": "append_child",
-            "classList": "class_list",
-            "createElement": "create_element",
-            "getElementById": "get_element_by_id",
-            "innerText": "inner_text",
-            "querySelector": "query_selector",
-            "querySelectorAll": "query_selector_all",
-            "removeChild": "remove_child",
-        }
-        for slug in document_group:
-            if f"document.{slug}(" in content:
-                skills.append(f"js/{document_group[slug]}")
-        date_method_group = {
-            "getDate": "get_date",
-            "getDay": "get_day",
-            "getFullYear": "get_full_year",
-            "getMonth": "get_month",
-            "getSeconds": "get_seconds",
-            "getTime": "get_time",
-            "getTimezoneOffset": "get_time_zone_offset",
-            "setDate": "set_date",
-            "toISOString": "to_iso_string",
-            "toLocaleDateString": "to_locale_date_string",
-            "toTimeString": "to_time_string",
-        }
-        for slug in date_method_group:
-            if f".{slug}(" in content:
-                skills.append(f"js/{date_method_group[slug]}")
-        object_method_group = {
-            "assign": "obj_assign",
-            "constructor": "obj_constructor",
-            "create": "obj_create",
-            "entries": "obj_entries",
-            "getPrototypeOf": "obj_get_prototype_of",
-            "keys": "obj_keys",
-            "values": "obj_values",
-            "freeze": "freeze",
-            "fromEntries": "from_entries",
-            "hasOwnProperty": "has_own_property",
-            "isFrozen": "is_frozen",
-        }
-        for slug in object_method_group:
-            if f"Object.{slug}(" in content or f".{slug}(" in content:
-                skills.append(f"js/{object_method_group[slug]}")
-        math_method_group = {
-            "PI": "pi",
-            "abs": "abs",
-            "acos": "acos",
-            "ceil": "ceil",
-            "cos": "cos",
-            "floor": "floor",
-            "hypot": "hypot",
-            "log": "log",
-            "log10": "log10",
-            "max": "max",
-            "min": "min",
-            "pow": "pow",
-            "random": "random",
-            "round": "round",
-            "sign": "sign",
-            "sqrt": "sqrt",
-        }
-        for slug in math_method_group:
-            if f"Math.{slug}(" in content:
-                skills.append(f"js/{math_method_group[slug]}")
-        array_method_group = {
-            "concat": "arr_concat",
-            "every": "arr_every",
-            "fill": "arr_fill",
-            "filter": "arr_filter",
-            "find": "arr_find",
-            "findIndex": "arr_find_index",
-            "forEach": "arr_for_each",
-            "from": "arr_from",
-            "includes": "arr_includes",
-            "indexOf": "arr_index_of",
-            "join": "arr_join",
-            "length": "arr_length",
-            "map": "arr_map",
-            "pop": "arr_pop",
-            "push": "arr_push",
-            "reduce": "arr_reduce",
-            "reduceRight": "arr_reduce_right",
-            "reverse": "arr_reverse",
-            "shift": "arr_shift",
-            "slice": "arr_slice",
-            "some": "arr_some",
-            "sort": "arr_sort",
-            "splice": "arr_splice",
-            "toString": "arr_to_string",
-            "unshift": "arr_unshift",
-            "isArray": "is_array",
-        }
-        for slug in array_method_group:
-            if f"Array.{slug}(" in content or f".{slug}(" in content:
-                skills.append(f"js/{array_method_group[slug]}")
-        # js/addition
-        if " + " in content:
-            skills.append("js/addition")
-        # js/conditional_operator
-        if " ? " in content:
-            skills.append("js/conditional_operator")
-        # js/decrement
-        if " -- " in content:
-            skills.append("js/decrement")
-        # js/division
-        if " / " in content:
-            skills.append("js/division")
-        # js/equality
-        if " == " in content:
-            skills.append("js/equality")
-        # js/greater_than
-        if " > " in content:
-            skills.append("js/greater_than")
-        # js/increment
-        if " ++ " in content:
-            skills.append("js/increment")
-        # js/less_than
-        if " < " in content:
-            skills.append("js/less_than")
-        # js/logic
-        if " && " in content or " || " in content:
-            skills.append("js/logic")
-        # js/multiplication
-        if " * " in content:
-            skills.append("js/multiplication")
-        # js/remainder
-        if " % " in content:
-            skills.append("js/remainder")
-        # js/spread_operator
-        if "..." in content:
-            skills.append("js/spread_operator")
-        # js/strict_equality
-        if " === " in content:
-            skills.append("js/strict_equality")
-        # js/subtraction
-        if " - " in content:
-            skills.append("js/subtraction")
-        # js/template_literals
-        if "`" in content:
-            skills.append("js/template_literals")
-        # js/const
-        if "const " in content:
-            skills.append("js/const")
-        # js/instanceof
-        if " instanceof " in content:
-            skills.append("js/instanceof")
-        # js/let
-        if "let " in content:
-            skills.append("js/let")
-        # js/typeof
-        if "typeof " in content:
-            skills.append("js/typeof")
-        # js/num_is_finite
-        if "isFinite(" in content:
-            skills.append("js/num_is_finite")
-        # js/num_is_nan
-        if "isNaN(" in content:
-            skills.append("js/num_is_nan")
-        # js/num_parse_float
-        if "parseFloat(" in content:
-            skills.append("js/num_parse_float")
-        # js/num_parse_int
-        if "parseInt(" in content:
-            skills.append("js/num_parse_int")
-        # js/num_to_locale_string
-        if "toLocaleString(" in content:
-            skills.append("js/num_to_locale_string")
-        # js/to_fixed
-        if "toFixed(" in content:
-            skills.append("js/to_fixed")
-        # js/str_last_index_of
-        if "lastIndexOf(" in content:
-            skills.append("js/str_last_index_of")
-        # js/str_length
-        if ".length" in content:
-            skills.append("js/str_length")
-        # js/str_match
-        if ".match(" in content:
-            skills.append("js/str_match")
-        # js/str_normalize
-        if ".normalize(" in content:
-            skills.append("js/str_normalize")
-        # js/str_repeat
-        if ".repeat(" in content:
-            skills.append("js/str_repeat")
-        # js/str_replace
-        if ".replace(" in content:
-            skills.append("js/str_replace")
-        # js/str_split
-        if ".split(" in content:
-            skills.append("js/str_split")
-        # js/char_code_at
-        if ".charCodeAt(" in content:
-            skills.append("js/char_code_at")
-        # js/from_char_code
-        if "fromCharCode(" in content:
-            skills.append("js/from_char_code")
-        # js/locale_compare
-        if ".localeCompare(" in content:
-            skills.append("js/locale_compare")
-        # js/pad_end
-        if ".padEnd(" in content:
-            skills.append("js/pad_end")
-        # js/pad_start
-        if ".padStart(" in content:
-            skills.append("js/pad_start")
-        # js/starts_with
-        if ".startsWith(" in content:
-            skills.append("js/starts_with")
-        # js/to_lower_case
-        if ".toLowerCase(" in content:
-            skills.append("js/to_lower_case")
-        # js/to_upper_case
-        if ".toUpperCase(" in content:
-            skills.append("js/to_upper_case")
-        # js/array
-        if "[]" in content:
-            skills.append("js/array")
-        # js/blob
-        if "Blob(" in content:
-            skills.append("js/blob")
-        # js/boolean
-        if "Boolean(" in content:
-            skills.append("js/boolean")
-        # js/date
-        if "Date(" in content:
-            skills.append("js/date")
-        # js/function
-        if "function " in content:
-            skills.append("js/function")
-        # js/generator
-        if "function*" in content:
-            skills.append("js/generator")
-        # js/intl_number_format
-        if "Intl.NumberFormat(" in content:
-            skills.append("js/intl_number_format")
-        # js/iterator
-        if "iterator" in content:
-            skills.append("js/iterator")
-        # js/json
-        if "JSON." in content:
-            skills.append("js/json")
-        # js/map
-        if "Map(" in content:
-            skills.append("js/map")
-        # js/math
-        if "Math." in content:
-            skills.append("js/math")
-        # js/object
-        if "Object." in content:
-            skills.append("js/object")
-        # js/promise
-        if "Promise(" in content:
-            skills.append("js/promise")
-        # js/reg_exp
-        if "RegExp(" in content:
-            skills.append("js/reg_exp")
-        # js/set
-        if "Set(" in content:
-            skills.append("js/set")
-        # js/string
-        if "String(" in content:
-            skills.append("js/string")
-        # js/symbol
-        if "Symbol(" in content:
-            skills.append("js/symbol")
-        # js/type_error
-        if "TypeError(" in content:
-            skills.append("js/type_error")
-        # js/url
-        if "URL(" in content:
-            skills.append("js/url")
-        # js/weak_set
-        if "WeakSet(" in content:
-            skills.append("js/weak_set")
-        # js/encode_url_component
-        if "encodeURIComponent(" in content:
-            skills.append("js/encode_url_component")
-        # js/do_while
-        if "do {" in content:
-            skills.append("js/do_while")
-        # js/for
-        if "for (" in content:
-            skills.append("js/for")
-        # js/for_of
-        if "for (" in content and "of " in content:
-            skills.append("js/for_of")
-        # js/for_in
-        if "for (" in content and "in " in content:
-            skills.append("js/for_in")
-        # js/if_else
-        if "if (" in content:
-            skills.append("js/if_else")
-        # js/switch_case
-        if "switch (" in content:
-            skills.append("js/switch_case")
-        # js/try_catch
-        if "try {" in content:
-            skills.append("js/try_catch")
-        # js/while
-        if "while (" in content:
-            skills.append("js/while")
-        # js/set_has
-        if ".has(" in content:
-            skills.append("js/set_has")
-        # js/set_size
-        if ".size" in content:
-            skills.append("js/set_size")
-        # js/func_apply
-        if ".apply(" in content:
-            skills.append("js/func_apply")
-        # js/func_bind
-        if ".bind(" in content:
-            skills.append("js/func_bind")
-        # js/func_call
-        if ".call(" in content:
-            skills.append("js/func_call")
-        # js/add_event_listener
-        if ".addEventListener(" in content:
-            skills.append("js/add_event_listener")
-        # js/clear_timeout
-        if "clearTimeout(" in content:
-            skills.append("js/clear_timeout")
-        # js/onchange
-        if "onchange" in content:
-            skills.append("js/onchange")
-        # js/set_timeout
-        if "setTimeout(" in content:
-            skills.append("js/set_timeout")
-        # js/console
-        if "console." in content:
-            skills.append("js/console")
-        # js/crypto
-        if "crypto." in content:
-            skills.append("js/crypto")
+
+        # Basic Concepts
+        if re.search(r"\bvar\b|\blet\b|\bconst\b", content):
+            skills.append("javascript/variables")
+        if re.search(r"['\"].*['\"]|\b\d+\b|\btrue\b|\bfalse\b|\bnull\b|\bundefined\b|\b\[\]|\b\{\}", content):
+            skills.append("javascript/data_types")
+        if re.search(r"\+|-|\*|\/|%|\+\+|--", content):
+            skills.append("javascript/arith_ops")
+        if re.search(r"==|!=|===|!==|>|<|>=|<=", content):
+            skills.append("javascript/comp_ops")
+        if re.search(r"\b&&\b|\b\|\|\b|\b!\b", content):
+            skills.append("javascript/logic_ops")
+        if re.search(r"\bif\b|\belse\b", content):
+            skills.append("javascript/cond_stmts")
+        if re.search(r"\bswitch\b.*\bcase\b", content, re.DOTALL):
+            skills.append("javascript/switch_stmts")
+        if re.search(r"\bfor\b|\bwhile\b|\bdo\b", content):
+            skills.append("javascript/loops")
+        if re.search(r"\bfunction\b\s+\w+|\bfunction\s*\(", content):
+            skills.append("javascript/functions")
+        if re.search(r"\b\w+\s*\+\s*['\"]|\b\w+\s*\+\=\s*['\"]", content):
+            skills.append("javascript/str_manip")
+        if re.search(r"\b\w+\s*\[\s*\w*\s*\]", content):
+            skills.append("javascript/array_methods")
+        if re.search(r"\b\w+\.\w+\s*=", content):
+            skills.append("javascript/obj_manip")
+
+        # Advanced Concepts
+        if re.search(r"\bclass\b\s+\w+", content):
+            skills.append("javascript/oop")
+        if re.search(r"\bsetTimeout\b|\bsetInterval\b|\bPromise\b|\basync\b|\bawait\b", content):
+            skills.append("javascript/async_prog")
+        if re.search(r"\btry\b|\bcatch\b|\bfinally\b|\bthrow\b", content):
+            skills.append("javascript/error_handle")
+        if re.search(r"function\s*\([^)]*\)\s*{[^}]*}[^)]*\)", content, re.DOTALL):
+            skills.append("javascript/closures")
+        if re.search(r"\bmap\b|\bfilter\b|\breduce\b", content):
+            skills.append("javascript/higher_funcs")
+        if re.search(r"\bprototype\b|\b__proto__\b|\bextends\b", content):
+            skills.append("javascript/proto_inherit")
+        if re.search(r"\{.*\:\s*\w+\s*\}", content):
+            skills.append("javascript/destr_assign")
+        if re.search(r"\.\.\.\w+", content):
+            skills.append("javascript/spread_rest")
+        if re.search(r"`[^`]*\$\{[^}]*\}[^`]*`", content):
+            skills.append("javascript/template_lit")
+        if re.search(r"import\s+.*\s+from\s+|export\s+.*", content):
+            skills.append("javascript/es6")
+
+        # DOM Manipulation
+        if re.search(r"\bdocument\.getElementById\b|\bdocument\.querySelector\b", content):
+            skills.append("javascript/dom_select")
+        if re.search(r"\binnerHTML\b|\btextContent\b|\bcreateElement\b", content):
+            skills.append("javascript/dom_manip")
+        if re.search(r"\baddEventListener\b", content):
+            skills.append("javascript/event_handle")
+        if re.search(r"\bparentNode\b|\bnextSibling\b|\bchildren\b", content):
+            skills.append("javascript/dom_traverse")
+
+        # Tools and Environment
+        if re.search(r"\bconsole\.log\b|\bconsole\.", content):
+            skills.append("javascript/debugging")
+        if re.search(r"\bwindow\b|\bdocument\b|\bnavigator\b|\blocation\b|\bhistory\b", content):
+            skills.append("javascript/bom")
+        if re.search(r"\blocalStorage\b|\bsessionStorage\b", content):
+            skills.append("javascript/web_storage")
+
+        # Networking
+        if re.search(r"\bfetch\b|\bXMLHttpRequest\b", content):
+            skills.append("javascript/http_req")
+        if re.search(r"\bJSON\.parse\b|\bJSON\.stringify\b", content):
+            skills.append("javascript/json")
+        if re.search(r"\bfetch\b.*\bthen\b|\baxios\b", content):
+            skills.append("javascript/api_interact")
+        if re.search(r"\bWebSocket\b", content):
+            skills.append("javascript/websockets")
+
+        # Security
+        if re.search(r"\binnerHTML\b|\bdocument\.createElement\b", content):
+            skills.append("javascript/xss")
+        if re.search(r"\bhttps\b|\bssl\b|\btls\b|\bsecurity\b", content):
+            skills.append("javascript/web_sec")
 
         return list(set(skills))
+
 
     def __parse_react_skill(self, content):
         slugs = {
@@ -3461,7 +3207,7 @@ class ParseSkills:
             return self.__parse_css_skill(content)
         elif language == "jquery":
             return self.__parse_jquery_skill(content)
-        elif language == "javascript" or language == "js":
+        elif language == "javascript":
             return self.__parse_javascript_skill(content)
         elif language == "react":
             return self.__parse_react_skill(content)
