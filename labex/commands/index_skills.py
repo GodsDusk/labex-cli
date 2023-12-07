@@ -1,6 +1,7 @@
 import os
 import json
 from rich import print
+from .utils.feishu_api import Feishu
 from .utils.skill_trees import ParseSkills
 
 
@@ -123,7 +124,9 @@ class RemoveSkills:
     def __init__(self) -> None:
         pass
 
-    def remove_skills(self, dir_path: str, skilltree: str, remove_skill: str) -> None:
+    def remove_all_skills(
+        self, dir_path: str, skilltree: str, remove_skill: str
+    ) -> None:
         for root, dirs, files in os.walk(dir_path):
             for file in files:
                 if file.endswith("index.json"):
@@ -155,6 +158,49 @@ class RemoveSkills:
                                 f"prettier --log-level silent --write {index_path}"
                             )
                             print(f"[green]→ REMOVE SKILLS:[/] {index_path}")
+                    except Exception as e:
+                        print(f"[red]→ ERROR:[/] {index_path}")
+                        print(e)
+
+    def remove_invalid_skills(
+        self, app_id: str, app_secret: str, dir_path: str
+    ) -> None:
+        # 从 skill tree 获取完整的 skill ids
+        feishu = Feishu(app_id, app_secret)
+        app_token = "bascnNz4Nqjqgqm1Nm5AYke6xxb"
+        skills_table_id = "tblV5pGIsGZMxmE9"
+        records = feishu.get_bitable_records(app_token, skills_table_id, params="")
+        skills = [r["fields"]["SKILL_ID"][0]["text"] for r in records]
+        print(f"[green]✔ Get:[/green] {len(skills)} skills in Feishu.")
+        for root, dirs, files in os.walk(dir_path):
+            for file in files:
+                if file.endswith("index.json"):
+                    index_path = os.path.join(root, file)
+                    # read the index.json file
+                    try:
+                        with open(index_path, "r") as f:
+                            data = json.load(f)
+                        steps = data["details"]["steps"]
+                        is_remove = False
+                        remove_skills = []
+                        for step in steps:
+                            step_skills = step.get("skills", [])
+                            for skill in step_skills:
+                                if skill not in skills:
+                                    step_skills.remove(skill)
+                                    remove_skills.append(skill)
+                                    is_remove = True
+                        if is_remove:
+                            # update the index.json file
+                            with open(index_path, "w") as f:
+                                json.dump(data, f, indent=2, ensure_ascii=False)
+                            # run prettier
+                            os.system(
+                                f"prettier --log-level silent --write {index_path}"
+                            )
+                            print(
+                                f"[green]→ REMOVE SKILLS:[/] {index_path} {remove_skills}"
+                            )
                     except Exception as e:
                         print(f"[red]→ ERROR:[/] {index_path}")
                         print(e)

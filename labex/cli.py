@@ -435,11 +435,44 @@ idx.add_command(remove)
     help="delete single skill",
 )
 def skills(path, skilltree, skill):
-    """Add skills to index.json"""
-    RemoveSkills().remove_skills(dir_path=path, skilltree=skilltree, remove_skill=skill)
+    """Remove skills from index.json"""
+    RemoveSkills().remove_all_skills(
+        dir_path=path, skilltree=skilltree, remove_skill=skill
+    )
 
 
 remove.add_command(skills)
+
+
+@click.command(no_args_is_help=True)
+@click.option(
+    "--appid",
+    type=str,
+    required=True,
+    help="Feishu App ID",
+)
+@click.option(
+    "--appsecret",
+    type=str,
+    required=True,
+    help="Feishu App Secret",
+)
+@click.option(
+    "--path",
+    type=str,
+    default="./",
+    show_default=True,
+    help="Directory path",
+    metavar="<path>",
+)
+def invalid(appid, appsecret, path):
+    """Remove all invalid skills"""
+    RemoveSkills().remove_invalid_skills(
+        app_id=appid, app_secret=appsecret, dir_path=path
+    )
+
+
+remove.add_command(invalid)
 
 # =========================
 # SKILL TREE COMMANDS GROUP

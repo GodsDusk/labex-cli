@@ -81,7 +81,6 @@ class CheckIndexNoSkills:
                         i += 1
         print(f"Total files: {i}")
 
-
 class CheckLabDictinary:
     def __init__(self) -> None:
         pass
