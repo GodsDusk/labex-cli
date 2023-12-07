@@ -2104,35 +2104,69 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_jquery_skill(self, content):
-        slugs = {
-            "children": "children",
-            "parent": "parent",
-            "siblings": "siblings",
-            "append": "append",
-            "addClass": "add_class",
-            "remove": "remove",
-            "removeClass": "remove_class",
-            "attr": "attr",
-            "html": "html",
-            "text": "text",
-            "css": "css",
-            "show": "show",
-            "fadeOut": "fade_out",
-            "hide": "hide",
-            "bind": "bind",
-            "on": "on",
-            "appendTo": "append_to",
-            "mouseover": "mouseover",
-            "toggle": "toggle",
-            "fadeIn": "fade_in",
-        }
+        skills = set()  # 使用集合以确保唯一性
 
-        skills = []
-        for slug in slugs:
-            if f".{slug}(" in content:
-                skills.append(f"jquery/{slugs[slug]}")
+        # 基础理解（Basic Understanding）
+        if re.search(r"\.jQuery\(\s*'\w+'\s*\)", content):
+            skills.add("jquery/syntax")
 
-        return list(set(skills))
+        if re.search(r"\$\(\s*'\w+'\s*\)", content):
+            skills.add("jquery/selectors")
+
+        if re.search(r"\.html\(\s*'\w+'\s*\)", content):
+            skills.add("jquery/dom_interaction")
+
+        # 事件处理（Event Handling）
+        if re.search(r"\.click\(", content):
+            skills.add("jquery/event_methods")
+
+        if re.search(r"\.on\(\s*'click'", content):
+            skills.add("jquery/event_delegation")
+
+        if re.search(r"\.fadeIn\(", content):
+            skills.add("jquery/event_effects")
+
+        # DOM 操作（DOM Manipulation）
+        if re.search(r"\.find\(", content):
+            skills.add("jquery/dom_traversal")
+
+        if re.search(r"\.text\(\s*'\w+'\s*\)", content):
+            skills.add("jquery/content_manipulation")
+
+        if re.search(r"\.append\(", content):
+            skills.add("jquery/element_management")
+
+        # 数据处理（Data Handling）
+        if re.search(r"\.ajax\(", content):
+            skills.add("jquery/ajax")
+
+        if re.search(r"\.parseJSON\(", content):
+            skills.add("jquery/json")
+
+        if re.search(r"\.serialize\(", content):
+            skills.add("jquery/form_serialization")
+
+        # 高级技术（Advanced Techniques）
+        if re.search(r"\.end\(\)", content):
+            skills.add("jquery/chaining")
+
+        if re.search(r"\.plugin\(", content):
+            skills.add("jquery/plugins")
+
+        if re.search(r"\.optimize\(", content):
+            skills.add("jquery/performance")
+
+        # 用户界面交互（User Interface Interaction）
+        if re.search(r"\.show\(", content):
+            skills.add("jquery/ui_effects")
+
+        if re.search(r"\.datepicker\(", content):
+            skills.add("jquery/widgets")
+
+        if re.search(r"\.responsive\(", content):
+            skills.add("jquery/responsive_design")
+
+        return list(skills)
 
     def __parse_javascript_skill(self, content):
         skills = []
@@ -2140,7 +2174,10 @@ class ParseSkills:
         # Basic Concepts
         if re.search(r"\bvar\b|\blet\b|\bconst\b", content):
             skills.append("javascript/variables")
-        if re.search(r"['\"].*['\"]|\b\d+\b|\btrue\b|\bfalse\b|\bnull\b|\bundefined\b|\b\[\]|\b\{\}", content):
+        if re.search(
+            r"['\"].*['\"]|\b\d+\b|\btrue\b|\bfalse\b|\bnull\b|\bundefined\b|\b\[\]|\b\{\}",
+            content,
+        ):
             skills.append("javascript/data_types")
         if re.search(r"\+|-|\*|\/|%|\+\+|--", content):
             skills.append("javascript/arith_ops")
@@ -2166,7 +2203,9 @@ class ParseSkills:
         # Advanced Concepts
         if re.search(r"\bclass\b\s+\w+", content):
             skills.append("javascript/oop")
-        if re.search(r"\bsetTimeout\b|\bsetInterval\b|\bPromise\b|\basync\b|\bawait\b", content):
+        if re.search(
+            r"\bsetTimeout\b|\bsetInterval\b|\bPromise\b|\basync\b|\bawait\b", content
+        ):
             skills.append("javascript/async_prog")
         if re.search(r"\btry\b|\bcatch\b|\bfinally\b|\bthrow\b", content):
             skills.append("javascript/error_handle")
@@ -2186,7 +2225,9 @@ class ParseSkills:
             skills.append("javascript/es6")
 
         # DOM Manipulation
-        if re.search(r"\bdocument\.getElementById\b|\bdocument\.querySelector\b", content):
+        if re.search(
+            r"\bdocument\.getElementById\b|\bdocument\.querySelector\b", content
+        ):
             skills.append("javascript/dom_select")
         if re.search(r"\binnerHTML\b|\btextContent\b|\bcreateElement\b", content):
             skills.append("javascript/dom_manip")
@@ -2198,7 +2239,9 @@ class ParseSkills:
         # Tools and Environment
         if re.search(r"\bconsole\.log\b|\bconsole\.", content):
             skills.append("javascript/debugging")
-        if re.search(r"\bwindow\b|\bdocument\b|\bnavigator\b|\blocation\b|\bhistory\b", content):
+        if re.search(
+            r"\bwindow\b|\bdocument\b|\bnavigator\b|\blocation\b|\bhistory\b", content
+        ):
             skills.append("javascript/bom")
         if re.search(r"\blocalStorage\b|\bsessionStorage\b", content):
             skills.append("javascript/web_storage")
@@ -2220,7 +2263,6 @@ class ParseSkills:
             skills.append("javascript/web_sec")
 
         return list(set(skills))
-
 
     def __parse_react_skill(self, content):
         slugs = {
