@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="labex",
-    version="0.0.1",
+    version="0.0.2",
     description="LabEx CLI",
     author="huhuhang",
     author_email="huhuhang@gmail.com",
@@ -18,7 +18,7 @@ setup(
         "jsonschema",
         "pandas",
         "retrying",
-        "openai",
+        "openai >= 1.3",
         "titlecase",
         "langchain",
         "tiktoken",

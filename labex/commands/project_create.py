@@ -426,6 +426,9 @@ class CreateProject:
             if "Opencv" in skills:
                 skills.remove("Opencv")
                 skills.append("OpenCV")
+            if "Numpy" in skills:
+                skills.remove("Numpy")
+                skills.append("NumPy")
             course_config = {
                 "name": title,
                 "description": description,

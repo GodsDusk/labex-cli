@@ -512,7 +512,7 @@ skt.add_command(export)
 @click.command()
 def notify():
     """Notify SkillTree"""
-    SkillTreeNotify().labs_from_skilltrees()
+    SkillTreeNotify().main()
 
 
 skt.add_command(notify)

@@ -1,19 +1,23 @@
 import os
 import json
 import openai
+from openai import AzureOpenAI
 import requests
 
 
 class ChatGPT:
-    def __init__(self, engine: str = "gpt-35-turbo") -> None:
+    def __init__(self, model: str = "gpt-35-turbo") -> None:
         # openai
-        self.openai_type = "azure"
-        self.openai_key = os.getenv("AZURE_OPENAI_API_KEY")
-        self.openai_base = os.getenv("AZURE_OPENAI_API_BASE")
-        self.deploy_name = os.getenv("AZURE_DEPLOYMENT_NAME")
+        self.model = model
+        self.resource_name = os.getenv("AZURE_OPENAI_RESOURCE_NAME")
+        self.api_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.cf_ai_gateway = os.getenv("CLOUDFLARE_AI_GATEWAY")
-        self.openai_version = "2023-07-01-preview"
-        self.engine = engine
+        self.api_version = "2023-07-01-preview"
+        self.client = AzureOpenAI(
+            api_key=self.api_key,
+            api_version=self.api_version,
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        )
 
     def azure_open_ai(self, system_prompts: str, user_prompts: str) -> str:
         """ChatGPT API
@@ -25,12 +29,8 @@ class ChatGPT:
             str: response
         """
         if self.cf_ai_gateway is None:
-            openai.api_type = self.openai_type
-            openai.api_key = self.openai_key
-            openai.api_base = self.openai_base
-            openai.api_version = self.openai_version
-            response = openai.ChatCompletion.create(
-                engine=self.engine,
+            completions = self.client.chat.completions.create(
+                model=self.model,
                 messages=[
                     {
                         "role": "system",
@@ -39,13 +39,14 @@ class ChatGPT:
                     {"role": "user", "content": user_prompts},
                 ],
             )
+            response = json.loads(completions.model_dump_json())
         else:
-            endpoint_url = f"{self.cf_ai_gateway}/{self.deploy_name}/{self.engine}/chat/completions?api-version={self.openai_version}"
+            endpoint_url = f"{self.cf_ai_gateway}/{self.resource_name}/{self.model}/chat/completions?api-version={self.api_version}"
             response = requests.post(
                 url=endpoint_url,
                 headers={
                     "Content-Type": "application/json",
-                    "Api-Key": self.openai_key,
+                    "Api-Key": self.api_key,
                 },
                 data=json.dumps(
                     {
@@ -80,19 +81,16 @@ class ChatGPT:
         functions = [
             function_json,
         ]
-        openai.api_type = self.openai_type
-        openai.api_key = self.openai_key
-        openai.api_base = self.openai_base
-        openai.api_version = self.openai_version
-        response = openai.ChatCompletion.create(
-            engine=self.engine,
+        response = self.client.chat.completions.create(
+            model=self.model,
             messages=messages,
             functions=functions,
-            function_call="auto",  # auto is default, but we'll be explicit
+            function_call="auto",
         )
-        response_message = response["choices"][0]["message"]
-        if response_message.get("function_call"):
-            function_args = json.loads(response_message["function_call"]["arguments"])
+        function_args = json.loads(
+            response.choices[0].message.model_dump_json(indent=2)
+        )
+        if function_args.get("function_call"):
             return function_args
         else:
             return None

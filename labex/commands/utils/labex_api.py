@@ -1,5 +1,6 @@
 import json
 import requests
+import urllib.parse
 from rich import print
 from retrying import retry
 from .auth import LabExLogin
@@ -97,6 +98,20 @@ class UserData:
         payloads = {"lab_paths": labs}
         return HTTP(url).post_data(json.dumps(payloads))
 
+    def get_skilltree_courses(self, tags: str) -> list:
+        """Get skilltree courses
+
+        Args:
+            tags (str): Python, Linux, etc.
+
+        Returns:
+            list: _description_
+        """
+        params = {"tags": tags}
+        tags_params = urllib.parse.urlencode(params, doseq=True)
+        url = f"{self.base_url}/courses?{tags_params}"
+        return HTTP(url).get_data()["courses"]
+
 
 class AdminData:
     """Admin Data"""
@@ -105,11 +120,7 @@ class AdminData:
         self.base_url = "https://labex.io/api/v2/admin"
 
     def get_skilltree_notify(self) -> list:
-        url = f"{self.base_url}/skilltree/notify"
-        return HTTP(url).get_data()
-
-    def get_skilltree_notify_by_id(self, _id: str) -> list:
-        url = f"{self.base_url}/skilltree/notify/{_id}"
+        url = f"{self.base_url}/skilltree_notify/objects"
         return HTTP(url).get_data()
 
     def get_lab_objects(self, params: str) -> list:
