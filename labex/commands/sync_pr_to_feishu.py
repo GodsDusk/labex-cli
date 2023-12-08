@@ -300,7 +300,7 @@ class SyncPRToFeishu:
                     step_skills = step.get("skills")
                     if step_skills != None:
                         lab_skills.extend(step_skills)
-                lab_skills = list(set(lab_skills))
+                lab_skills = sorted(list(set(lab_skills)))
                 lab_imageid = index_json.get("backend").get("imageid")
                 lab_info_comment = f"### 🔖 Lab information has been updated:\n\n- **Title**: `{lab_title}`\n- **Description**: `{lab_description}`\n- **Lab Type**: `{lab_type}`\n- **Fee Type**: `{lab_fee_type}`\n- **Steps**: `{len(lab_steps)}`\n- **Image ID**: `{lab_imageid}`\n- **Skills**: `{'`, `'.join(lab_skills)}`\n- **Lab Path**: `{lab_path}`"
                 if lab_info_comment in pr_comments:
