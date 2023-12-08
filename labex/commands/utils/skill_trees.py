@@ -2264,32 +2264,116 @@ class ParseSkills:
 
         return list(set(skills))
 
+
     def __parse_react_skill(self, content):
-        slugs = {
-            "useCallback": "use_callback",
-            "useContext": "use_context",
-            "useEffect": "use_effect",
-            "useForm": "use_form",
-            "useLayoutEffect": "use_layout_effect",
-            "useLocation": "use_location",
-            "useMemo": "use_memo",
-            "useParams": "use_params",
-            "useReducer": "use_reducer",
-            "useRef": "use_ref",
-            "useState": "use_state",
-            "createPortal": "create_portal",
-            "createRoot": "create_root",
-            "render": "render",
-            "unmountComponentAtNode": "unmount_component_at_node",
-            "Component": "component",
-            "Link": "link",
-            "Route": "route",
-        }
         skills = []
-        for slug in slugs:
-            if f"React.{slug}(" in content:
-                skills.append(f"react/{slugs[slug]}")
+
+        # JSX
+        if re.search(r'(<\w+.*?>)|(<\/\w+>)', content):
+            skills.append("react/jsx")
+
+        # Components and Props
+        if re.search(r'class\s+\w+\s+extends\s+React\.Component', content) or re.search(r'function\s+\w+\s*\(', content):
+            skills.append("react/components_props")
+
+        # State and Lifecycle
+        if re.search(r'this\.state\b|\bsetState\(', content):
+            skills.append("react/state_lifecycle")
+
+        # Handling Events
+        if re.search(r'on[A-Z]\w+\s*=', content):
+            skills.append("react/event_handling")
+
+        # Conditional Rendering
+        if re.search(r'\{.*\?.*\:.*\}', content):
+            skills.append("react/conditional_render")
+
+        # Lists and Keys
+        if re.search(r'\.map\(', content) and 'key=' in content:
+            skills.append("react/list_keys")
+
+        # Context API
+        if re.search(r'React\.createContext', content):
+            skills.append("react/context_api")
+
+        # Higher-Order Components
+        # Note: HOCs detection would require analyzing the pattern of function returning a component or wrapping components.
+
+        # React Hooks
+        if re.search(r'\buse[A-Z]\w+\b', content):
+            skills.append("react/hooks")
+
+        # Code Splitting
+        if re.search(r'\bReact\.lazy\b', content) or re.search(r'\bimport\(\)', content):
+            skills.append("react/code_split")
+
+        # Portals
+        if re.search(r'React\.createPortal', content):
+            skills.append("react/portals")
+
+        # Error Boundaries
+        if re.search(r'componentDidCatch', content) or re.search(r'getDerivedStateFromError', content):
+            skills.append("react/error_boundary")
+
+        # Using useState and useReducer
+        if re.search(r'\buseState\b|\buseReducer\b', content):
+            skills.append("react/use_state_reducer")
+
+        # Managing Global State
+        # Note: Global state management would typically involve detecting context or external state management libraries.
+
+        # Using Context for State
+        if re.search(r'\buseContext\b', content):
+            skills.append("react/context_state")
+
+        # React Router Basics, Dynamic Routing, Nested Routes
+        if re.search(r'from\s+\'react-router-dom\'', content) or re.search(r'from\s+"react-router-dom"', content):
+            skills.append("react/router_basic")
+            # Further analysis can be required to distinguish between basic, dynamic, and nested routing.
+
+        # CSS in React
+        if re.search(r'style\s*=\s*\{', content):
+            skills.append("react/css_in_react")
+
+        # Styled Components
+        if re.search(r'styled\.\w+\s*\`', content):
+            skills.append("react/styled_comp")
+
+        # CSS Modules
+        if re.search(r'import\s.*\sfrom\s.*\.module\.css', content):
+            skills.append("react/css_modules")
+
+        # Memoization with useMemo
+        if re.search(r'\buseMemo\b', content):
+            skills.append("react/memoization")
+
+        # Virtual DOM and Reconciliation
+        # Note: This is more of a conceptual understanding and might not be directly detectable from code.
+
+        # Lazy Loading Components
+        if re.search(r'React\.lazy', content):
+            skills.append("react/lazy_loading")
+
+        # Unit Testing with Jest
+        # Note: This would typically involve checking for Jest configurations or import statements.
+
+        # Testing Components with React Testing Library
+        # Note: Look for imports from '@testing-library/react'.
+
+        # End-to-End Testing Strategies
+        # Note: Detection would involve recognizing E2E testing frameworks like Cypress.
+
+        # Using Create React App
+        # Note: Typically involves inspecting build scripts or project configuration.
+
+        # Understanding Webpack and Babel
+        # Note: This would typically involve checking configuration files or specific Webpack/Babel usage in the project.
+
+        # Navigating the React DevTools
+        # Note: This is more of a usage skill and not directly detectable from code.
+
         return list(set(skills))
+
 
     def __parse_java_skill(self, content):
         skills = []
