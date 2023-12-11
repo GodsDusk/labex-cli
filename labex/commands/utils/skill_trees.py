@@ -3312,23 +3312,35 @@ class ParseSkills:
         if language == "python":
             return self.__parse_python_skill(content)
         elif language == "linux":
-            return self.__parse_linux_skill(content)
+            skills_a = self.__parse_linux_skill(content)
+            skills_b = self.__parse_shell_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "tkinter":
-            return self.__parse_tkinter_skill(content)
+            skills_a = self.__parse_tkinter_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "sklearn":
-            return self.__parse_sklearn_skill(content)
+            skills_a = self.__parse_sklearn_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "shell":
             return self.__parse_shell_skill(content)
         elif language == "rust":
             return self.__parse_rust_skill(content)
         elif language == "pygame":
-            return self.__parse_pygame_skill(content)
+            skills_a = self.__parse_pygame_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "django":
-            return self.__parse_django_skill(content)
+            skills_a = self.__parse_django_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "go":
             return self.__parse_go_skill(content)
         elif language == "flask":
-            return self.__parse_flask_skill(content)
+            skills_a = self.__parse_flask_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "cpp":
             return self.__parse_cpp_skill(content)
         elif language == "c":
@@ -3338,20 +3350,32 @@ class ParseSkills:
         elif language == "css":
             return self.__parse_css_skill(content)
         elif language == "jquery":
-            return self.__parse_jquery_skill(content)
+            skills_a = self.__parse_jquery_skill(content)
+            skills_b = self.__parse_javascript_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "javascript":
             return self.__parse_javascript_skill(content)
         elif language == "react":
-            return self.__parse_react_skill(content)
+            skills_a = self.__parse_react_skill(content)
+            skills_b = self.__parse_javascript_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "java":
             return self.__parse_java_skill(content)
         elif language == "mysql":
-            return self.__parse_mysql_skill(content)
+            skills_a = self.__parse_mysql_skill(content)
+            skills_b = self.__parse_sql_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "pandas":
-            return self.__parse_pandas_skill(content)
+            skills_a = self.__parse_pandas_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "matplotlib":
-            return self.__parse_matplotlib_skill(content)
+            skills_a = self.__parse_matplotlib_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "numpy":
-            return self.__parse_numpy_skill(content)
+            skills_a = self.__parse_numpy_skill(content)
+            skills_b = self.__parse_python_skill(content)
+            return list(set(skills_a + skills_b))
         elif language == "sql":
             return self.__parse_sql_skill(content)
