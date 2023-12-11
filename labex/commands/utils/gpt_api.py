@@ -18,6 +18,7 @@ class ChatGPT:
             api_version=self.api_version,
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
+        print(f"[green]✔ CONNECT:[/green] OpenAI API")
 
     def azure_open_ai(self, system_prompts: str, user_prompts: str) -> str:
         """ChatGPT API

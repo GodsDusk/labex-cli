@@ -8,6 +8,7 @@ class GitHub:
 
     def __init__(self, token: str) -> None:
         self.token = token
+        print(f"[green]✔ CONNECT:[/green] GitHub API")
 
     @retry(stop_max_attempt_number=2)
     def get_issue(self, repo_name: str, issue_number: int) -> str:

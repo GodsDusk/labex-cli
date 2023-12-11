@@ -11,6 +11,7 @@ class HTTP:
         self.url = url
         self._timeout = 15
         self._headers = LabExLogin().read_account_cookies()
+        print(f"[green]✔ CONNECT:[/green] LabEx API")
 
     def __status_code(self, r):
         if r.status_code == 200:
