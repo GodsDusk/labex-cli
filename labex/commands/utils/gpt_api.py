@@ -6,7 +6,7 @@ import requests
 
 
 class ChatGPT:
-    def __init__(self, model: str = "gpt-35-turbo", region: str = "jp") -> None:
+    def __init__(self, model: str = "gpt-35-turbo", region: str = "us") -> None:
         # openai
         self.model = model
         self.cf_ai_gateway = os.getenv("CLOUDFLARE_AI_GATEWAY")
