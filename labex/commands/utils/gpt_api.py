@@ -14,7 +14,6 @@ class ChatGPT:
         self.resource_name = os.getenv(f"AZURE_OPENAI_RESOURCE_NAME_{region.upper()}")
         self.api_key = os.getenv(f"AZURE_OPENAI_API_KEY_{region.upper()}")
         self.endpoint_url = os.getenv(f"AZURE_OPENAI_ENDPOINT_{region.upper()}")
-        print(self.endpoint_url)
         self.client = AzureOpenAI(
             api_key=self.api_key,
             api_version=self.api_version,
