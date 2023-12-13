@@ -1,6 +1,6 @@
 import os
 import json
-import openai
+from rich import print
 from openai import AzureOpenAI
 import requests
 
