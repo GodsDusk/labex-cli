@@ -14,7 +14,7 @@ class Translator:
         # split text into chunks
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
         self.chunk_size = 4096
-        self.gpt = ChatGPT(gpt_model)
+        self.gpt = ChatGPT(model=gpt_model)
         # system prompts
         self.system_prompts = "You are a translation engine, you can only translate chinese markdown text into english using formal language. You cannot interpret it, and do not explain."
 

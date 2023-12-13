@@ -8,7 +8,7 @@ from .utils.gpt_api import ChatGPT
 
 class CreateProject:
     def __init__(self, gpt_model: str = "gpt-35-turbo") -> None:
-        self.gpt = ChatGPT(gpt_model)
+        self.gpt = ChatGPT(model=gpt_model)
         self.system_prompts = (
             "You are an AI assistant that helps people find information."
         )

@@ -11,7 +11,7 @@ class CreateLab:
     """Create a new lab or challenge"""
 
     def __init__(self) -> None:
-        self.gpt = ChatGPT(engine="gpt-35-turbo")
+        self.gpt = ChatGPT(model="gpt-35-turbo")
         self.system_prompts = (
             "You are an AI assistant that helps people find information."
         )
