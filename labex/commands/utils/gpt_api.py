@@ -6,19 +6,21 @@ import requests
 
 
 class ChatGPT:
-    def __init__(self, model: str = "gpt-35-turbo") -> None:
+    def __init__(self, model: str = "gpt-35-turbo", region: str = "jp") -> None:
         # openai
         self.model = model
-        self.resource_name = os.getenv("AZURE_OPENAI_RESOURCE_NAME")
-        self.api_key = os.getenv("AZURE_OPENAI_API_KEY")
         self.cf_ai_gateway = os.getenv("CLOUDFLARE_AI_GATEWAY")
-        self.api_version = "2023-07-01-preview"
+        self.api_version = os.getenv(f"AZURE_OPENAI_API_VERSION")
+        self.resource_name = os.getenv(f"AZURE_OPENAI_RESOURCE_NAME_{region.upper()}")
+        self.api_key = os.getenv(f"AZURE_OPENAI_API_KEY_{region.upper()}")
+        self.endpoint_url = os.getenv(f"AZURE_OPENAI_ENDPOINT_{region.upper()}")
+        print(self.endpoint_url)
         self.client = AzureOpenAI(
             api_key=self.api_key,
             api_version=self.api_version,
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            azure_endpoint=self.endpoint_url,
         )
-        print(f"[green]✔ CONNECT:[/green] OpenAI API")
+        print(f"[green]✔ CONNECT:[/green] OpenAI {region.upper()} ({self.model})")
 
     def azure_open_ai(self, system_prompts: str, user_prompts: str) -> str:
         """ChatGPT API
