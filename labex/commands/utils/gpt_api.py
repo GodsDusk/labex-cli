@@ -19,7 +19,7 @@ class ChatGPT:
             api_version=self.api_version,
             azure_endpoint=self.endpoint_url,
         )
-        print(f"[green]✔ CONNECT:[/green] OpenAI {region.upper()} ({self.model})")
+        print(f"[green]✔ CONNECT[/green]: OpenAI {region.upper()} ({self.model})")
 
     def azure_open_ai(
         self, system_prompts: str, user_prompts: str, use_cf: bool = True

@@ -32,7 +32,7 @@ class SyncIssuesToFeishu:
         skills_dicts = {
             r["fields"]["SKILL_ID"][0]["text"]: r["record_id"] for r in skills
         }
-        print(f"[green]✔ Found:[/green] {len(skills_dicts)} skills in Feishu.")
+        print(f"[green]✔ Found[/green]: {len(skills_dicts)} skills in Feishu.")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
@@ -43,7 +43,7 @@ class SyncIssuesToFeishu:
         records_dicts_fields = {r["fields"]["ISSUE_NUM"]: r["fields"] for r in records}
         # Get all issues from github
         issues_list = self.github.get_issues_list(repo_name)
-        print(f"[green]✔ Found:[/green] {len(issues_list)} issues in GitHub.")
+        print(f"[green]✔ Found[/green]: {len(issues_list)} issues in GitHub.")
         # Feishu 未关闭的 Issue
         feishu_not_closed_issue_nums = [
             str(r["fields"]["ISSUE_NUM"])
@@ -52,7 +52,7 @@ class SyncIssuesToFeishu:
             and r["fields"]["REPO_NAME"] == repo_name
         ]
         print(
-            f"[green]✔ Found:[/green] {len(feishu_not_closed_issue_nums)} OPEN ISSUE in Feishu."
+            f"[green]✔ Found[/green]: {len(feishu_not_closed_issue_nums)} OPEN ISSUE in Feishu."
         )
         # 忽略已经关闭的 ISSUE
         issues_list = [
@@ -63,7 +63,7 @@ class SyncIssuesToFeishu:
         ]
         # 忽略 locked 的 issue
         issues_list = [issue for issue in issues_list if issue["locked"] == False]
-        print(f"[green]✔ Processing:[/green] {len(issues_list)} OPEN issue...")
+        print(f"[green]✔ Processing[/green]: {len(issues_list)} OPEN issue...")
         for issue in issues_list:
             try:
                 issue_title = issue["title"]
@@ -144,18 +144,18 @@ class SyncIssuesToFeishu:
                             payloads,
                         )
                         print(
-                            f"[green]↑ UPDATED:[/green] {issue_title} {r['msg'].upper()}"
+                            f"[green]↑ UPDATED[/green]: {issue_title} {r['msg'].upper()}"
                         )
                     else:
                         print(
-                            f"[yellow]➜ SKIPPED:[/yellow] {issue_title}'s state not changed."
+                            f"[yellow]➜ SKIPPED[/yellow]: {issue_title}'s state not changed."
                         )
                 else:
                     # Add record
                     r = self.feishu.add_bitable_record(
                         self.app_token, self.table_id, payloads
                     )
-                    print(f"[green]↑ ADDED:[/green] {issue_title} {r['msg'].upper()}")
+                    print(f"[green]↑ ADDED[/green]: {issue_title} {r['msg'].upper()}")
 
             except Exception as e:
                 print(f"Exception: {e}")

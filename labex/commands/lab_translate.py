@@ -37,7 +37,7 @@ class Translator:
             chunks: chunks
         """
         tokens = self.tokenizer.encode(text, disallowed_special=())
-        print(f"[yellow]➜ TOKENS:[/yellow] {len(tokens)}")
+        print(f"[yellow]➜ TOKENS[/yellow]: {len(tokens)}")
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunk_size,
             chunk_overlap=5,
@@ -57,8 +57,8 @@ class Translator:
         """
         chunks = self.__text_splitter(text)
         tokens = self.__tiktoken_len(text)
-        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, {self.__token_price(tokens)} USD")
-        print(f"[yellow]➜ CHUNKS:[/yellow] {len(chunks)}")
+        print(f"[yellow]➜ TOKENS[/yellow]: {tokens}, {self.__token_price(tokens)} USD")
+        print(f"[yellow]➜ CHUNKS[/yellow]: {len(chunks)}")
         text_translated = ""
         text_tokens = 0
         if click.confirm("Start translating?"):
@@ -114,7 +114,7 @@ class Translator:
         Returns:
             str: translated text
         """
-        print(f"[yellow]➜ FILE:[/yellow] {file_path}")
+        print(f"[yellow]➜ FILE[/yellow]: {file_path}")
         # read text
         with open(file_path, "r", encoding="utf-8") as f:
             text = f.read()
@@ -127,7 +127,7 @@ class Translator:
         with open(file_path_translated, "w", encoding="utf-8") as f:
             f.write(text_translated)
         print(
-            f"[green]✔ DONE:[/green] {file_path_translated} (tokens: {text_tokens}, {self.__token_price(text_tokens)} USD)"
+            f"[green]✔ DONE[/green]: {file_path_translated} (tokens: {text_tokens}, {self.__token_price(text_tokens)} USD)"
         )
 
     def translate_lab(self, lab_path: str) -> str:
@@ -139,25 +139,25 @@ class Translator:
         Returns:
             str: translated text
         """
-        print(f"[yellow]➜ FOLDER:[/yellow] {lab_path}")
+        print(f"[yellow]➜ FOLDER[/yellow]: {lab_path}")
         # search index.json
         for root, dirs, files in os.walk(lab_path):
             for file in files:
                 if file == "index.json":
                     index_path = os.path.join(root, file)
         if index_path is None:
-            print("[red]✗ ERROR:[/red] index.json not found.")
+            print("[red]✗ ERROR[/red]: index.json not found.")
             exit(1)
-        print(f"[yellow]➜ INDEX:[/yellow] {index_path}")
+        print(f"[yellow]➜ INDEX[/yellow]: {index_path}")
         # read index.json
         with open(index_path, "r", encoding="utf-8") as f:
             index = json.load(f)
         # translate index.json
         title = index["title"]
-        print(f"[yellow]➜ TITLE:[/yellow] {title}")
+        print(f"[yellow]➜ TITLE[/yellow]: {title}")
         # translate steps
         steps = index["details"]["steps"]
-        print(f"[yellow]➜ STEPS:[/yellow] {len(steps)}")
+        print(f"[yellow]➜ STEPS[/yellow]: {len(steps)}")
         if not click.confirm("Start translating?"):
             return
         all_tokens = 0
@@ -214,7 +214,7 @@ class Translator:
         # translate intro
         intro = index["details"]["intro"]
         intro_text_path = os.path.join(lab_path, intro["text"])
-        print(f"[yellow]➜ INTRO:[/yellow] {intro_text_path}")
+        print(f"[yellow]➜ INTRO[/yellow]: {intro_text_path}")
         with open(intro_text_path, "r", encoding="utf-8") as f:
             intro_text = f.read()
         if self.__in_chinese(intro_text):
@@ -241,7 +241,7 @@ class Translator:
         # translate finish
         finish = index["details"]["finish"]
         finish_text_path = os.path.join(lab_path, finish["text"])
-        print(f"[yellow]➜ FINISH:[/yellow] {finish_text_path}")
+        print(f"[yellow]➜ FINISH[/yellow]: {finish_text_path}")
         with open(finish_text_path, "r", encoding="utf-8") as f:
             finish_text = f.read()
         if self.__in_chinese(finish_text):
@@ -260,7 +260,7 @@ class Translator:
         with open(index_path, "w", encoding="utf-8") as f:
             json.dump(index, f, indent=2, ensure_ascii=False)
         print(
-            f"[green]✔ DONE:[/green] {index_path} (tokens: {all_tokens}, {self.__token_price(all_tokens)} USD)"
+            f"[green]✔ DONE[/green]: {index_path} (tokens: {all_tokens}, {self.__token_price(all_tokens)} USD)"
         )
         # rename lab folder
         if not click.confirm("Rename lab folder?"):
@@ -271,7 +271,7 @@ class Translator:
             lab_name = lab_path
         lab_name_en = f"{index['type']}-{self.__title_slugify(title)}"
         os.rename(lab_name, lab_name_en)
-        print(f"[green]✔ DONE:[/green] {lab_name} → {lab_name_en}")
+        print(f"[green]✔ DONE[/green]: {lab_name} → {lab_name_en}")
         # run prettier
         os.system(f"prettier --log-level silent --write {lab_name_en}")
         print(f"[green]✔ prettier done![/green]")
@@ -325,7 +325,7 @@ class Translator:
             ipynb_file (str): ipynb file
         """
         tokens = self.__count_ipynb_tokens(ipynb_file)
-        print(f"[yellow]➜ TOKENS:[/yellow] {tokens}, {self.__token_price(tokens)} USD")
+        print(f"[yellow]➜ TOKENS[/yellow]: {tokens}, {self.__token_price(tokens)} USD")
         if click.confirm(f"Translate {ipynb_file}?"):
             file_name = os.path.basename(ipynb_file)
             ipynb = self.__parse_ipynb(ipynb_file)
@@ -339,7 +339,7 @@ class Translator:
                     for source in cell_source:
                         if "base64" in source or len(source) > 4096:
                             print(
-                                f"[yellow]→ SKIP:[/yellow] source too long or base64."
+                                f"[yellow]→ SKIP[/yellow]: source too long or base64."
                             )
                             continue
                         if self.__in_chinese(source):
@@ -355,5 +355,5 @@ class Translator:
             with open(output_file, "w") as f:
                 json.dump(ipynb, f, indent=2, ensure_ascii=False)
             print(
-                f"[green]✔ DONE:[/green] {output_file} (tokens: {all_tokens}, {self.__token_price(all_tokens)} USD)"
+                f"[green]✔ DONE[/green]: {output_file} (tokens: {all_tokens}, {self.__token_price(all_tokens)} USD)"
             )

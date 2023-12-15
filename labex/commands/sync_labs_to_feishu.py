@@ -145,17 +145,17 @@ class SyncLabsToFeishu:
             full (bool): synchronize all labs without checking for changes in record fields.
             dirpath (str, optional): Defaults to ".".
         """
-        print(f"[yellow]➜ TASK:[/yellow] Syncing {self.repo} to Feishu...")
-        print(f"[yellow]➜ MODE:[/yellow] Skip: {skip}, Full: {full}")
+        print(f"[yellow]➜ TASK[/yellow]: Syncing {self.repo} to Feishu...")
+        print(f"[yellow]➜ MODE[/yellow]: Skip: {skip}, Full: {full}")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.lab_table_id, params=""
         )
-        print(f"[green]✔ Found:[/green] {len(records)} labs in Feishu.")
+        print(f"[green]✔ Found[/green]: {len(records)} labs in Feishu.")
         # Drop Duplicate records
         records = list({v["fields"]["PATH"]: v for v in records}.values())
         print(
-            f"[green]✔ Found:[/green] {len(records)} labs in Feishu after deduplication."
+            f"[green]✔ Found[/green]: {len(records)} labs in Feishu after deduplication."
         )
         # Make a full dict of path and record_id and repo_name
         path_dicts = {
@@ -175,7 +175,7 @@ class SyncLabsToFeishu:
             r["fields"]["SKILL_ID"][0]["text"]: r["record_id"] for r in skills
         }
         print(
-            f"[green]✔ Found:[/green] {len(skills_dicts)} skills in Feishu, start syncing..."
+            f"[green]✔ Found[/green]: {len(skills_dicts)} skills in Feishu, start syncing..."
         )
         # Walk through all index.json files
         # If path in path_dicts, update record
@@ -204,7 +204,7 @@ class SyncLabsToFeishu:
                         if skip:
                             # Skip record
                             print(
-                                f"[yellow]➜ SKIPPED:[/yellow] {data_path} because of skip=True"
+                                f"[yellow]➜ SKIPPED[/yellow]: {data_path} because of skip=True"
                             )
                             continue
                         else:
@@ -218,7 +218,7 @@ class SyncLabsToFeishu:
                                     payloads,
                                 )
                                 print(
-                                    f"[green]↑ UPDATED:[/green] {data_path} {r['msg'].upper()}"
+                                    f"[green]↑ UPDATED[/green]: {data_path} {r['msg'].upper()}"
                                 )
                             else:
                                 # Update record with full=False
@@ -265,26 +265,26 @@ class SyncLabsToFeishu:
                                         payloads,
                                     )
                                     print(
-                                        f"[green]↑ UPDATED:[/green] {data_path} {r['msg'].upper()}"
+                                        f"[green]↑ UPDATED[/green]: {data_path} {r['msg'].upper()}"
                                     )
                                 else:
                                     print(
-                                        f"[yellow]➜ SKIPPED:[/yellow] {data_path} because of no change"
+                                        f"[yellow]➜ SKIPPED[/yellow]: {data_path} because of no change"
                                     )
                     else:
                         # Add record
                         r = self.feishu.add_bitable_record(
                             self.app_token, self.lab_table_id, payloads
                         )
-                        print(f"[green]↑ ADDED:[/green] {data_path} {r['msg'].upper()}")
+                        print(f"[green]↑ ADDED[/green]: {data_path} {r['msg'].upper()}")
                 except Exception as e:
-                    print(f"[red]× Error:[/red] {filepath} {e}")
+                    print(f"[red]× Error[/red]: {filepath} {e}")
         # Delete records not in this repo
         repo_path_dicts = [
             path for path in path_dicts if path_dicts[path]["repo_name"] == self.repo
         ]
         print(
-            f"[green]✔ Found:[/green] {len(repo_path_dicts)} labs in this {self.repo}, checking if need delete..."
+            f"[green]✔ Found[/green]: {len(repo_path_dicts)} labs in this {self.repo}, checking if need delete..."
         )
         deleted = 0
         for path in repo_path_dicts:
@@ -293,6 +293,6 @@ class SyncLabsToFeishu:
                 r = self.feishu.delete_bitable_record(
                     self.app_token, self.lab_table_id, record_id
                 )
-                print(f"[red]× Deleting:[/red] {record_id}-{path} {r['msg'].upper()}")
+                print(f"[red]× Deleting[/red]: {record_id}-{path} {r['msg'].upper()}")
                 deleted += 1
         print(f"[green]✔ Deleted[/green] {deleted} labs in {self.repo}")

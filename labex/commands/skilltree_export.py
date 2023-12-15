@@ -53,7 +53,7 @@ class ExportSkills:
             try:
                 config = self.__parse_single_config(os.path.dirname(path))
             except:
-                print(f"[red]Error:[/red] {path}")
+                print(f"[red]Error[/red]: {path}")
                 pass
             configs.extend(config)
         # Export to csv

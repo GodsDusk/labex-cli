@@ -8,7 +8,7 @@ class GitHub:
 
     def __init__(self, token: str) -> None:
         self.token = token
-        print(f"[green]✔ CONNECT:[/green] GitHub API")
+        print(f"[green]✔ CONNECT[/green]: GitHub API")
 
     @retry(stop_max_attempt_number=2)
     def get_issue(self, repo_name: str, issue_number: int) -> str:
@@ -141,10 +141,10 @@ class GitHub:
         )
         if r.status_code == 201:
             print(
-                f"[green]✔ MILESTONE:[/green] {title} successfully created, due_on {due_on}"
+                f"[green]✔ MILESTONE[/green]: {title} successfully created, due_on {due_on}"
             )
         else:
-            print(f"[red]✘ MILESTONE:[/red] {title} failed to create, due_on {due_on}")
+            print(f"[red]✘ MILESTONE[/red]: {title} failed to create, due_on {due_on}")
         return r.json()
 
     @retry(stop_max_attempt_number=2)

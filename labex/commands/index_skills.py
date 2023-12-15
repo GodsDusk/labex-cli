@@ -171,7 +171,7 @@ class RemoveSkills:
         skills_table_id = "tblV5pGIsGZMxmE9"
         records = feishu.get_bitable_records(app_token, skills_table_id, params="")
         skills = [r["fields"]["SKILL_ID"][0]["text"] for r in records]
-        print(f"[green]✔ Get:[/green] {len(skills)} skills in Feishu.")
+        print(f"[green]✔ Get[/green]: {len(skills)} skills in Feishu.")
         for root, dirs, files in os.walk(dir_path):
             for file in files:
                 if file.endswith("index.json"):

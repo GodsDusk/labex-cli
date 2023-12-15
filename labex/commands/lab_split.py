@@ -22,7 +22,7 @@ class MDSplitter:
         # read the md file
         with open(md_path, "r") as f:
             md_content = f.read()
-        print(f"[yellow]➜ FILE:[/yellow] {md_path}")
+        print(f"[yellow]➜ FILE[/yellow]: {md_path}")
         # Title begins with markdown first level header
         lab_title = titlecase(md_content.split("\n")[0].replace("# ", "").strip())
         # remove begin and end spaces

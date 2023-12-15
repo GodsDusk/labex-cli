@@ -73,11 +73,11 @@ class CheckIndexNoSkills:
                         is_valid = True
             if not is_valid:
                 if filter_skill == None:
-                    print(f"[red]No {skilltree} in:[/red] {path}")
+                    print(f"[red]No {skilltree} in[/red]: {path}")
                     i += 1
                 else:
                     if filter_skill == skilltree:
-                        print(f"[red]No {skilltree} in:[/red] {path}")
+                        print(f"[red]No {skilltree} in[/red]: {path}")
                         i += 1
         print(f"Total files: {i}")
 
@@ -105,5 +105,5 @@ class CheckLabDictinary:
                 if lab_skill_tree in path_skill_tree:
                     check_status = True
             if not check_status:
-                print(f"[red]Wrong Dir:[/red] {path}")
+                print(f"[red]Wrong Dir[/red]: {path}")
                 i += 1

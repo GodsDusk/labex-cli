@@ -11,7 +11,7 @@ class Feishu:
     def __init__(self, app_id: str, app_secret: str) -> None:
         self.app_id = app_id
         self.app_secret = app_secret
-        print(f"[green]✔ CONNECT:[/green] Feishu API")
+        print(f"[green]✔ CONNECT[/green]: Feishu API")
 
     def tenant_access_token(self):
         """Get tenant access token"""
@@ -47,7 +47,7 @@ class Feishu:
                 if r.json()["data"]["total"] > 0:
                     records += r.json()["data"]["items"]
                     print(
-                        f"[green]✔ RECORDS:[/green] {len(records)}, page_token: {page_token}"
+                        f"[green]✔ RECORDS[/green]: {len(records)}, page_token: {page_token}"
                     )
         return records
 

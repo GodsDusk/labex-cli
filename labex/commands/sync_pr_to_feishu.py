@@ -76,27 +76,27 @@ class SyncPRToFeishu:
         return issue_id
 
     def sync_pr(self, repo_name: str) -> None:
-        print(f"[yellow]➜ TASKS:[/yellow] Sync PR to Feishu")
-        print(f"[yellow]➜ TASK1:[/yellow] Get data from Feishu")
+        print(f"[yellow]➜ TASKS[/yellow]: Sync PR to Feishu")
+        print(f"[yellow]➜ TASK1[/yellow]: Get data from Feishu")
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.table_id, params=""
         )
-        print(f"[green]✔ RECORDS:[/green] {len(records)}")
+        print(f"[green]✔ RECORDS[/green]: {len(records)}")
         # Make a dict of PR_NUMBER and record_id
         num_id_dicts = {r["fields"]["PR_NUM"]: r["record_id"] for r in records}
-        print(f"[yellow]➜ TASK2:[/yellow] Get data from GitHub")
-        print(f"[yellow]➜ REPO:[/yellow] {repo_name}")
+        print(f"[yellow]➜ TASK2[/yellow]: Get data from GitHub")
+        print(f"[yellow]➜ REPO[/yellow]: {repo_name}")
         # Get all pr from github
         pr_list = self.github.get_pr_list(repo_name)
-        print(f"[green]✔ PRs:[/green] {len(pr_list)}")
+        print(f"[green]✔ PRs[/green]: {len(pr_list)}")
         # Get all milestone from github
         milestones = self.github.list_milestone(repo_name)
-        print(f"[green]✔ MILESTONE:[/green] {len(milestones)}")
+        print(f"[green]✔ MILESTONE[/green]: {len(milestones)}")
         # List all collaborators
         collaborators = self.github.list_collaborators(repo_name)
-        print(f"[green]✔ COLLABORATORS:[/green] {len(collaborators)}")
-        print(f"[yellow]➜ TASK3:[/yellow] Processing data")
+        print(f"[green]✔ COLLABORATORS[/green]: {len(collaborators)}")
+        print(f"[yellow]➜ TASK3[/yellow]: Processing data")
         # Feishu 未关闭的 PR
         feishu_not_closed_pr_nums = [
             str(r["fields"]["PR_NUM"])
@@ -112,8 +112,8 @@ class SyncPRToFeishu:
         ]
         # 忽略 locked 的 PR
         pr_list = [pr for pr in pr_list if pr["locked"] == False]
-        print(f"[green]✔ OPEN PRs:[/green] {len(pr_list)}")
-        print(f"[yellow]➜ TASK4:[/yellow] Loop all PRs")
+        print(f"[green]✔ OPEN PRs[/green]: {len(pr_list)}")
+        print(f"[yellow]➜ TASK4[/yellow]: Loop all PRs")
         # Loop all PRs
         for pr in pr_list:
             try:
@@ -135,9 +135,9 @@ class SyncPRToFeishu:
                     pr_labels_list = []
                 else:
                     pr_labels_list = [l["name"] for l in pr_labels]
-                print(f"\n[yellow]➜ PR NUM:[/yellow] {pr_number}")
+                print(f"\n[yellow]➜ PR NUM[/yellow]: {pr_number}")
                 print(
-                    f"[yellow]➜ PR URL:[/yellow] https://github.com/{repo_name}/pull/{pr_number}"
+                    f"[yellow]➜ PR URL[/yellow]: https://github.com/{repo_name}/pull/{pr_number}"
                 )
                 # 获取 PR 全部的 comments 便于后续判断是否已经添加过评论
                 pr_comments = self.github.list_issue_comments(repo_name, pr_number)
@@ -147,18 +147,18 @@ class SyncPRToFeishu:
                 if lab_path == None:
                     # 如果 index.json 不存在
                     if index_json == None:
-                        print(f"[yellow]➜ SKIPPED:[/yellow] No index.json found.")
+                        print(f"[yellow]➜ SKIPPED[/yellow]: No index.json found.")
                         continue
                     else:
                         index_json_comment = f"Hi, @{pr_user} \n\n该 PR 检测到变更内容包含对 {index_json} 个 index.json 的修改。为了避免冲突和更好统计数据，一个 PR 仅能包含对 1 个 lab 的内容变更。请重新从 master 拉取最新的分支提交。在修改完成之前，系统不会分配 Reviewer。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
                         if index_json_comment in pr_comments:
                             print(
-                                f"[yellow]➜ SKIPPED:[/yellow] Multiple ({index_json}) index.json found in {pr_number}, comment to {pr_user} skip because already commented."
+                                f"[yellow]➜ SKIPPED[/yellow]: Multiple ({index_json}) index.json found in {pr_number}, comment to {pr_user} skip because already commented."
                             )
                             continue
                         self.github.comment_pr(repo_name, pr_number, index_json_comment)
                         print(
-                            f"[yellow]➜ SKIPPED:[/yellow] Multiple ({index_json}) index.json found in {pr_number}, comment to {pr_user}"
+                            f"[yellow]➜ SKIPPED[/yellow]: Multiple ({index_json}) index.json found in {pr_number}, comment to {pr_user}"
                         )
                         continue
                 ###################
@@ -166,7 +166,7 @@ class SyncPRToFeishu:
                 ###################
                 # 判断 PR 是否已经测试完成
                 if "Test Completed" not in pr_labels_list:
-                    print(f"[yellow]➜ SKIPPED:[/yellow] PR is not tested completed.")
+                    print(f"[yellow]➜ SKIPPED[/yellow]: PR is not tested completed.")
                     continue
                 # 从 PR 描述中获取 issue id
                 pr_body = pr["body"]
@@ -176,12 +176,12 @@ class SyncPRToFeishu:
                     issue_comment = f"Hi, @{pr_user} \n\n该 PR 未检测到正确关联 Issue, 无法分配 Reviewer。请你在 PR 描述中按要求添加, 如有问题请及时联系 LabEx 的同事。如果该 PR 无需关联 Issue, 请在 Labels 中选择 `noissue`, 系统将会忽略 Issue 绑定检查。\n\n[❓ 如何提交](https://www.labex.wiki/zh/advanced/how-to-submit) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
                     if issue_comment in pr_comments:
                         print(
-                            f"[yellow]➜ SKIPPED:[/yellow] No issue id found in {pr_number}, comment to {pr_user} skip because already commented."
+                            f"[yellow]➜ SKIPPED[/yellow]: No issue id found in {pr_number}, comment to {pr_user} skip because already commented."
                         )
                         continue
                     self.github.comment_pr(repo_name, pr_number, issue_comment)
                     print(
-                        f"[yellow]➜ SKIPPED:[/yellow] No issue id found in {pr_number}, comment to {pr_user}"
+                        f"[yellow]➜ SKIPPED[/yellow]: No issue id found in {pr_number}, comment to {pr_user}"
                     )
                     continue
                 # 如果检查通过, 则更新 PR 状态
@@ -191,7 +191,7 @@ class SyncPRToFeishu:
                 # 如果 PR 原本存在 milestone
                 if pr_milestone != None:
                     date_milestone_str = pr_milestone["title"]
-                    print(f"[yellow]➜ SKIPPED:[/yellow] PR already has a milestone.")
+                    print(f"[yellow]➜ SKIPPED[/yellow]: PR already has a milestone.")
                 else:
                     # 如果 PR 原本不存在 milestone
                     # 使用更新日期所在的周作为 milestone
@@ -216,7 +216,7 @@ class SyncPRToFeishu:
                         payloads,
                     )
                     print(
-                        f"[green]↑ UPDATED:[/green] PR milestone to {date_milestone_str}, {pr_milestone_number}"
+                        f"[green]↑ UPDATED[/green]: PR milestone to {date_milestone_str}, {pr_milestone_number}"
                     )
                 # STEP2 为 PR 添加 Reviewer
                 # 如果 issue_id 不为 0, 则获取 issue user
@@ -239,7 +239,7 @@ class SyncPRToFeishu:
                 # 如果 reviewer 已经是 assignees, 则跳过添加
                 if reviewer in assignees_list:
                     print(
-                        f"[yellow]➜ SKIPPED:[/yellow] {reviewer} already in assignees."
+                        f"[yellow]➜ SKIPPED[/yellow]: {reviewer} already in assignees."
                     )
                 else:
                     # 如果 reviewer 不在 assignees 里, 则添加 reviewer
@@ -253,7 +253,7 @@ class SyncPRToFeishu:
                     # 添加评论通知 reviewer
                     reviewer_comment = f"Hi, @{pr_user} \n\n系统检测到你已经完成测试，已将 @{reviewer} 自动分配为本 PR 的 Reviewer。一般情况下，@{reviewer} 会在 2 个工作日内完成 Review, 并与你沟通。如果一直没有进展，请及时通过评论或微信群与 @{reviewer} 联系确认。\n\n**再次郑重提醒**：PR 提交后，和每次修改后，都需要基于 [归零原则](https://www.labex.wiki/zh/basic/how-to-test) 在线上测试环境中，认真完成测试一遍。请不要用「眼睛」测试，而是用手。请不要把测试的工作交给 Reviewer。因测试疏漏导致的低级错误，会严重影响协作效率，浪费大家的时间。我们会延迟 Review 你的内容，甚至放弃 Review 直接劝退。\n\n[❓ 如何 Review](https://www.labex.wiki/zh/advanced/how-to-review) | [✍️ LabEx 手册](https://www.labex.wiki/zh/advanced/how-to-review) | [🏪 LabEx 网站](https://labex.io) \n\n> 这是一条自动消息, 如有疑问可以直接回复本条评论, 或者微信联系。"
                     self.github.comment_pr(repo_name, pr_number, reviewer_comment)
-                    print(f"[green]↑ UPDATED:[/green] {reviewer} added as a reviewer.")
+                    print(f"[green]↑ UPDATED[/green]: {reviewer} added as a reviewer.")
                 # 添加 Final Reviewer
                 # 获取 PR 的 Review 状态
                 (
@@ -263,14 +263,14 @@ class SyncPRToFeishu:
                 ) = self.github.pr_reviews(repo_name, pr_number)
                 if len(approved_by) == 0:
                     print(
-                        f"[yellow]➜ SKIPPED:[/yellow] pr has not been approved, skip add final reviewer."
+                        f"[yellow]➜ SKIPPED[/yellow]: pr has not been approved, skip add final reviewer."
                     )
                 else:
                     final_reviewer = "huhuhang"
                     # 如果 final_reviewer 在 assignees 里
                     if final_reviewer in assignees_list:
                         print(
-                            f"[yellow]➜ SKIPPED:[/yellow] pr has been approved, {final_reviewer} already added as a final reviewer."
+                            f"[yellow]➜ SKIPPED[/yellow]: pr has been approved, {final_reviewer} already added as a final reviewer."
                         )
                     else:
                         payloads = {"assignees": [final_reviewer]}
@@ -285,7 +285,7 @@ class SyncPRToFeishu:
                             repo_name, pr_number, final_reviewer_comment
                         )
                         print(
-                            f"[green]↑ UPDATED:[/green] pr has been approved, {reviewer} added as a final reviewer."
+                            f"[green]↑ UPDATED[/green]: pr has been approved, {reviewer} added as a final reviewer."
                         )
                 #######################
                 # STEP3 更新 PR 信息
@@ -304,11 +304,11 @@ class SyncPRToFeishu:
                 lab_imageid = index_json.get("backend").get("imageid")
                 lab_info_comment = f"### 🔖 Lab information has been updated:\n\n- **Title**: `{lab_title}`\n- **Description**: `{lab_description}`\n- **Lab Type**: `{lab_type}`\n- **Fee Type**: `{lab_fee_type}`\n- **Steps**: `{len(lab_steps)}`\n- **Image ID**: `{lab_imageid}`\n- **Skills**: `{'`, `'.join(lab_skills)}`\n- **Lab Path**: `{lab_path}`"
                 if lab_info_comment in pr_comments:
-                    print(f"[yellow]➜ SKIPPED:[/yellow] Lab info already in comments.")
+                    print(f"[yellow]➜ SKIPPED[/yellow]: Lab info already in comments.")
                 else:
-                    print(f"[green]➜  LAB INFO:[/green] {lab_info_comment}")
+                    print(f"[green]➜  LAB INFO[/green]: {lab_info_comment}")
                     self.github.comment_pr(repo_name, pr_number, lab_info_comment)
-                    print(f"[green]↑ UPDATED:[/green] Lab info added to comments.")
+                    print(f"[green]↑ UPDATED[/green]: Lab info added to comments.")
                 #######################
                 # STEP4 更新 Feishu 记录
                 #######################
@@ -355,13 +355,13 @@ class SyncPRToFeishu:
                         num_id_dicts[str(pr_number)],
                         payloads,
                     )
-                    print(f"[green]↑ UPDATED:[/green] {lab_path} {r['msg'].upper()}")
+                    print(f"[green]↑ UPDATED[/green]: {lab_path} {r['msg'].upper()}")
                 else:
                     # Add record
                     r = self.feishu.add_bitable_record(
                         self.app_token, self.table_id, payloads
                     )
-                    print(f"[green]↑ ADDED:[/green] {lab_path} {r['msg'].upper()}")
+                    print(f"[green]↑ ADDED[/green]: {lab_path} {r['msg'].upper()}")
 
             except Exception as e:
                 print(f"Exception: {e}")

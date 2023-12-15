@@ -174,7 +174,7 @@ class CreateProject:
             "contributors": [],
         }
         index_file.write(json.dumps(index_config, indent=2, ensure_ascii=False))
-        print(f"[green]✔ DONE:[/green] {lab_title} created successfully.")
+        print(f"[green]✔ DONE[/green]: {lab_title} created successfully.")
 
     def __parse_json_content(self, json_path: str) -> str:
         """Parse JSON Content from data.json
@@ -252,21 +252,21 @@ class CreateProject:
         )
         path_name = f"{os.path.join(path, lab_name_lower)}-using-{techstack.lower().replace(' ', '-')}"
         if os.path.exists(path_name):
-            print(f"[red]✗ ERROR:[/red] {path_name} already exists.")
+            print(f"[red]✗ ERROR[/red]: {path_name} already exists.")
             return
         else:
             try:
-                print(f"[yellow]➜ PROJECT:[/yellow] {project_name}")
+                print(f"[yellow]➜ PROJECT[/yellow]: {project_name}")
                 lab_content_prompt = f"Please help me to develop a project named {project_name} using {techstack}: {project_description} It should contain the file name and full codes. The project code must be ensured to be executable. The user interface is beautiful and modern."
                 # save lab_content_prompt to prompts.md
                 prompts_path = os.path.join(path, "prompts.md")
                 with open(prompts_path, "w") as f:
                     f.write(lab_content_prompt)
-                print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
+                print(f"[yellow]➜ PROMPTS[/yellow]: {lab_content_prompt}")
                 if not click.confirm(f"➜ Generate this project using ChatGPT?"):
                     return
                 if mode == "fc":
-                    print(f"[yellow]➜ MODE:[/yellow] Function Call")
+                    print(f"[yellow]➜ MODE[/yellow]: Function Call")
                     lab_content = self.gpt.azure_open_ai_fc(
                         user_prompts=lab_content_prompt,
                         function_json=self.__func_json(techstack),
@@ -282,9 +282,9 @@ class CreateProject:
                         # create code file
                         with open(f"{path_name}/{code_file_name}", "w") as f:
                             f.write(full_codes)
-                        print(f"[green]✔ SAVE:[/green] {path_name}")
+                        print(f"[green]✔ SAVE[/green]: {path_name}")
                     else:
-                        print(f"[red]➜ MODE:[/red] Change to markdown mode.")
+                        print(f"[red]➜ MODE[/red]: Change to markdown mode.")
                         lab_content, tokens = self.gpt.azure_open_ai(
                             self.system_prompts, lab_content_prompt
                         )
@@ -295,10 +295,10 @@ class CreateProject:
                             with open(f"{path_name}/data.md", "w") as f:
                                 f.write(lab_content)
                             print(
-                                f"[green]✔ SAVE:[/green] {path_name}, {tokens} tokens used."
+                                f"[green]✔ SAVE[/green]: {path_name}, {tokens} tokens used."
                             )
                 elif mode == "md":
-                    print(f"[yellow]➜ MODE:[/yellow] Markdown")
+                    print(f"[yellow]➜ MODE[/yellow]: Markdown")
                     lab_content, tokens = self.gpt.azure_open_ai(
                         self.system_prompts, lab_content_prompt
                     )
@@ -309,10 +309,10 @@ class CreateProject:
                         with open(f"{path_name}/data.md", "w") as f:
                             f.write(lab_content)
                         print(
-                            f"[green]✔ SAVE:[/green] {path_name}, {tokens} tokens used."
+                            f"[green]✔ SAVE[/green]: {path_name}, {tokens} tokens used."
                         )
             except Exception as e:
-                print(f"[red]✗ ERROR:[/red] {project_name} failed, {e}")
+                print(f"[red]✗ ERROR[/red]: {project_name} failed, {e}")
                 pass
 
     def create_project_md(self, path: str) -> None:
@@ -325,10 +325,10 @@ class CreateProject:
         json_path = os.path.join(path, "data.json")
         md_path = os.path.join(path, "data.md")
         if os.path.exists(json_path):
-            print(f"[yellow]➜ FOUND:[/yellow] {json_path}")
+            print(f"[yellow]➜ FOUND[/yellow]: {json_path}")
             lab_content = self.__parse_json_content(json_path)
         elif os.path.exists(md_path):
-            print(f"[yellow]➜ FOUND:[/yellow] {md_path}")
+            print(f"[yellow]➜ FOUND[/yellow]: {md_path}")
             with open(md_path, "r") as f:
                 lab_content = f.read()
         else:
@@ -339,7 +339,7 @@ class CreateProject:
         prompts_path = os.path.join(path, "prompts.md")
         with open(prompts_path, "w") as f:
             f.write(lab_content_prompt)
-        print(f"[yellow]➜ PROMPTS:[/yellow] {lab_content_prompt}")
+        print(f"[yellow]➜ PROMPTS[/yellow]: {lab_content_prompt}")
         if not click.confirm(f"➜ Generate step_raw.md using ChatGPT?"):
             return
         step_raw_path = os.path.join(path, "step_raw.md")
@@ -348,7 +348,7 @@ class CreateProject:
         )
         with open(step_raw_path, "w") as f:
             f.write(lab_content)
-            print(f"[green]✔ SAVE:[/green] {step_raw_path}, {tokens} tokens used.")
+            print(f"[green]✔ SAVE[/green]: {step_raw_path}, {tokens} tokens used.")
         os.system(f"prettier --log-level silent --write {step_raw_path}")
         print(f"[green]✔ prettier done![/green]")
 
@@ -363,10 +363,10 @@ class CreateProject:
             lab_title, lab_intro, lab_steps, lab_summary = self.__parse_md(
                 step_raw_path
             )
-            print(f"[yellow]➜ TITLE:[/yellow] {lab_title}")
-            print(f"[yellow]➜ INTRO:[/yellow] {lab_intro}")
-            print(f"[yellow]➜ STEPS:[/yellow] {len(lab_steps)} steps")
-            print(f"[yellow]➜ SUMMA:[/yellow] {lab_summary}")
+            print(f"[yellow]➜ TITLE[/yellow]: {lab_title}")
+            print(f"[yellow]➜ INTRO[/yellow]: {lab_intro}")
+            print(f"[yellow]➜ STEPS[/yellow]: {len(lab_steps)} steps")
+            print(f"[yellow]➜ SUMMA[/yellow]: {lab_summary}")
             if not click.confirm(f"➜ Create this lab?"):
                 return
             self.__new_lab(path, lab_title, lab_intro, lab_steps, lab_summary)
@@ -382,7 +382,7 @@ class CreateProject:
             os.system(f"prettier --log-level silent --write {lab_folder_name}")
             print(f"[green]✔ prettier done![/green]")
         else:
-            print(f"[red]✗ ERROR:[/red] {step_raw_path} not found.")
+            print(f"[red]✗ ERROR[/red]: {step_raw_path} not found.")
 
     def create_course_json(self, path: str) -> None:
         """STEP4: Create Course Config
@@ -452,12 +452,12 @@ class CreateProject:
             course_config_path = os.path.join(path, "course.json")
             with open(course_config_path, "w") as f:
                 json.dump(course_config, f, indent=2, ensure_ascii=False)
-            print(f"[green]✔ DONE:[/green] {course_config_path} created successfully.")
+            print(f"[green]✔ DONE[/green]: {course_config_path} created successfully.")
             os.system(f"prettier --log-level silent --write {course_config_path}")
             print(f"[green]✔ prettier done![/green]")
 
         else:
-            print(f"[red]✗ ERROR:[/red] {index_path} not found.")
+            print(f"[red]✗ ERROR[/red]: {index_path} not found.")
 
     def create_course_intro(self, path: str) -> None:
         index_path = os.path.join(path, "index.json")
@@ -500,19 +500,19 @@ In this project, you will learn:
 
 ```
 """
-        print(f"[yellow]➜ PROMPTS:[/yellow] {lab_intro_prompt}")
+        print(f"[yellow]➜ PROMPTS[/yellow]: {lab_intro_prompt}")
         if click.confirm(f"➜ Generate new intro.md using ChatGPT?"):
             new_lab_intro, tokens = self.gpt.azure_open_ai(
                 self.system_prompts, lab_intro_prompt
             )
             print(
-                f"[yellow]➜ NEW INTRO ({tokens} tokens):[/yellow] \n\n{new_lab_intro}"
+                f"[yellow]➜ NEW INTRO ({tokens} tokens)[/yellow]: \n\n{new_lab_intro}"
             )
             if click.confirm(f"➜ Replace intro.md?"):
                 with open(lab_intro_path, "w") as f:
                     f.write(new_lab_intro)
                     print(
-                        f"[green]✔ DONE:[/green] {lab_intro_path} replaced successfully."
+                        f"[green]✔ DONE[/green]: {lab_intro_path} replaced successfully."
                     )
                 os.system(f"prettier --log-level silent --write {lab_intro_path}")
                 print(f"[green]✔ prettier done![/green]")

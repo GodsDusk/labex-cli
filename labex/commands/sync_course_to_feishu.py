@@ -90,7 +90,7 @@ class SyncCoursesToFeishu:
             cover_path = file_path.replace(
                 "course.json", course_cover.replace("./", "")
             )
-            print(f"[yellow]➜ TASK:[/yellow] Uploading cover {cover_path}")
+            print(f"[yellow]➜ TASK[/yellow]: Uploading cover {cover_path}")
             cover_record = self.feishu.upload_media(
                 file_path=cover_path,
                 parent_type="bitable_image",
@@ -112,17 +112,17 @@ class SyncCoursesToFeishu:
             full (bool): synchronize all courses without checking for changes in record fields.
             dirpath (str, optional): Defaults to ".".
         """
-        print(f"[yellow]➜ TASK:[/yellow] Syncing {self.repo} to Feishu...")
-        print(f"[yellow]➜ MODE:[/yellow] Skip: {skip}, Full: {full}")
+        print(f"[yellow]➜ TASK[/yellow]: Syncing {self.repo} to Feishu...")
+        print(f"[yellow]➜ MODE[/yellow]: Skip: {skip}, Full: {full}")
         # Get all course from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.course_table_id, params=""
         )
-        print(f"[green]✔ Found:[/green] {len(records)} courses in Feishu.")
+        print(f"[green]✔ Found[/green]: {len(records)} courses in Feishu.")
         # Drop Duplicate records
         records = list({v["fields"]["NAME"]: v for v in records}.values())
         print(
-            f"[green]✔ Found:[/green] {len(records)} courses in Feishu after deduplication."
+            f"[green]✔ Found[/green]: {len(records)} courses in Feishu after deduplication."
         )
         # Make a full dict of name and record_id and repo_name
         name_dicts = {
@@ -140,7 +140,7 @@ class SyncCoursesToFeishu:
         # Make a dict of lab_path and record_id
         labs_dicts = {r["fields"]["LAB_PATH"][0]["text"]: r["record_id"] for r in labs}
         print(
-            f"[green]✔ Found:[/green] {len(labs_dicts)} labs in Feishu, start syncing..."
+            f"[green]✔ Found[/green]: {len(labs_dicts)} labs in Feishu, start syncing..."
         )
         # Walk through all index.json files
         # If course name in name_dicts, update record
@@ -163,7 +163,7 @@ class SyncCoursesToFeishu:
                         if skip:
                             # Skip record
                             print(
-                                f"[yellow]➜ SKIPPED:[/yellow] {course_name} because of skip=True"
+                                f"[yellow]➜ SKIPPED[/yellow]: {course_name} because of skip=True"
                             )
                             continue
                         else:
@@ -179,7 +179,7 @@ class SyncCoursesToFeishu:
                                     payloads,
                                 )
                                 print(
-                                    f"[green]↑ UPDATED:[/green] {course_name} {r['msg'].upper()}"
+                                    f"[green]↑ UPDATED[/green]: {course_name} {r['msg'].upper()}"
                                 )
                             else:
                                 # Update record with full=False
@@ -225,11 +225,11 @@ class SyncCoursesToFeishu:
                                         payloads,
                                     )
                                     print(
-                                        f"[green]↑ UPDATED:[/green] {course_name} {r['msg'].upper()}"
+                                        f"[green]↑ UPDATED[/green]: {course_name} {r['msg'].upper()}"
                                     )
                                 else:
                                     print(
-                                        f"[yellow]➜ SKIPPED:[/yellow] {course_name} because of no change"
+                                        f"[yellow]➜ SKIPPED[/yellow]: {course_name} because of no change"
                                     )
                     else:
                         # upload course cover
@@ -239,7 +239,7 @@ class SyncCoursesToFeishu:
                             self.app_token, self.course_table_id, payloads
                         )
                         print(
-                            f"[green]↑ ADDED:[/green] {course_name} {r['msg'].upper()}"
+                            f"[green]↑ ADDED[/green]: {course_name} {r['msg'].upper()}"
                         )
                 except Exception as e:
                     print(f"× Error {filepath} {e}")
@@ -248,7 +248,7 @@ class SyncCoursesToFeishu:
             name for name in name_dicts if name_dicts[name]["repo_name"] == self.repo
         ]
         print(
-            f"[green]✔ Found:[/green] {len(repo_name_dicts)} courses in {self.repo}, checking if need delete..."
+            f"[green]✔ Found[/green]: {len(repo_name_dicts)} courses in {self.repo}, checking if need delete..."
         )
         deleted = 0
         for name in repo_name_dicts:
