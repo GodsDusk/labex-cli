@@ -21,7 +21,9 @@ class ChatGPT:
         )
         print(f"[green]✔ CONNECT:[/green] OpenAI {region.upper()} ({self.model})")
 
-    def azure_open_ai(self, system_prompts: str, user_prompts: str) -> str:
+    def azure_open_ai(
+        self, system_prompts: str, user_prompts: str, use_cf: bool = True
+    ) -> str:
         """ChatGPT API
 
         Args:
@@ -30,7 +32,7 @@ class ChatGPT:
         Returns:
             str: response
         """
-        if self.cf_ai_gateway is None:
+        if self.cf_ai_gateway is None or use_cf is False:
             completions = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
