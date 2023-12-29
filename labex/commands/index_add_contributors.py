@@ -56,9 +56,10 @@ class AddContributors:
                 "bot",
                 "huhuhang",
             ]
-            now_contributors = [
-                x for x in now_contributors if not any([y in x for y in remove_list])
-            ]
+            # remove contributors in remove_list
+            for name in remove_list:
+                if name in now_contributors:
+                    now_contributors.remove(name)
             # sort contributors
             now_contributors.sort()
             # add contributors
