@@ -193,7 +193,6 @@ class ParseSkills:
                         skills.add("python/booleans")
                 self.generic_visit(node)
 
-
             def visit_Call(self, node):
                 if isinstance(node.func, ast.Name):
                     if node.func.id in ["int", "float", "str"]:
@@ -206,12 +205,11 @@ class ParseSkills:
                         skills.add("python/iterators")
                     if node.func.id in built_in_functions:
                         skills.add("python/build_in_functions")
-                    
+
                 self.generic_visit(node)
 
             def visit_Comment(self, node):
                 skills.add("python/comments")
-            
 
             def visit_List(self, node):
                 # Check for non-empty lists
@@ -223,7 +221,7 @@ class ParseSkills:
                 # Check for tuples, avoiding confusion with function calls
                 if len(node.elts) > 1:
                     skills.add("python/tuples")
-                self.generic_visit(node)       
+                self.generic_visit(node)
 
             def visit_Dict(self, node):
                 # Check for dictionaries
@@ -235,7 +233,7 @@ class ParseSkills:
                 # Check for sets, distinguishing from dictionaries
                 if node.elts:
                     skills.add("python/sets")
-                self.generic_visit(node)            
+                self.generic_visit(node)
 
             def visit_ClassDef(self, node):
 
@@ -243,15 +241,18 @@ class ParseSkills:
                 skills.add("python/inheritance")
 
                 # Check for classes with methods using self and dunder methods
-                has_self = any("self" in arg.arg for method in node.body if isinstance(method, ast.FunctionDef) for arg in method.args.args)
-                has_dunder_method = any(method.name.startswith("__") and method.name.endswith("__") for method in node.body if isinstance(method, ast.FunctionDef))
+                has_self = any("self" in arg.arg for method in node.body if isinstance(
+                    method, ast.FunctionDef) for arg in method.args.args)
+                has_dunder_method = any(method.name.startswith("__") and method.name.endswith(
+                    "__") for method in node.body if isinstance(method, ast.FunctionDef))
 
                 if has_self:
                     skills.add("python/encapsulation")
                     if has_dunder_method:
                         skills.add("python/polymorphism")
 
-                has_init = any(isinstance(method, ast.FunctionDef) and method.name == '__init__' for method in node.body)
+                has_init = any(isinstance(method, ast.FunctionDef)
+                               and method.name == '__init__' for method in node.body)
                 if has_init:
                     skills.add("python/constructor")
 
@@ -263,7 +264,7 @@ class ParseSkills:
             def visit_If(self, node):
                 skills.add("python/conditional_statements")
                 if isinstance(node.test, ast.Compare) and any(isinstance(el, ast.Name) for el in node.test.left.elts if el.id == '__name__'):
-                        skills.add("python/creating_modules")
+                    skills.add("python/creating_modules")
 
                 self.generic_visit(node)
 
@@ -282,21 +283,22 @@ class ParseSkills:
 
             def visit_Continue(self, node):
                 skills.add("python/break_continue")
-                self.generic_visit(node)            
+                self.generic_visit(node)
 
             def visit_ListComp(self, node):
                 skills.add("python/list_comprehensions")
-                self.generic_visit(node)            
+                self.generic_visit(node)
 
             def check_collection_types(self, node):
                 if isinstance(node, (ast.List, ast.Tuple, ast.Set, ast.Dict)):
                     skills.add("python/data_collections")
 
             def visit_FunctionDef(self, node):
-                
+
                 skills.add("python/function_definition")
 
-                has_return = any(isinstance(child, ast.Return) for child in ast.walk(node))
+                has_return = any(isinstance(child, ast.Return)
+                                 for child in ast.walk(node))
                 if has_return:
                     skills.add("python/arguments_return")
 
@@ -317,7 +319,7 @@ class ParseSkills:
                 if node.decorator_list:
                     skills.add("python/decorators")
                 self.generic_visit(node)
-            
+
             def visit_Lambda(self, node):
                 skills.add("python/lambda_functions")
                 self.generic_visit(node)
@@ -328,11 +330,11 @@ class ParseSkills:
 
             def visit_Nonlocal(self, node):
                 skills.add("python/scope")
-                self.generic_visit(node)        
+                self.generic_visit(node)
 
             def visit_Try(self, node):
                 skills.add("python/catching_exceptions")
-                self.generic_visit(node)           
+                self.generic_visit(node)
 
             def visit_Raise(self, node):
                 skills.add("python/raising_exceptions")
@@ -345,16 +347,16 @@ class ParseSkills:
             def visit_With(self, node):
                 skills.add("python/with_statement")
                 self.generic_visit(node)
-            
+
             def visit_Attribute(self, node):
                 if node.attr in ["read", "write"]:
                     skills.add("python/file_reading_writing")
-                self.generic_visit(node) 
+                self.generic_visit(node)
 
             def visit_Yield(self, node):
                 skills.add("python/generators")
                 self.generic_visit(node)
-                       
+
             def visit_Import(self, node):
                 # Check for specific library imports
                 skills.add("python/importing_modules")
@@ -1668,7 +1670,8 @@ class ParseSkills:
                 split_line = line.split(".")
                 if len(split_line) > 1:
                     skill_id = line.split(".")[0].strip()
-                    skill_function = line.split(".")[1].strip().replace(")", "")
+                    skill_function = line.split(
+                        ".")[1].strip().replace(")", "")
                     if skill_id not in all_skills:
                         all_skills[skill_id] = []
                     all_skills[skill_id].append(skill_function)
@@ -3179,7 +3182,8 @@ class ParseSkills:
         # Array Basics
         if re.search(r"np\.array\(\[[^\[\]]*\]\)", content):  # Matches 1D arrays
             skills.append("numpy/1d_array")
-        if re.search(r"np\.array\(\[\[", content):  # Matches multi-dimensional arrays
+        # Matches multi-dimensional arrays
+        if re.search(r"np\.array\(\[\[", content):
             skills.append("numpy/multi_array")
         if re.search(
             r"np\.array\(", content
