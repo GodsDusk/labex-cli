@@ -263,8 +263,11 @@ class ParseSkills:
 
             def visit_If(self, node):
                 skills.add("python/conditional_statements")
-                if isinstance(node.test, ast.Compare) and any(isinstance(el, ast.Name) for el in node.test.left.elts if el.id == '__name__'):
-                    skills.add("python/creating_modules")
+                if (isinstance(node.test, ast.Compare) and isinstance(node.test.left, ast.Name)
+                        and node.test.left.id == '__name__' and isinstance(node.test.comparators[0], ast.Str)
+                        and node.test.comparators[0].s == '__main__'):
+                    if "python/creating_modules" not in skills:
+                        skills.add("python/creating_modules")
 
                 self.generic_visit(node)
 
@@ -310,8 +313,11 @@ class ParseSkills:
                     skills.add("python/keyword_arguments")
 
                 # Check for recursion
-                if any(child.name == node.name for child in ast.walk(node) if isinstance(child, ast.Call)):
-                    skills.add("python/recursion")
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Call) and isinstance(child.func, ast.Name):
+                        if child.func.id == node.name:
+                            skills.add("python/recursion")
+                            break
 
                 if any(isinstance(decorator, ast.Name) and decorator.id in ['classmethod', 'staticmethod'] for decorator in node.decorator_list):
                     skills.add("python/class_static_methods")
