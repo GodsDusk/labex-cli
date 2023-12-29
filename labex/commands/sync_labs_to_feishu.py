@@ -181,11 +181,21 @@ class SyncLabsToFeishu:
         # If path in path_dicts, update record
         # If path not in path_dicts, add record
         data_paths = []
-        for dirpath, dirnames, filenames in os.walk(dirpath):
+        for dirpath, _, filenames in os.walk(dirpath):
             filenames = [f for f in filenames if f == "index.json"]
             for filename in filenames:
                 try:
                     filepath = os.path.join(dirpath, filename)
+                    # read index.json
+                    with open(filepath, "r") as f:
+                        index = json.load(f)
+                        is_confirm = index.get("is_confirm", False)
+                    # Skip unconfirmed labs
+                    if not is_confirm:
+                        print(
+                            f"[yellow]➜ SKIPPED[/yellow]: {filepath} because of unconfirmed"
+                        )
+                        continue
                     data = self.__parse_json(filepath, skills_dicts)
                     # Validate index.json
                     s = self.schema.validate(json_file=filepath)
@@ -237,7 +247,7 @@ class SyncLabsToFeishu:
                                     "HIDDEN",
                                     "FEE_TYPE",
                                 ]
-                                list_fields = ["SKILLS_ID"]
+                                list_fields = ["SKILLS_ID", "CONTRIBUTORS"]
                                 num_fields = ["STEPS", "SCRIPTS", "DESC_WORDS", "TIME"]
                                 # Compare the fields, if any change, update
                                 if (
