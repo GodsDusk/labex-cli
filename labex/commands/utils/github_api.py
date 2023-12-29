@@ -258,7 +258,6 @@ class GitHub:
 
         return noly_issues
 
-    @retry(stop_max_attempt_number=2)
     def get_contributors(self, repo_name: str, file_path: str) -> str:
         # Set the API URL
         url = f"https://api.github.com/repos/{repo_name}/commits"
@@ -267,14 +266,10 @@ class GitHub:
             "Authorization": f"token {self.token}",
             "Accept": "application/vnd.github+json",
         }
-
         # Set the parameters to filter commits by file path
         params = {"path": file_path}
-
         # Send the request
         r = requests.get(url, headers=headers, params=params)
-        if r.status_code != 200:
-            raise Exception(f"Error retrieving commits: {r.status_code}, {r.text}")
         # Check if the request was successful
         try:
             commits = r.json()
@@ -286,6 +281,6 @@ class GitHub:
                     login = author.get("login", False)
                     if login:
                         contributors.add(login)
-            return list(contributors)
+            return r.status_code, list(contributors)
         except:
-            return []
+            return r.status_code, []
