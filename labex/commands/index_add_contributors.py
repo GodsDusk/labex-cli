@@ -1,5 +1,6 @@
 import os
 import json
+from rich import print
 from .utils.github_api import GitHub
 
 
@@ -26,13 +27,15 @@ class AddContributors:
                 is_confirm = index.get("is_confirm", True)
             # Skip unconfirmed labs
             if not is_confirm:
-                print(f"{i}/{len(idx)}: {file} because of unconfirmed")
+                print(f"{i}/{len(idx)}: [yellow]SKIPPED[/yellow] {file} UNCONFIRMED")
                 i += 1
                 continue
             # original contributors
             original_contributors = index.get("contributors", [])
             if len(original_contributors) > 0:
-                print(f"{i}/{len(idx)}: {file} already has contributors")
+                print(
+                    f"{i}/{len(idx)}: [yellow]SKIPPED[/yellow] {file} ALREADY HAS CONTRIBUTORS"
+                )
                 i += 1
                 continue
             # get contributors
@@ -40,17 +43,22 @@ class AddContributors:
                 repo_name=repo, file_path=file
             )
             if status_code == 403:
-                print("API rate limit exceeded, cancel add contributors")
+                print(
+                    "[red]CANCELED[/red] API rate limit exceeded, cancel add contributors"
+                )
                 break
             if len(contributors) == 0:
                 continue
             # update contributors
             now_contributors = list(set(original_contributors + contributors))
-            # remove name contains bot
-            now_contributors = [c for c in now_contributors if "bot" not in c]
-            # remove huhuhang
-            if len(now_contributors) > 1 and "huhuhang" in now_contributors:
-                now_contributors.remove("huhuhang")
+            # remove name contains
+            remove_list = [
+                "bot",
+                "huhuhang",
+            ]
+            now_contributors = [
+                x for x in now_contributors if not any([y in x for y in remove_list])
+            ]
             # sort contributors
             now_contributors.sort()
             # add contributors
@@ -59,6 +67,9 @@ class AddContributors:
             with open(file, "w") as f:
                 json.dump(index, f, indent=2, ensure_ascii=False)
             print(
-                f"{i}/{len(idx)}: {file} add new contributors {len(now_contributors) - len(original_contributors)}, total {len(now_contributors)}"
+                f"{i}/{len(idx)}: [green]ADDED[/green] {file} new contributors {len(now_contributors) - len(original_contributors)}, total {len(now_contributors)}"
             )
             i += 1
+        # prettify index.json
+        print("Prettify index.json")
+        os.system(f"npx prettier --log-level silent --write {path}/**/*.json")
