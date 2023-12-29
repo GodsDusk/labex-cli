@@ -195,7 +195,6 @@ class SyncLabsToFeishu:
                         print(
                             f"[yellow]➜ SKIPPED[/yellow]: {filepath} because of unconfirmed"
                         )
-                        data_paths.append(data_path)
                         continue
                     data = self.__parse_json(filepath, skills_dicts)
                     # Validate index.json
