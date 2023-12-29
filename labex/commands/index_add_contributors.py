@@ -27,6 +27,8 @@ class AddContributors:
             if status_code == 403:
                 print("API rate limit exceeded, cancel add contributors")
                 break
+            if len(contributors) == 0:
+                continue
             # read index.json
             with open(file, "r") as f:
                 index = json.load(f)
