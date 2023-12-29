@@ -1,8 +1,10 @@
-import os
 import json
+import os
+
 from rich import print
-from .utils.feishu_api import Feishu
-from .utils.skill_trees import ParseSkills
+
+from utils.feishu_api import Feishu
+from utils.skill_trees import ParseSkills
 
 
 class AddSkills:
@@ -48,6 +50,55 @@ class AddSkills:
         return code_block_content
 
     def add_skills(self, dir_path: str, skilltree: str) -> None:
+        # read the index.json file
+        index_path = os.path.join(dir_path, "index.json")
+        with open(index_path, "r") as f:
+            data = json.load(f)
+        steps = data["details"]["steps"]
+        task_type = "ADD"
+        for step in steps:
+            step_skills = set(step.get("skills", []))
+            if skilltree is None:
+                task_type = "SORT"
+                continue
+            solution_files = step.get("solutions")
+            if solution_files:  # process challenge
+                for file in solution_files:
+                    with open(os.path.join(dir_path, "solutions", file), "r") as f:
+                        solution_content = f.read()
+                    if file.endswith(".md"):  # solution.md
+                        for language in self.languages[skilltree]:
+                            solution_code_block_content = (
+                                self.__parse_code_block(
+                                    solution_content, language
+                                )
+                            )
+                            solution_code_block_content = "\n".join(solution_code_block_content)
+                            skills = self.parse_skills.parse(
+                                skilltree, solution_code_block_content
+                            )
+                            step_skills.update(skills)
+                    else:  # solution with each program language files
+                        skills = self.parse_skills.parse(
+                            skilltree, solution_content
+                        )
+                        step_skills.update(skills)
+
+            else:  # process lab
+                step_file = step['text']
+                with open(os.path.join(dir_path, step_file), "r") as f:
+                    step_content = f.read()
+
+            step["skills"] = sorted(step_skills)
+
+        # update the index.json file
+        # with open(index_path, "w") as f:
+        # json.dump(data, f, indent=2, ensure_ascii=False)
+        # run prettier
+        os.system(f"prettier --log-level silent --write {index_path}")
+        print(f"[green]→ {task_type} SKILLS:[/] {index_path}")
+
+    def add_skills_tmp(self, dir_path: str, skilltree: str) -> None:
         for root, dirs, files in os.walk(dir_path):
             for file in files:
                 if file.endswith("index.json"):
@@ -76,10 +127,10 @@ class AddSkills:
                                     step_content, language
                                 )
                                 code_block_content = "\n".join(code_block_content)
-                                skills = self.parse_skills.parse(
-                                    skilltree, code_block_content
-                                )
-                                step_skills += skills
+                                # skills = self.parse_skills.parse(
+                                #     skilltree, code_block_content
+                                # )
+                                # step_skills += skills
                             # if step solutions is not empty, parse the solutions
                             solutions = step.get("solutions", [])
                             if solutions:
@@ -125,7 +176,7 @@ class RemoveSkills:
         pass
 
     def remove_all_skills(
-        self, dir_path: str, skilltree: str, remove_skill: str
+            self, dir_path: str, skilltree: str, remove_skill: str
     ) -> None:
         for root, dirs, files in os.walk(dir_path):
             for file in files:
@@ -143,7 +194,7 @@ class RemoveSkills:
                                 skill
                                 for skill in step_skills
                                 if skill.startswith(f"{skilltree}/")
-                                or skill == remove_skill
+                                   or skill == remove_skill
                             ]
                             if skill_remove:
                                 is_remove = True
@@ -163,7 +214,7 @@ class RemoveSkills:
                         print(e)
 
     def remove_invalid_skills(
-        self, app_id: str, app_secret: str, dir_path: str
+            self, app_id: str, app_secret: str, dir_path: str
     ) -> None:
         # 从 skill tree 获取完整的 skill ids
         feishu = Feishu(app_id, app_secret)
@@ -204,3 +255,8 @@ class RemoveSkills:
                     except Exception as e:
                         print(f"[red]→ ERROR:[/] {index_path}")
                         print(e)
+
+
+if __name__ == "__main__":
+    add = AddSkills()
+    add.add_skills('/Users/xujunjie/Documents/scenarios/python/lab-typing-module', 'python')
