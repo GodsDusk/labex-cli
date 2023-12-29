@@ -23,6 +23,12 @@ class AddContributors:
             # read index.json
             with open(file, "r") as f:
                 index = json.load(f)
+                is_confirm = index.get("is_confirm", True)
+            # Skip unconfirmed labs
+            if not is_confirm:
+                print(f"{i}/{len(idx)}: {file} because of unconfirmed")
+                i += 1
+                continue
             # original contributors
             original_contributors = index.get("contributors", [])
             if len(original_contributors) > 0:
