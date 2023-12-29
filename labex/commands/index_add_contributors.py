@@ -32,14 +32,8 @@ class AddContributors:
                 continue
             # original contributors
             original_contributors = index.get("contributors", [])
-            if len(original_contributors) > 0:
-                print(
-                    f"{i}/{len(idx)}: [yellow]SKIPPED[/yellow] {file} ALREADY HAS CONTRIBUTORS"
-                )
-                i += 1
-                continue
             # get contributors
-            status_code, contributors = self.github.get_contributors(
+            status_code, new_contributors = self.github.get_contributors(
                 repo_name=repo, file_path=file
             )
             if status_code == 403:
@@ -47,28 +41,25 @@ class AddContributors:
                     "[red]CANCELED[/red] API rate limit exceeded, cancel add contributors"
                 )
                 break
-            if len(contributors) == 0:
+            if len(new_contributors) == 0:
                 continue
             # update contributors
-            now_contributors = list(set(original_contributors + contributors))
+            all_contributors = list(set(original_contributors + new_contributors))
             # remove name contains
-            remove_list = [
-                "bot",
-                "huhuhang",
-            ]
+            remove_list = ["bot", "github"]
             # remove contributors in remove_list
             for name in remove_list:
-                if name in now_contributors:
-                    now_contributors.remove(name)
+                if name in all_contributors:
+                    all_contributors.remove(name)
             # sort contributors
-            now_contributors.sort()
+            all_contributors.sort()
             # add contributors
-            index["contributors"] = now_contributors
+            index["contributors"] = all_contributors
             # write index.json
             with open(file, "w") as f:
                 json.dump(index, f, indent=2, ensure_ascii=False)
             print(
-                f"{i}/{len(idx)}: [green]ADDED[/green] {file} new contributors {len(now_contributors) - len(original_contributors)}, total {len(now_contributors)}"
+                f"{i}/{len(idx)}: [green]ADDED[/green] {file} new contributors {len(all_contributors) - len(original_contributors)}, total {len(all_contributors)}"
             )
             i += 1
         # prettify index.json
