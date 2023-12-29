@@ -53,7 +53,7 @@ class UpdateIndexTitle:
                     step["title"] = md_step_titles[i]
         # write to index.json
         with open(os.path.join(path, "index.json"), "w") as f:
-            json.dump(index_cofig, f, indent=2)
+            json.dump(index_cofig, f, indent=2, ensure_ascii=False)
         # run prettier shell command
         if click.confirm("→ If you want to run prettier, press y"):
             os.system(f"prettier --write {path}/**/*.json")

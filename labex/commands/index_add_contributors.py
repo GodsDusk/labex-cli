@@ -39,7 +39,7 @@ class AddContributors:
             index["contributors"] = now_contributors
             # write index.json
             with open(file, "w") as f:
-                json.dump(index, f, indent=2)
+                json.dump(index, f, indent=2, ensure_ascii=False)
             print(
                 f"{i}/{len(idx)}: {file} add new contributors {len(now_contributors) - len(original_contributors)}, total {len(now_contributors)}"
             )
