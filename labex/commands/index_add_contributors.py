@@ -20,6 +20,15 @@ class AddContributors:
         idx = self.get_index_json(path=path)
         i = 1
         for file in idx:
+            # read index.json
+            with open(file, "r") as f:
+                index = json.load(f)
+            # original contributors
+            original_contributors = index.get("contributors", [])
+            if len(original_contributors) > 0:
+                print(f"{i}/{len(idx)}: {file} already has contributors")
+                i += 1
+                continue
             # get contributors
             status_code, contributors = self.github.get_contributors(
                 repo_name=repo, file_path=file
@@ -29,11 +38,6 @@ class AddContributors:
                 break
             if len(contributors) == 0:
                 continue
-            # read index.json
-            with open(file, "r") as f:
-                index = json.load(f)
-            # original contributors
-            original_contributors = index.get("contributors", [])
             # update contributors
             now_contributors = list(set(original_contributors + contributors))
             # remove name contains bot
