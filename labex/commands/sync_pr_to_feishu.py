@@ -322,9 +322,9 @@ class SyncPRToFeishu:
                 # payloads
                 payloads = {
                     "fields": {
-                        "SCENARIO_TITLE": lab_title,
-                        "SCENARIO_PATH": lab_path,
-                        "SCENARIO_SLUG": lab_path.split("/")[-1],
+                        "LAB_TITLE": lab_title,
+                        "LAB_PATH": lab_path,
+                        "LAB_SLUG": lab_path.split("/")[-1],
                         "PR_TITLE": pr_title,
                         "PR_USER": pr_user,
                         "PR_NUM": pr_number,
