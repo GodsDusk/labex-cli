@@ -325,7 +325,6 @@ class SyncPRToFeishu:
                         "SCENARIO_TITLE": lab_title,
                         "SCENARIO_PATH": lab_path,
                         "SCENARIO_SLUG": lab_path.split("/")[-1],
-                        "SCENARIO_TYPE": lab_type,
                         "PR_TITLE": pr_title,
                         "PR_USER": pr_user,
                         "PR_NUM": pr_number,
