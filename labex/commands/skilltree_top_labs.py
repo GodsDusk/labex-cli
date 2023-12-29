@@ -10,7 +10,7 @@ class TopLabs:
         self.feishu = Feishu(app_id, app_secret)
 
     def __parse_skills_tree(self) -> dict:
-        skills_tree = self.__admin_data.get_show_nomal_paths()
+        skills_tree = self.__admin_data.get_show_normal_paths()
         trees = []
         for tree in skills_tree:
             tree_id = tree["id"]
