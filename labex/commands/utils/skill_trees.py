@@ -1,3 +1,4 @@
+import ast
 import re
 
 
@@ -6,175 +7,7 @@ class ParseSkills:
         pass
 
     def __parse_python_skill(self, content):
-        skills = []
-
-        # Data types and variables
-        if re.search(
-            r"\bint\b|\bfloat\b|\bcomplex\b|\bstr\b|\bbool\b|\blist\b|\btuple\b|\bdict\b|\bset\b",
-            content,
-        ):
-            skills.append("python/variables_data_types")
-        if re.search(r"\bint\b|\bfloat\b|\bcomplex\b", content):
-            skills.append("python/numeric_types")
-        if re.search(r"\bstr\b", content):
-            skills.append("python/strings")
-        if re.search(r"\bTrue\b|\bFalse\b", content):
-            skills.append("python/booleans")
-        if re.search(r"#", content):
-            skills.append("python/comments")
-        if re.search(r"\bint\(.+\)|\bfloat\(.+\)|\bstr\(.+\)", content):
-            skills.append("python/type_conversion")
-
-        # Lists - 改进以避免将空方括号误识别为列表
-        if re.search(r"\blist\s*\(|\[\s*[^]]*\]", content):
-            skills.append("python/lists")
-
-        # Tuples - 改进以避免将函数调用误识别为元组
-        if re.search(r"\([^,)]+,\s*[^)]*\)", content) or re.search(
-            r"\btuple\s*\(", content
-        ):
-            skills.append("python/tuples")
-
-        # Dictionaries - 更精确地匹配字典结构
-        if re.search(r"\{[^}:]*:[^}]*\}", content):
-            skills.append("python/dictionaries")
-
-        # Sets - 改进以区分集合和字典
-        if re.search(r"\{[^}:]+\}", content) and not re.search(
-            r"\{[^}:]*:[^}]*\}", content
-        ):
-            skills.append("python/sets")
-
-        # Polymorphism
-        if (
-            re.search(r"\bclass\b", content)
-            and re.search(r"\bdef\b.*\bself\b", content)
-            and re.search(r"\bdef\s+__\w+__\b", content)
-        ):
-            skills.append("python/polymorphism")
-
-        # Python Shell
-        if re.search(r"^\s*>>> |\s*\.\.\. ", content, re.MULTILINE):
-            skills.append("python/python_shell")
-
-        # IPython Shell
-        if re.search(
-            r"^\s*In \[\d+\]: |\s*Out\[\d+\]: |^\s*%[a-zA-Z]+", content, re.MULTILINE
-        ):
-            skills.append("python/python_shell")
-
-        # Control structures
-        if re.search(r"\bif\b|\belif\b|\belse\b", content):
-            skills.append("python/conditional_statements")
-        if re.search(r"\bfor\b", content):
-            skills.append("python/for_loops")
-        if re.search(r"\bwhile\b", content):
-            skills.append("python/while_loops")
-        if re.search(r"\bbreak\b|\bcontinue\b", content):
-            skills.append("python/break_continue")
-
-        # Comprehensions and collections
-        if re.search(r"\[.+\s+for\s+.+\s+in\s+.+\]", content):
-            skills.append("python/list_comprehensions")
-        if re.search(r"\blist\b|\btuple\b|\bset\b|\bdict\b", content):
-            skills.append("python/data_collections")
-
-        # Functions and scope
-        if re.search(r"\bdef\b", content):
-            skills.append("python/function_definition")
-        if re.search(r"\blambda\b", content):
-            skills.append("python/lambda_functions")
-        if re.search(r"\bglobal\b|\bnonlocal\b", content):
-            skills.append("python/scope")
-        if re.search(r"\bdef\b.*\breturn\b", content):
-            skills.append("python/arguments_return")
-        if re.search(r"\bdef\b.*\=", content):
-            skills.append("python/default_arguments")
-        if re.search(r"\bdef\b.*\*\w+", content):
-            skills.append("python/keyword_arguments")
-        if re.search(r"\bdef\b.*\*\*[^*]", content):
-            skills.append("python/keyword_arguments")
-        if re.search(r"\brecursion\b|\bdef\b.*\bdef\b", content):
-            skills.append("python/recursion")
-
-        # Error handling
-        if re.search(r"\btry\b|\bexcept\b", content):
-            skills.append("python/catching_exceptions")
-        if re.search(r"\braise\b", content):
-            skills.append("python/raising_exceptions")
-        if re.search(r"\bassert\b", content):
-            skills.append("python/custom_exceptions")
-        if re.search(r"\bfinally\b", content):
-            skills.append("python/finally_block")
-
-        # Files and I/O
-        if re.search(r"\bopen\b", content):
-            skills.append("python/file_opening_closing")
-        if re.search(r"\bwith\b", content):
-            skills.append("python/with_statement")
-        if re.search(r"\b.read\b|\b.write\b", content):
-            skills.append("python/file_reading_writing")
-        if re.search(r"\bfile\b.*\bopen\b|\bfile\b.*\bclose\b", content):
-            skills.append("python/file_operations")
-
-        # Iterators and Generators
-        if re.search(r"\biter\b|\bnext\b", content):
-            skills.append("python/iterators")
-        if re.search(r"\byield\b", content):
-            skills.append("python/generators")
-
-        # Object-oriented programming
-        if re.search(r"\bclass\b", content):
-            skills.append("python/classes_objects")
-        if re.search(r"\b__init__\b", content):
-            skills.append("python/constructor")
-        if re.search(r"\bclass\b.*\bclass\b", content):
-            skills.append("python/inheritance")
-        if re.search(r"\bdef\b.*\bself\b", content):
-            skills.append("python/encapsulation")
-        if re.search(r"\b@classmethod\b|\b@staticmethod\b", content):
-            skills.append("python/class_static_methods")
-
-        # Advanced concepts
-        if re.search(r"\b@\w+", content):
-            skills.append("python/decorators")
-        if re.search(r"\b__enter__\b|\b__exit__\b", content):
-            skills.append("python/context_managers")
-        if re.search(r"\bimport\b.*\bre\b|\bre\.\w+", content):
-            skills.append("python/regular_expressions")
-        if re.search(r"\bthreading\b|\bmultiprocessing\b", content):
-            skills.append("python/threading_multiprocessing")
-        if re.search(r"\bmath\b|\brandom\b", content):
-            skills.append("python/math_random")
-        if re.search(r"\bdatetime\b", content):
-            skills.append("python/date_time")
-        if re.search(r"\bjson\b|\bpickle\b|\bmarshal\b", content):
-            skills.append("python/data_serialization")
-        if re.search(r"\bos\b|\bsys\b", content):
-            skills.append("python/os_system")
-        if re.search(r"\bsocket\b", content):
-            skills.append("python/socket_programming")
-        if re.search(r"\brequests\b|\bhttp.client\b", content):
-            skills.append("python/http_requests")
-        if re.search(r"\bsocket\b", content):
-            skills.append("python/networking_protocols")
-        if re.search(r"\bnumpy\b|\bscipy\b|\bpandas\b", content):
-            skills.append("python/numerical_computing")
-        if re.search(r"\bpandas\b", content):
-            skills.append("python/data_analysis")
-        if re.search(r"\bmatplotlib\b|\bseaborn\b", content):
-            skills.append("python/data_visualization")
-        if re.search(r"\bsklearn\b|\btensorflow\b|\bkeras\b|\bpytorch\b", content):
-            skills.append("python/machine_learning")
-
-        # Modules and Packages
-        if re.search(r"\bimport\b", content):
-            skills.append("python/importing_modules")
-        if re.search(r"\bfrom\b.*\bimport\b", content):
-            skills.append("python/using_packages")
-        if re.search(r"\b__name__\s*==\s*\'__main__\'\b", content):
-            skills.append("python/creating_modules")
-
+        skills = set()
         # Standard libraries
         standard_libraries = [
             "os",
@@ -269,9 +102,6 @@ class ParseSkills:
             "cmd",
             "shlex",
         ]
-        if any(re.search(r"\b{}\b".format(lib), content) for lib in standard_libraries):
-            skills.append("python/standard_libraries")
-
         # Built-in functions
         built_in_functions = [
             "abs",
@@ -344,13 +174,247 @@ class ParseSkills:
             "__import__",
         ]
 
-        # Built-in functions
-        if any(
-            re.search(r"\b{}\(".format(func), content) for func in built_in_functions
-        ):
-            skills.append("python/build_in_functions")
+        class SkillCollector(ast.NodeVisitor):
+            def check_variable_types(self, node):
+                if isinstance(node, (ast.List, ast.Tuple, ast.Dict, ast.Set)):
+                    skills.add("python/variables_data_types")
 
-        return list(set(skills))
+            def visit_Name(self, node):
+                if node.id in ["int", "float", "complex", "str", "bool"]:
+                    skills.add("python/variables_data_types")
+
+                    if node.id in ["int", "float", "complex"]:
+                        skills.add("python/numeric_types")
+
+                    if node.id == "str":
+                        skills.add("python/strings")
+
+                    if node.id in ["True", "False"]:
+                        skills.add("python/booleans")
+                self.generic_visit(node)
+
+
+            def visit_Call(self, node):
+                if isinstance(node.func, ast.Name):
+                    if node.func.id in ["int", "float", "str"]:
+                        skills.add("python/type_conversion")
+                    if node.func.id in ['list', 'tuple', 'set', 'dict']:
+                        skills.add("python/data_collections")
+                    if node.func.id == "open":
+                        skills.add("python/file_opening_closing")
+                    if node.func.id in ['iter', 'next']:
+                        skills.add("python/iterators")
+                    if node.func.id in built_in_functions:
+                        skills.add("python/build_in_functions")
+                    
+                self.generic_visit(node)
+
+            def visit_Comment(self, node):
+                skills.add("python/comments")
+            
+
+            def visit_List(self, node):
+                # Check for non-empty lists
+                if node.elts:
+                    skills.add("python/lists")
+                self.generic_visit(node)
+
+            def visit_Tuple(self, node):
+                # Check for tuples, avoiding confusion with function calls
+                if len(node.elts) > 1:
+                    skills.add("python/tuples")
+                self.generic_visit(node)       
+
+            def visit_Dict(self, node):
+                # Check for dictionaries
+                if node.keys:
+                    skills.add("python/dictionaries")
+                self.generic_visit(node)
+
+            def visit_Set(self, node):
+                # Check for sets, distinguishing from dictionaries
+                if node.elts:
+                    skills.add("python/sets")
+                self.generic_visit(node)            
+
+            def visit_ClassDef(self, node):
+
+                skills.add("python/classes_objects")
+                skills.add("python/inheritance")
+
+                # Check for classes with methods using self and dunder methods
+                has_self = any("self" in arg.arg for method in node.body if isinstance(method, ast.FunctionDef) for arg in method.args.args)
+                has_dunder_method = any(method.name.startswith("__") and method.name.endswith("__") for method in node.body if isinstance(method, ast.FunctionDef))
+
+                if has_self:
+                    skills.add("python/encapsulation")
+                    if has_dunder_method:
+                        skills.add("python/polymorphism")
+
+                has_init = any(isinstance(method, ast.FunctionDef) and method.name == '__init__' for method in node.body)
+                if has_init:
+                    skills.add("python/constructor")
+
+                if any(m.name in ["__enter__", "__exit__"] for m in node.body if isinstance(m, ast.FunctionDef)):
+                    skills.add("python/context_managers")
+
+                self.generic_visit(node)
+
+            def visit_If(self, node):
+                skills.add("python/conditional_statements")
+                if isinstance(node.test, ast.Compare) and any(isinstance(el, ast.Name) for el in node.test.left.elts if el.id == '__name__'):
+                        skills.add("python/creating_modules")
+
+                self.generic_visit(node)
+
+            def visit_For(self, node):
+                if isinstance(node.target, ast.Name):
+                    skills.add("python/for_loops")
+                self.generic_visit(node)
+
+            def visit_While(self, node):
+                skills.add("python/while_loops")
+                self.generic_visit(node)
+
+            def visit_Break(self, node):
+                skills.add("python/break_continue")
+                self.generic_visit(node)
+
+            def visit_Continue(self, node):
+                skills.add("python/break_continue")
+                self.generic_visit(node)            
+
+            def visit_ListComp(self, node):
+                skills.add("python/list_comprehensions")
+                self.generic_visit(node)            
+
+            def check_collection_types(self, node):
+                if isinstance(node, (ast.List, ast.Tuple, ast.Set, ast.Dict)):
+                    skills.add("python/data_collections")
+
+            def visit_FunctionDef(self, node):
+                
+                skills.add("python/function_definition")
+
+                has_return = any(isinstance(child, ast.Return) for child in ast.walk(node))
+                if has_return:
+                    skills.add("python/arguments_return")
+
+                has_default_args = any(arg for arg in node.args.defaults)
+                if has_default_args:
+                    skills.add("python/default_arguments")
+
+                if node.args.vararg or node.args.kwarg:
+                    skills.add("python/keyword_arguments")
+
+                # Check for recursion
+                if any(child.name == node.name for child in ast.walk(node) if isinstance(child, ast.Call)):
+                    skills.add("python/recursion")
+
+                if any(isinstance(decorator, ast.Name) and decorator.id in ['classmethod', 'staticmethod'] for decorator in node.decorator_list):
+                    skills.add("python/class_static_methods")
+
+                if node.decorator_list:
+                    skills.add("python/decorators")
+                self.generic_visit(node)
+            
+            def visit_Lambda(self, node):
+                skills.add("python/lambda_functions")
+                self.generic_visit(node)
+
+            def visit_Global(self, node):
+                skills.add("python/scope")
+                self.generic_visit(node)
+
+            def visit_Nonlocal(self, node):
+                skills.add("python/scope")
+                self.generic_visit(node)        
+
+            def visit_Try(self, node):
+                skills.add("python/catching_exceptions")
+                self.generic_visit(node)           
+
+            def visit_Raise(self, node):
+                skills.add("python/raising_exceptions")
+                self.generic_visit(node)
+
+            def visit_Assert(self, node):
+                skills.add("python/custom_exceptions")
+                self.generic_visit(node)
+
+            def visit_With(self, node):
+                skills.add("python/with_statement")
+                self.generic_visit(node)
+            
+            def visit_Attribute(self, node):
+                if node.attr in ["read", "write"]:
+                    skills.add("python/file_reading_writing")
+                self.generic_visit(node) 
+
+            def visit_Yield(self, node):
+                skills.add("python/generators")
+                self.generic_visit(node)
+                       
+            def visit_Import(self, node):
+                # Check for specific library imports
+                skills.add("python/importing_modules")
+                for alias in node.names:
+                    self.check_import(alias.name)
+                self.generic_visit(node)
+
+            def visit_ImportFrom(self, node):
+                # Check for specific module imports from a library
+                skills.add("python/using_packages")
+                self.check_import(node.module)
+                self.generic_visit(node)
+
+            def check_import(self, name):
+                library_skill_mapping = {
+                    "re": ["python/regular_expressions"],
+                    "threading": ["python/threading_multiprocessing"],
+                    "multiprocessing": ["python/threading_multiprocessing"],
+                    "math": ["python/math_random"],
+                    "random": ["python/math_random"],
+                    "datetime": ["python/date_time"],
+                    "json": ["python/data_serialization"],
+                    "pickle": ["python/data_serialization"],
+                    "marshal": ["python/data_serialization"],
+                    "os": ["python/os_system"],
+                    "sys": ["python/os_system"],
+                    "socket": ["python/socket_programming"],
+                    "requests": ["python/http_requests"],
+                    "http.client": ["python/http_requests"],
+                    "numpy": ["python/numerical_computing"],
+                    "scipy": ["python/numerical_computing"],
+                    "pandas": ["python/numerical_computing", "python/data_analysis"],
+                    "matplotlib": ["python/data_visualization"],
+                    "seaborn": ["python/data_visualization"],
+                    "sklearn": ["python/machine_learning"],
+                    "tensorflow": ["python/machine_learning"],
+                    "keras": ["python/machine_learning"],
+                    "pytorch": ["python/machine_learning"]
+                }
+                if name in library_skill_mapping:
+                    skills.update(library_skill_mapping[name])
+                if name in standard_libraries:
+                    skills.add("python/standard_libraries")
+
+        tree = ast.parse(content)
+        collector = SkillCollector()
+        collector.visit(tree)
+
+        # Regex-based checks
+        # Python Shell
+        if re.search(r"^\s*>>> |\s*\.\.\. ", content, re.MULTILINE):
+            skills.add("python/python_shell")
+
+        # IPython Shell
+        if re.search(
+            r"^\s*In \[\d+\]: |\s*Out\[\d+\]: |^\s*%[a-zA-Z]+", content, re.MULTILINE
+        ):
+            skills.add("python/python_shell")
+
+        return list(skills)
 
     def __parse_linux_skill(self, content):
         skills = []
