@@ -279,8 +279,11 @@ class GitHub:
             contributors = set()
             # Iterate through the commits and extract the author's login
             for commit in commits:
-                author = commit["author"]["login"]
-                contributors.add(author)
+                author = commit.get("author", False)
+                if author:
+                    author = author.get("login", False)
+                    if author:
+                        contributors.add(author)
             return list(contributors)
         except:
             return []
