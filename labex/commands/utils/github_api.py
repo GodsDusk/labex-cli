@@ -273,6 +273,8 @@ class GitHub:
 
         # Send the request
         r = requests.get(url, headers=headers, params=params)
+        if r.status_code != 200:
+            raise Exception(f"Error retrieving commits: {r.status_code}, {r.text}")
         # Check if the request was successful
         try:
             commits = r.json()
@@ -281,9 +283,9 @@ class GitHub:
             for commit in commits:
                 author = commit.get("author", False)
                 if author:
-                    author = author.get("login", False)
-                    if author:
-                        contributors.add(author)
+                    login = author.get("login", False)
+                    if login:
+                        contributors.add(login)
             return list(contributors)
         except:
             return []
