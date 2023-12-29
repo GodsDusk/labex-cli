@@ -189,12 +189,13 @@ class SyncLabsToFeishu:
                     # read index.json
                     with open(filepath, "r") as f:
                         index = json.load(f)
-                        is_confirm = index.get("is_confirm", False)
+                        is_confirm = index.get("is_confirm", True)
                     # Skip unconfirmed labs
                     if not is_confirm:
                         print(
                             f"[yellow]➜ SKIPPED[/yellow]: {filepath} because of unconfirmed"
                         )
+                        data_paths.append(data_path)
                         continue
                     data = self.__parse_json(filepath, skills_dicts)
                     # Validate index.json
