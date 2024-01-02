@@ -57,7 +57,8 @@ class AddSkills:
         steps = data["details"]["steps"]
         task_type = "ADD"
         for step in steps:
-            step_skills = set(step.get("skills", []))
+            # step_skills = set(step.get("skills", []))
+            step_skills = set()
             if skilltree is None:
                 task_type = "SORT"
                 continue
@@ -83,92 +84,29 @@ class AddSkills:
                             skilltree, solution_content
                         )
                         step_skills.update(skills)
-
             else:  # process lab
                 step_file = step['text']
                 with open(os.path.join(dir_path, step_file), "r") as f:
                     step_content = f.read()
-
+                # parse the code block
+                languages = self.languages[skilltree]
+                for language in languages:
+                    code_block_content = self.__parse_code_block(
+                        step_content, language
+                    )
+                    code_block_content = "\n".join(code_block_content)
+                    skills = self.parse_skills.parse(
+                        skilltree, code_block_content
+                    )
+                    step_skills.update(skills)
             step["skills"] = sorted(step_skills)
 
         # update the index.json file
-        # with open(index_path, "w") as f:
-        # json.dump(data, f, indent=2, ensure_ascii=False)
+        with open(index_path, "w") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
         # run prettier
         os.system(f"prettier --log-level silent --write {index_path}")
         print(f"[green]→ {task_type} SKILLS:[/] {index_path}")
-
-    def add_skills_tmp(self, dir_path: str, skilltree: str) -> None:
-        for root, dirs, files in os.walk(dir_path):
-            for file in files:
-                if file.endswith("index.json"):
-                    index_path = os.path.join(root, file)
-                    # read the index.json file
-                    with open(index_path, "r") as f:
-                        data = json.load(f)
-                    steps = data["details"]["steps"]
-                    task_type = "ADD"
-                    for step in steps:
-                        step_text = os.path.join(root, step["text"])
-                        skills_original = step.get("skills", [])
-                        if skilltree == None:
-                            # only sort the skills
-                            all_skills = list(set(skills_original))
-                            task_type = "SORT"
-                        else:
-                            # read the step file
-                            with open(step_text, "r") as f:
-                                step_content = f.read()
-                            step_skills = []
-                            # parse the code block
-                            languages = self.languages[skilltree]
-                            for language in languages:
-                                code_block_content = self.__parse_code_block(
-                                    step_content, language
-                                )
-                                code_block_content = "\n".join(code_block_content)
-                                # skills = self.parse_skills.parse(
-                                #     skilltree, code_block_content
-                                # )
-                                # step_skills += skills
-                            # if step solutions is not empty, parse the solutions
-                            solutions = step.get("solutions", [])
-                            if solutions:
-                                for solution in solutions:
-                                    # read the solution file
-                                    solution_text = os.path.join(
-                                        root, "solutions", solution
-                                    )
-                                    with open(solution_text, "r") as f:
-                                        solution_content = f.read()
-                                    if solution.endswith(".md"):
-                                        for language in languages:
-                                            solution_code_block_content = (
-                                                self.__parse_code_block(
-                                                    solution_content, language
-                                                )
-                                            )
-                                            solution_code_block_content = "\n".join(
-                                                solution_code_block_content
-                                            )
-                                            skills = self.parse_skills.parse(
-                                                skilltree, solution_code_block_content
-                                            )
-                                            step_skills += skills
-                                    else:
-                                        skills = self.parse_skills.parse(
-                                            skilltree, solution_content
-                                        )
-                                        step_skills += skills
-                            # update the index.json file
-                            all_skills = list(set(skills_original + step_skills))
-                        step["skills"] = sorted(all_skills)
-                    # update the index.json file
-                    with open(index_path, "w") as f:
-                        json.dump(data, f, indent=2, ensure_ascii=False)
-                    # run prettier
-                    os.system(f"prettier --log-level silent --write {index_path}")
-                    print(f"[green]→ {task_type} SKILLS:[/] {index_path}")
 
 
 class RemoveSkills:
@@ -255,8 +193,3 @@ class RemoveSkills:
                     except Exception as e:
                         print(f"[red]→ ERROR:[/] {index_path}")
                         print(e)
-
-
-if __name__ == "__main__":
-    add = AddSkills()
-    add.add_skills('/Users/xujunjie/Documents/scenarios/python/lab-typing-module', 'python')

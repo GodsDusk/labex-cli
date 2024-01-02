@@ -1,15 +1,13 @@
 import ast
 import re
 
+from labex.commands.utils.python_ast_skill_collector import PythonSkillCollector
+
 
 class ParseSkills:
     def __init__(self) -> None:
-        pass
-
-    def __parse_python_skill(self, content):
-        skills = set()
         # Standard libraries
-        standard_libraries = [
+        self.standard_libraries = [
             "os",
             "sys",
             "math",
@@ -103,7 +101,7 @@ class ParseSkills:
             "shlex",
         ]
         # Built-in functions
-        built_in_functions = [
+        self.built_in_functions = [
             "abs",
             "all",
             "any",
@@ -174,255 +172,196 @@ class ParseSkills:
             "__import__",
         ]
 
-        class SkillCollector(ast.NodeVisitor):
-            def check_variable_types(self, node):
-                if isinstance(node, (ast.List, ast.Tuple, ast.Dict, ast.Set)):
-                    skills.add("python/variables_data_types")
+    def __parse_python_skill(self, content):
 
-            def visit_Name(self, node):
-                if node.id in ["int", "float", "complex", "str", "bool"]:
-                    skills.add("python/variables_data_types")
+        try:
+            tree = ast.parse(content)
+            collector = PythonSkillCollector(self.standard_libraries, self.built_in_functions)
+            collector.visit(tree)
+            return list(collector.skills), 'ast'
+        except Exception as e:
+            pass
 
-                    if node.id in ["int", "float", "complex"]:
-                        skills.add("python/numeric_types")
+        skills = []
 
-                    if node.id == "str":
-                        skills.add("python/strings")
-
-                    if node.id in ["True", "False"]:
-                        skills.add("python/booleans")
-                self.generic_visit(node)
-
-            def visit_Call(self, node):
-                if isinstance(node.func, ast.Name):
-                    if node.func.id in ["int", "float", "str"]:
-                        skills.add("python/type_conversion")
-                    if node.func.id in ['list', 'tuple', 'set', 'dict']:
-                        skills.add("python/data_collections")
-                    if node.func.id == "open":
-                        skills.add("python/file_opening_closing")
-                    if node.func.id in ['iter', 'next']:
-                        skills.add("python/iterators")
-                    if node.func.id in built_in_functions:
-                        skills.add("python/build_in_functions")
-
-                self.generic_visit(node)
-
-            def visit_Comment(self, node):
-                skills.add("python/comments")
-
-            def visit_List(self, node):
-                # Check for non-empty lists
-                if node.elts:
-                    skills.add("python/lists")
-                self.generic_visit(node)
-
-            def visit_Tuple(self, node):
-                # Check for tuples, avoiding confusion with function calls
-                if len(node.elts) > 1:
-                    skills.add("python/tuples")
-                self.generic_visit(node)
-
-            def visit_Dict(self, node):
-                # Check for dictionaries
-                if node.keys:
-                    skills.add("python/dictionaries")
-                self.generic_visit(node)
-
-            def visit_Set(self, node):
-                # Check for sets, distinguishing from dictionaries
-                if node.elts:
-                    skills.add("python/sets")
-                self.generic_visit(node)
-
-            def visit_ClassDef(self, node):
-
-                skills.add("python/classes_objects")
-                skills.add("python/inheritance")
-
-                # Check for classes with methods using self and dunder methods
-                has_self = any("self" in arg.arg for method in node.body if isinstance(
-                    method, ast.FunctionDef) for arg in method.args.args)
-                has_dunder_method = any(method.name.startswith("__") and method.name.endswith(
-                    "__") for method in node.body if isinstance(method, ast.FunctionDef))
-
-                if has_self:
-                    skills.add("python/encapsulation")
-                    if has_dunder_method:
-                        skills.add("python/polymorphism")
-
-                has_init = any(isinstance(method, ast.FunctionDef)
-                               and method.name == '__init__' for method in node.body)
-                if has_init:
-                    skills.add("python/constructor")
-
-                if any(m.name in ["__enter__", "__exit__"] for m in node.body if isinstance(m, ast.FunctionDef)):
-                    skills.add("python/context_managers")
-
-                self.generic_visit(node)
-
-            def visit_If(self, node):
-                skills.add("python/conditional_statements")
-                if (isinstance(node.test, ast.Compare) and isinstance(node.test.left, ast.Name)
-                        and node.test.left.id == '__name__' and isinstance(node.test.comparators[0], ast.Str)
-                        and node.test.comparators[0].s == '__main__'):
-                    if "python/creating_modules" not in skills:
-                        skills.add("python/creating_modules")
-
-                self.generic_visit(node)
-
-            def visit_For(self, node):
-                if isinstance(node.target, ast.Name):
-                    skills.add("python/for_loops")
-                self.generic_visit(node)
-
-            def visit_While(self, node):
-                skills.add("python/while_loops")
-                self.generic_visit(node)
-
-            def visit_Break(self, node):
-                skills.add("python/break_continue")
-                self.generic_visit(node)
-
-            def visit_Continue(self, node):
-                skills.add("python/break_continue")
-                self.generic_visit(node)
-
-            def visit_ListComp(self, node):
-                skills.add("python/list_comprehensions")
-                self.generic_visit(node)
-
-            def check_collection_types(self, node):
-                if isinstance(node, (ast.List, ast.Tuple, ast.Set, ast.Dict)):
-                    skills.add("python/data_collections")
-
-            def visit_FunctionDef(self, node):
-
-                skills.add("python/function_definition")
-
-                has_return = any(isinstance(child, ast.Return)
-                                 for child in ast.walk(node))
-                if has_return:
-                    skills.add("python/arguments_return")
-
-                has_default_args = any(arg for arg in node.args.defaults)
-                if has_default_args:
-                    skills.add("python/default_arguments")
-
-                if node.args.vararg or node.args.kwarg:
-                    skills.add("python/keyword_arguments")
-
-                # Check for recursion
-                for child in ast.walk(node):
-                    if isinstance(child, ast.Call) and isinstance(child.func, ast.Name):
-                        if child.func.id == node.name:
-                            skills.add("python/recursion")
-                            break
-
-                if any(isinstance(decorator, ast.Name) and decorator.id in ['classmethod', 'staticmethod'] for decorator in node.decorator_list):
-                    skills.add("python/class_static_methods")
-
-                if node.decorator_list:
-                    skills.add("python/decorators")
-                self.generic_visit(node)
-
-            def visit_Lambda(self, node):
-                skills.add("python/lambda_functions")
-                self.generic_visit(node)
-
-            def visit_Global(self, node):
-                skills.add("python/scope")
-                self.generic_visit(node)
-
-            def visit_Nonlocal(self, node):
-                skills.add("python/scope")
-                self.generic_visit(node)
-
-            def visit_Try(self, node):
-                skills.add("python/catching_exceptions")
-                self.generic_visit(node)
-
-            def visit_Raise(self, node):
-                skills.add("python/raising_exceptions")
-                self.generic_visit(node)
-
-            def visit_Assert(self, node):
-                skills.add("python/custom_exceptions")
-                self.generic_visit(node)
-
-            def visit_With(self, node):
-                skills.add("python/with_statement")
-                self.generic_visit(node)
-
-            def visit_Attribute(self, node):
-                if node.attr in ["read", "write"]:
-                    skills.add("python/file_reading_writing")
-                self.generic_visit(node)
-
-            def visit_Yield(self, node):
-                skills.add("python/generators")
-                self.generic_visit(node)
-
-            def visit_Import(self, node):
-                # Check for specific library imports
-                skills.add("python/importing_modules")
-                for alias in node.names:
-                    self.check_import(alias.name)
-                self.generic_visit(node)
-
-            def visit_ImportFrom(self, node):
-                # Check for specific module imports from a library
-                skills.add("python/using_packages")
-                self.check_import(node.module)
-                self.generic_visit(node)
-
-            def check_import(self, name):
-                library_skill_mapping = {
-                    "re": ["python/regular_expressions"],
-                    "threading": ["python/threading_multiprocessing"],
-                    "multiprocessing": ["python/threading_multiprocessing"],
-                    "math": ["python/math_random"],
-                    "random": ["python/math_random"],
-                    "datetime": ["python/date_time"],
-                    "json": ["python/data_serialization"],
-                    "pickle": ["python/data_serialization"],
-                    "marshal": ["python/data_serialization"],
-                    "os": ["python/os_system"],
-                    "sys": ["python/os_system"],
-                    "socket": ["python/socket_programming"],
-                    "requests": ["python/http_requests"],
-                    "http.client": ["python/http_requests"],
-                    "numpy": ["python/numerical_computing"],
-                    "scipy": ["python/numerical_computing"],
-                    "pandas": ["python/numerical_computing", "python/data_analysis"],
-                    "matplotlib": ["python/data_visualization"],
-                    "seaborn": ["python/data_visualization"],
-                    "sklearn": ["python/machine_learning"],
-                    "tensorflow": ["python/machine_learning"],
-                    "keras": ["python/machine_learning"],
-                    "pytorch": ["python/machine_learning"]
-                }
-                if name in library_skill_mapping:
-                    skills.update(library_skill_mapping[name])
-                if name in standard_libraries:
-                    skills.add("python/standard_libraries")
-
-        tree = ast.parse(content)
-        collector = SkillCollector()
-        collector.visit(tree)
-
-        # Regex-based checks
-        # Python Shell
-        if re.search(r"^\s*>>> |\s*\.\.\. ", content, re.MULTILINE):
-            skills.add("python/python_shell")
-
-        # IPython Shell
+        # Data types and variables
         if re.search(
-            r"^\s*In \[\d+\]: |\s*Out\[\d+\]: |^\s*%[a-zA-Z]+", content, re.MULTILINE
+                r"\bint\b|\bfloat\b|\bcomplex\b|\bstr\b|\bbool\b|\blist\b|\btuple\b|\bdict\b|\bset\b",
+                content,
         ):
-            skills.add("python/python_shell")
+            skills.append("python/variables_data_types")
+        if re.search(r"\bint\b|\bfloat\b|\bcomplex\b", content):
+            skills.append("python/numeric_types")
+        if re.search(r"\bstr\b", content):
+            skills.append("python/strings")
+        if re.search(r"\bTrue\b|\bFalse\b", content):
+            skills.append("python/booleans")
+        if re.search(r"#", content):
+            skills.append("python/comments")
+        if re.search(r"\bint\(.+\)|\bfloat\(.+\)|\bstr\(.+\)", content):
+            skills.append("python/type_conversion")
 
-        return list(skills)
+        # Lists - 改进以避免将空方括号误识别为列表
+        if re.search(r"\blist\s*\(|\[\s*[^]]*\]", content):
+            skills.append("python/lists")
+
+        # Tuples - 改进以避免将函数调用误识别为元组
+        if re.search(r"\([^,)]+,\s*[^)]*\)", content) or re.search(
+                r"\btuple\s*\(", content
+        ):
+            skills.append("python/tuples")
+
+        # Dictionaries - 更精确地匹配字典结构
+        if re.search(r"\{[^}:]*:[^}]*\}", content):
+            skills.append("python/dictionaries")
+
+        # Sets - 改进以区分集合和字典
+        if re.search(r"\{[^}:]+\}", content) and not re.search(
+                r"\{[^}:]*:[^}]*\}", content
+        ):
+            skills.append("python/sets")
+
+        # Polymorphism
+        if (
+                re.search(r"\bclass\b", content)
+                and re.search(r"\bdef\b.*\bself\b", content)
+                and re.search(r"\bdef\s+__\w+__\b", content)
+        ):
+            skills.append("python/polymorphism")
+
+            # Python Shell
+        if re.search(r"^\s*>>> |\s*\.\.\. ", content, re.MULTILINE):
+            skills.append("python/python_shell")
+
+            # IPython Shell
+        if re.search(
+                r"^\s*In \[\d+\]: |\s*Out\[\d+\]: |^\s*%[a-zA-Z]+", content, re.MULTILINE
+        ):
+            skills.append("python/python_shell")
+
+            # Control structures
+        if re.search(r"\bif\b|\belif\b|\belse\b", content):
+            skills.append("python/conditional_statements")
+        if re.search(r"\bfor\b", content):
+            skills.append("python/for_loops")
+        if re.search(r"\bwhile\b", content):
+            skills.append("python/while_loops")
+        if re.search(r"\bbreak\b|\bcontinue\b", content):
+            skills.append("python/break_continue")
+
+            # Comprehensions and collections
+        if re.search(r"\[.+\s+for\s+.+\s+in\s+.+\]", content):
+            skills.append("python/list_comprehensions")
+        if re.search(r"\blist\b|\btuple\b|\bset\b|\bdict\b", content):
+            skills.append("python/data_collections")
+
+            # Functions and scope
+        if re.search(r"\bdef\b", content):
+            skills.append("python/function_definition")
+        if re.search(r"\blambda\b", content):
+            skills.append("python/lambda_functions")
+        if re.search(r"\bglobal\b|\bnonlocal\b", content):
+            skills.append("python/scope")
+        if re.search(r"\bdef\b.*\breturn\b", content):
+            skills.append("python/arguments_return")
+        if re.search(r"\bdef\b.*\=", content):
+            skills.append("python/default_arguments")
+        if re.search(r"\bdef\b.*\*\w+", content):
+            skills.append("python/keyword_arguments")
+        if re.search(r"\bdef\b.*\*\*[^*]", content):
+            skills.append("python/keyword_arguments")
+        if re.search(r"\brecursion\b|\bdef\b.*\bdef\b", content):
+            skills.append("python/recursion")
+
+            # Error handling
+        if re.search(r"\btry\b|\bexcept\b", content):
+            skills.append("python/catching_exceptions")
+        if re.search(r"\braise\b", content):
+            skills.append("python/raising_exceptions")
+        if re.search(r"\bassert\b", content):
+            skills.append("python/custom_exceptions")
+        if re.search(r"\bfinally\b", content):
+            skills.append("python/finally_block")
+
+            # Files and I/O
+        if re.search(r"\bopen\b", content):
+            skills.append("python/file_opening_closing")
+        if re.search(r"\bwith\b", content):
+            skills.append("python/with_statement")
+        if re.search(r"\b.read\b|\b.write\b", content):
+            skills.append("python/file_reading_writing")
+        if re.search(r"\bfile\b.*\bopen\b|\bfile\b.*\bclose\b", content):
+            skills.append("python/file_operations")
+
+            # Iterators and Generators
+        if re.search(r"\biter\b|\bnext\b", content):
+            skills.append("python/iterators")
+        if re.search(r"\byield\b", content):
+            skills.append("python/generators")
+
+            # Object-oriented programming
+        if re.search(r"\bclass\b", content):
+            skills.append("python/classes_objects")
+        if re.search(r"\b__init__\b", content):
+            skills.append("python/constructor")
+        if re.search(r"\bclass\b.*\bclass\b", content):
+            skills.append("python/inheritance")
+        if re.search(r"\bdef\b.*\bself\b", content):
+            skills.append("python/encapsulation")
+        if re.search(r"\b@classmethod\b|\b@staticmethod\b", content):
+            skills.append("python/class_static_methods")
+
+            # Advanced concepts
+        if re.search(r"\b@\w+", content):
+            skills.append("python/decorators")
+        if re.search(r"\b__enter__\b|\b__exit__\b", content):
+            skills.append("python/context_managers")
+        if re.search(r"\bimport\b.*\bre\b|\bre\.\w+", content):
+            skills.append("python/regular_expressions")
+        if re.search(r"\bthreading\b|\bmultiprocessing\b", content):
+            skills.append("python/threading_multiprocessing")
+        if re.search(r"\bmath\b|\brandom\b", content):
+            skills.append("python/math_random")
+        if re.search(r"\bdatetime\b", content):
+            skills.append("python/date_time")
+        if re.search(r"\bjson\b|\bpickle\b|\bmarshal\b", content):
+            skills.append("python/data_serialization")
+        if re.search(r"\bos\b|\bsys\b", content):
+            skills.append("python/os_system")
+        if re.search(r"\bsocket\b", content):
+            skills.append("python/socket_programming")
+        if re.search(r"\brequests\b|\bhttp.client\b", content):
+            skills.append("python/http_requests")
+        if re.search(r"\bsocket\b", content):
+            skills.append("python/networking_protocols")
+        if re.search(r"\bnumpy\b|\bscipy\b|\bpandas\b", content):
+            skills.append("python/numerical_computing")
+        if re.search(r"\bpandas\b", content):
+            skills.append("python/data_analysis")
+        if re.search(r"\bmatplotlib\b|\bseaborn\b", content):
+            skills.append("python/data_visualization")
+        if re.search(r"\bsklearn\b|\btensorflow\b|\bkeras\b|\bpytorch\b", content):
+            skills.append("python/machine_learning")
+
+            # Modules and Packages
+        if re.search(r"\bimport\b", content):
+            skills.append("python/importing_modules")
+        if re.search(r"\bfrom\b.*\bimport\b", content):
+            skills.append("python/using_packages")
+        if re.search(r"\b__name__\s*==\s*\'__main__\'\b", content):
+            skills.append("python/creating_modules")
+
+        # Standard libraries
+        if any(re.search(r"\b{}\b".format(lib), content) for lib in self.standard_libraries):
+            skills.append("python/standard_libraries")
+
+        # Built-in functions
+        if any(
+                re.search(r"\b{}\(".format(func), content) for func in self.built_in_functions
+        ):
+            skills.append("python/build_in_functions")
+
+        return list(skills), 're'
 
     def __parse_linux_skill(self, content):
         skills = []
@@ -726,13 +665,13 @@ class ParseSkills:
 
         # String Manipulation
         if re.search(r"\$\{[^}]*\}", content) or re.search(
-            r"\b[A-Za-z_][A-Za-z0-9_]*\s*\+=\s*", content
+                r"\b[A-Za-z_][A-Za-z0-9_]*\s*\+=\s*", content
         ):
             skills.append("shell/str_manipulation")
 
         # Arithmetic Operations
         if re.search(r"\b[0-9]+(\s*[\+\-\*/]\s*[0-9]+)+", content) or re.search(
-            r"\$\(\s*[0-9]+ \s*[\+\-\*/] \s*[0-9]+\s*\)", content
+                r"\$\(\s*[0-9]+ \s*[\+\-\*/] \s*[0-9]+\s*\)", content
         ):
             skills.append("shell/arith_ops")
 
@@ -874,9 +813,9 @@ class ParseSkills:
             skills.append("django/applications")
         # django/built_in_views
         if (
-            "django.views.generic" in content
-            or "django.views.View" in content
-            or "django.views.TemplateView" in content
+                "django.views.generic" in content
+                or "django.views.View" in content
+                or "django.views.TemplateView" in content
         ):
             skills.append("django/built_in_views")
         # django/clickjacking_protection
@@ -1693,14 +1632,14 @@ class ParseSkills:
         skills = []
         # Variables: Look for variable declarations
         if re.search(
-            r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b", content
+                r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b", content
         ):
             skills.append("cpp/variables")
 
         # Data Types: Look for specific data type declarations
         if re.search(
-            r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b|\blong\b|\bshort\b",
-            content,
+                r"\bint\b|\bfloat\b|\bdouble\b|\bchar\b|\bwchar_t\b|\bbool\b|\blong\b|\bshort\b",
+                content,
         ):
             skills.append("cpp/data_types")
 
@@ -1790,8 +1729,8 @@ class ParseSkills:
 
         # String manipulation: Look for string operations
         if re.search(
-            r"\bstd::string\b.*\.length\b|\bstd::string\b.*\.substr\b|\bstd::string\b.*\.find\b",
-            content,
+                r"\bstd::string\b.*\.length\b|\bstd::string\b.*\.substr\b|\bstd::string\b.*\.find\b",
+                content,
         ):
             skills.append("cpp/string_manipulation")
 
@@ -1813,7 +1752,7 @@ class ParseSkills:
 
         # Inheritance: Look for class inheritance patterns
         if re.search(
-            r"\bclass\b\s+\w+\s*:\s*(public|private|protected)\s+\w+", content
+                r"\bclass\b\s+\w+\s*:\s*(public|private|protected)\s+\w+", content
         ):
             skills.append("cpp/inheritance")
 
@@ -1927,7 +1866,7 @@ class ParseSkills:
 
         # Recursion
         for match in re.finditer(
-            r"\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{", content
+                r"\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{", content
         ):
             func_name = match.group(1)
             func_body_start = match.end()
@@ -1979,8 +1918,8 @@ class ParseSkills:
 
         # HTML Text Content and Formatting
         if re.search(
-            r"<(h[1-6]|strong|em|b|i|mark|del|ins|sub|sup|small|s|abbr|address|cite|blockquote)[ >]",
-            content,
+                r"<(h[1-6]|strong|em|b|i|mark|del|ins|sub|sup|small|s|abbr|address|cite|blockquote)[ >]",
+                content,
         ):
             skills.append("html/text_head")
 
@@ -2034,8 +1973,8 @@ class ParseSkills:
 
         # HTML Forms and Input
         if re.search(
-            r"<(form|input|button|select|optgroup|option|label|fieldset|legend|datalist|output|textarea|progress|meter)[ >]",
-            content,
+                r"<(form|input|button|select|optgroup|option|label|fieldset|legend|datalist|output|textarea|progress|meter)[ >]",
+                content,
         ):
             skills.append("html/forms")
 
@@ -2050,8 +1989,8 @@ class ParseSkills:
 
         # Advanced HTML Elements
         if re.search(
-            r"<(template|noscript|data|bdi|ruby|rt|rp|dfn|code|var|samp|kbd|pre)[ >]",
-            content,
+                r"<(template|noscript|data|bdi|ruby|rt|rp|dfn|code|var|samp|kbd|pre)[ >]",
+                content,
         ):
             skills.append("html/inter_elems")
 
@@ -2112,26 +2051,26 @@ class ParseSkills:
             skills.append("css/grid_layout")
         # css/pseudo_classes
         if (
-            ":hover" in content
-            or ":active" in content
-            or ":focus" in content
-            or ":link" in content
-            or ":visited" in content
-            or ":first-child" in content
-            or ":last-child" in content
-            or ":nth-child" in content
-            or ":nth-last-child" in content
-            or ":nth-of-type" in content
-            or ":nth-last-of-type" in content
-            or ":first-of-type" in content
-            or ":last-of-type" in content
-            or ":only-child" in content
-            or ":only-of-type" in content
-            or ":empty" in content
-            or ":target" in content
-            or ":enabled" in content
-            or ":disabled" in content
-            or ":checked" in content
+                ":hover" in content
+                or ":active" in content
+                or ":focus" in content
+                or ":link" in content
+                or ":visited" in content
+                or ":first-child" in content
+                or ":last-child" in content
+                or ":nth-child" in content
+                or ":nth-last-child" in content
+                or ":nth-of-type" in content
+                or ":nth-last-of-type" in content
+                or ":first-of-type" in content
+                or ":last-of-type" in content
+                or ":only-child" in content
+                or ":only-of-type" in content
+                or ":empty" in content
+                or ":target" in content
+                or ":enabled" in content
+                or ":disabled" in content
+                or ":checked" in content
         ):
             skills.append("css/pseudo_classes")
         # css/pseudo_elements
@@ -2248,8 +2187,8 @@ class ParseSkills:
         if re.search(r"\bvar\b|\blet\b|\bconst\b", content):
             skills.append("javascript/variables")
         if re.search(
-            r"['\"].*['\"]|\b\d+\b|\btrue\b|\bfalse\b|\bnull\b|\bundefined\b|\b\[\]|\b\{\}",
-            content,
+                r"['\"].*['\"]|\b\d+\b|\btrue\b|\bfalse\b|\bnull\b|\bundefined\b|\b\[\]|\b\{\}",
+                content,
         ):
             skills.append("javascript/data_types")
         if re.search(r"\+|-|\*|\/|%|\+\+|--", content):
@@ -2277,7 +2216,7 @@ class ParseSkills:
         if re.search(r"\bclass\b\s+\w+", content):
             skills.append("javascript/oop")
         if re.search(
-            r"\bsetTimeout\b|\bsetInterval\b|\bPromise\b|\basync\b|\bawait\b", content
+                r"\bsetTimeout\b|\bsetInterval\b|\bPromise\b|\basync\b|\bawait\b", content
         ):
             skills.append("javascript/async_prog")
         if re.search(r"\btry\b|\bcatch\b|\bfinally\b|\bthrow\b", content):
@@ -2299,7 +2238,7 @@ class ParseSkills:
 
         # DOM Manipulation
         if re.search(
-            r"\bdocument\.getElementById\b|\bdocument\.querySelector\b", content
+                r"\bdocument\.getElementById\b|\bdocument\.querySelector\b", content
         ):
             skills.append("javascript/dom_select")
         if re.search(r"\binnerHTML\b|\btextContent\b|\bcreateElement\b", content):
@@ -2313,7 +2252,7 @@ class ParseSkills:
         if re.search(r"\bconsole\.log\b|\bconsole\.", content):
             skills.append("javascript/debugging")
         if re.search(
-            r"\bwindow\b|\bdocument\b|\bnavigator\b|\blocation\b|\bhistory\b", content
+                r"\bwindow\b|\bdocument\b|\bnavigator\b|\blocation\b|\bhistory\b", content
         ):
             skills.append("javascript/bom")
         if re.search(r"\blocalStorage\b|\bsessionStorage\b", content):
@@ -2346,7 +2285,7 @@ class ParseSkills:
 
         # Components and Props
         if re.search(r"class\s+\w+\s+extends\s+React\.Component", content) or re.search(
-            r"function\s+\w+\s*\(", content
+                r"function\s+\w+\s*\(", content
         ):
             skills.append("react/components_props")
 
@@ -2379,7 +2318,7 @@ class ParseSkills:
 
         # Code Splitting
         if re.search(r"\bReact\.lazy\b", content) or re.search(
-            r"\bimport\(\)", content
+                r"\bimport\(\)", content
         ):
             skills.append("react/code_split")
 
@@ -2389,7 +2328,7 @@ class ParseSkills:
 
         # Error Boundaries
         if re.search(r"componentDidCatch", content) or re.search(
-            r"getDerivedStateFromError", content
+                r"getDerivedStateFromError", content
         ):
             skills.append("react/error_boundary")
 
@@ -2406,7 +2345,7 @@ class ParseSkills:
 
         # React Router Basics, Dynamic Routing, Nested Routes
         if re.search(r"from\s+\'react-router-dom\'", content) or re.search(
-            r'from\s+"react-router-dom"', content
+                r'from\s+"react-router-dom"', content
         ):
             skills.append("react/router_basic")
             # Further analysis can be required to distinguish between basic, dynamic, and nested routing.
@@ -2470,8 +2409,8 @@ class ParseSkills:
 
         # Operators
         if re.search(
-            r"[+\-*\/%]|[\+\-]=|==|!=|>|<|>=|<=|&&|\|\||!|>>=|<<=|>>>|<<<|\^=|\|=|&=",
-            content,
+                r"[+\-*\/%]|[\+\-]=|==|!=|>|<|>=|<=|&&|\|\||!|>>=|<<=|>>>|<<<|\^=|\|=|&=",
+                content,
         ):
             skills.append("java/operators")
 
@@ -2481,8 +2420,8 @@ class ParseSkills:
 
         # Variables
         if re.search(
-            r"\b(int|String|float|double|boolean|char|long|short|byte)\s+\w+\s*=",
-            content,
+                r"\b(int|String|float|double|boolean|char|long|short|byte)\s+\w+\s*=",
+                content,
         ):
             skills.append("java/variables")
 
@@ -2516,7 +2455,7 @@ class ParseSkills:
 
         # Type Casting
         if re.search(
-            r"\(\s*(int|String|float|double|boolean|char|long|short|byte)\s*\)", content
+                r"\(\s*(int|String|float|double|boolean|char|long|short|byte)\s*\)", content
         ):
             skills.append("java/type_casting")
 
@@ -2542,8 +2481,8 @@ class ParseSkills:
 
         # Arrays Methods
         if re.search(
-            r"\b(Arrays\.(sort|binarySearch|equals|fill|toString|copyOf|copyOfRange))\b",
-            content,
+                r"\b(Arrays\.(sort|binarySearch|equals|fill|toString|copyOf|copyOfRange))\b",
+                content,
         ):
             skills.append("java/arrays_methods")
 
@@ -2553,7 +2492,7 @@ class ParseSkills:
 
         # Collections Methods
         if re.search(
-            r"\b(Collections\.(sort|binarySearch|reverse|shuffle|max|min))\b", content
+                r"\b(Collections\.(sort|binarySearch|reverse|shuffle|max|min))\b", content
         ):
             skills.append("java/collections_methods")
 
@@ -2564,15 +2503,15 @@ class ParseSkills:
         # Class Attributes
         # Note: This is a rough approximation, might include variables outside class scope
         if re.search(
-            r"\b(private|protected|public|static|final)\s+\w+\s+\w+;", content
+                r"\b(private|protected|public|static|final)\s+\w+\s+\w+;", content
         ):
             skills.append("java/class_attributes")
 
         # Class Methods
         # Note: This is a rough approximation, might include methods outside class scope
         if re.search(
-            r"\b(private|protected|public|static|final)\s+\w+\s+\w+\(.*?\)\s*\{",
-            content,
+                r"\b(private|protected|public|static|final)\s+\w+\s+\w+\(.*?\)\s*\{",
+                content,
         ):
             skills.append("java/class_methods")
 
@@ -2582,8 +2521,8 @@ class ParseSkills:
 
         # Modifiers
         if re.search(
-            r"\b(public|protected|private|static|final|abstract|synchronized|volatile|transient|native|strictfp)\b",
-            content,
+                r"\b(public|protected|private|static|final|abstract|synchronized|volatile|transient|native|strictfp)\b",
+                content,
         ):
             skills.append("java/modifiers")
 
@@ -2625,7 +2564,7 @@ class ParseSkills:
 
         # Wrapper Classes
         if re.search(
-            r"\b(Integer|Float|Double|Boolean|Character|Long|Short|Byte)\b", content
+                r"\b(Integer|Float|Double|Boolean|Character|Long|Short|Byte)\b", content
         ):
             skills.append("java/wrapper_classes")
 
@@ -2707,8 +2646,8 @@ class ParseSkills:
 
         # Scope (捕获不同类型的作用域声明，如局部变量、循环内变量等)
         if re.search(
-            r"\bfor\s*\(|\bwhile\s*\(|\bif\s*\(|\{[^}]*\bint\b|\{[^}]*\bString\b",
-            content,
+                r"\bfor\s*\(|\bwhile\s*\(|\bif\s*\(|\{[^}]*\bint\b|\{[^}]*\bString\b",
+                content,
         ):
             skills.append("java/scope")
 
@@ -2718,8 +2657,8 @@ class ParseSkills:
 
         # Files (匹配文件操作相关的类或方法)
         if re.search(
-            r"\bFile\b|\bFileReader\b|\bFileWriter\b|\bFileInputStream\b|\bFileOutputStream\b",
-            content,
+                r"\bFile\b|\bFileReader\b|\bFileWriter\b|\bFileInputStream\b|\bFileOutputStream\b",
+                content,
         ):
             skills.append("java/files")
 
@@ -2737,7 +2676,7 @@ class ParseSkills:
 
         # IO (捕获输入输出流相关的代码)
         if re.search(
-            r"\bInputStream\b|\bOutputStream\b|\bReader\b|\bWriter\b", content
+                r"\bInputStream\b|\bOutputStream\b|\bReader\b|\bWriter\b", content
         ):
             skills.append("java/io")
 
@@ -2763,8 +2702,8 @@ class ParseSkills:
 
         # String Methods (字符串操作的方法)
         if re.search(
-            r"\bString\s+\w+\s*=|\b\w+\.length\(\)|\b\w+\.charAt\(|\b\w+\.substring\(",
-            content,
+                r"\bString\s+\w+\s*=|\b\w+\.length\(\)|\b\w+\.charAt\(|\b\w+\.substring\(",
+                content,
         ):
             skills.append("java/string_methods")
 
@@ -2944,9 +2883,9 @@ class ParseSkills:
 
         # Select Columns
         if (
-            re.search(r"\[[\"'].*[\"']\]", content)
-            or re.search(r"\.loc\[", content)
-            or re.search(r"\.iloc\[", content)
+                re.search(r"\[[\"'].*[\"']\]", content)
+                or re.search(r"\.loc\[", content)
+                or re.search(r"\.iloc\[", content)
         ):
             skills.append("pandas/select_columns")
 
@@ -2956,13 +2895,13 @@ class ParseSkills:
 
         # Conditional Selection
         if re.search(r"\[.*\]", content) and re.search(
-            r"==|!=|>|<|>=|<=| in | not in ", content
+                r"==|!=|>|<|>=|<=| in | not in ", content
         ):
             skills.append("pandas/conditional_selection")
 
         # Slicing
         if re.search(r"\.loc\[.*:.*\]", content) or re.search(
-            r"\.iloc\[.*:.*\]", content
+                r"\.iloc\[.*:.*\]", content
         ):
             skills.append("pandas/slicing")
 
@@ -2980,7 +2919,7 @@ class ParseSkills:
 
         # Sorting Data
         if re.search(r"\.sort_values\(", content) or re.search(
-            r"\.sort_index\(", content
+                r"\.sort_index\(", content
         ):
             skills.append("pandas/sort_data")
 
@@ -3001,10 +2940,10 @@ class ParseSkills:
 
         # Basic Statistics
         if (
-            re.search(r"\.mean\(", content)
-            or re.search(r"\.median\(", content)
-            or re.search(r"\.sum\(", content)
-            or re.search(r"\.count\(", content)
+                re.search(r"\.mean\(", content)
+                or re.search(r"\.median\(", content)
+                or re.search(r"\.sum\(", content)
+                or re.search(r"\.count\(", content)
         ):
             skills.append("pandas/basic_statistics")
 
@@ -3022,39 +2961,39 @@ class ParseSkills:
 
         # Data Normalization
         if re.search(r"(\.min\(\)|\.max\(\)|\.mean\(\))", content) and re.search(
-            r"\.apply\(", content
+                r"\.apply\(", content
         ):
             skills.append("pandas/data_normalization")
 
         # Bar Plots
         if re.search(r"\.plot\(\s*kind\s*=\s*['\"]bar['\"]", content) or re.search(
-            r"\.bar\(", content
+                r"\.bar\(", content
         ):
             skills.append("pandas/bar_plots")
 
         # Histograms
         if re.search(r"\.hist\(", content) or re.search(
-            r"\.plot\(\s*kind\s*=\s*['\"]hist['\"]", content
+                r"\.plot\(\s*kind\s*=\s*['\"]hist['\"]", content
         ):
             skills.append("pandas/histograms")
 
         # Scatter Plots
         if re.search(r"\.plot\(\s*kind\s*=\s*['\"]scatter['\"]", content) or re.search(
-            r"\.scatter\(", content
+                r"\.scatter\(", content
         ):
             skills.append("pandas/scatter_plots")
 
         # Line Plots
         if re.search(r"\.plot(\(\s*kind\s*=\s*['\"]line['\"])?", content) or re.search(
-            r"\.line\(", content
+                r"\.line\(", content
         ):
             skills.append("pandas/line_plots")
 
         # Time Series Analysis
         if (
-            re.search(r"\.resample\(", content)
-            or re.search(r"\.asfreq\(", content)
-            or re.search(r"\.rolling\(", content)
+                re.search(r"\.resample\(", content)
+                or re.search(r"\.asfreq\(", content)
+                or re.search(r"\.rolling\(", content)
         ):
             skills.append("pandas/time_series_analysis")
 
@@ -3068,10 +3007,10 @@ class ParseSkills:
 
         # Reshaping Data
         if (
-            re.search(r"\.melt\(", content)
-            or re.search(r"\.pivot\(", content)
-            or re.search(r"\.stack\(", content)
-            or re.search(r"\.unstack\(", content)
+                re.search(r"\.melt\(", content)
+                or re.search(r"\.pivot\(", content)
+                or re.search(r"\.stack\(", content)
+                or re.search(r"\.unstack\(", content)
         ):
             skills.append("pandas/reshape_data")
 
@@ -3084,9 +3023,9 @@ class ParseSkills:
         if re.search(r"(import matplotlib|from matplotlib import)", content):
             skills.append("matplotlib/importing_matplotlib")
         if re.search(
-            r"matplotlib\.(figure|pyplot|axes)|from matplotlib\.figure import|from matplotlib\.pyplot import|from matplotlib\.axes import",
-            content,
-            re.IGNORECASE,
+                r"matplotlib\.(figure|pyplot|axes)|from matplotlib\.figure import|from matplotlib\.pyplot import|from matplotlib\.axes import",
+                content,
+                re.IGNORECASE,
         ):
             skills.append("matplotlib/figures_axes")
         if re.search(r"figure\(\s*size\s*=", content):
@@ -3120,19 +3059,19 @@ class ParseSkills:
         if re.search(r"\.(twinx\(|twiny\()", content):
             skills.append("matplotlib/secondary_axis")
         if re.search(r"\.set_yscale\(['\"]log['\"]\)", content) or re.search(
-            r"\.set_xscale\(['\"]log['\"]\)", content
+                r"\.set_xscale\(['\"]log['\"]\)", content
         ):
             skills.append("matplotlib/log_scale")
         if re.search(r"\.polar\(", content):
             skills.append("matplotlib/polar_charts")
         if re.search(r"\.plot_surface\(", content) or re.search(
-            r"\.plot_wireframe\(", content
+                r"\.plot_wireframe\(", content
         ):
             skills.append("matplotlib/3d_plots")
 
         # Plot Customization
         if re.search(r"\.setp\(", content) or re.search(
-            r"(linestyle|linecolor)", content
+                r"(linestyle|linecolor)", content
         ):
             skills.append("matplotlib/line_styles_colors")
         if re.search(r"(\.title\(|\.xlabel\(|\.ylabel\()", content):
@@ -3192,7 +3131,7 @@ class ParseSkills:
         if re.search(r"np\.array\(\[\[", content):
             skills.append("numpy/multi_array")
         if re.search(
-            r"np\.array\(", content
+                r"np\.array\(", content
         ):  # General array creation, could be 1D or multi-dimensional
             skills.append("numpy/data_array")
         if re.search(r"\.shape\b", content):
@@ -3225,8 +3164,8 @@ class ParseSkills:
 
         # Math and Statistics
         if re.search(
-            r"np\.(sum|mean|median|max|min|std|var|add|subtract|multiply|divide)\b",
-            content,
+                r"np\.(sum|mean|median|max|min|std|var|add|subtract|multiply|divide)\b",
+                content,
         ):
             skills.append("numpy/math_ops")
         if re.search(r"np\.linalg\.", content):  # Linear algebra
@@ -3239,15 +3178,15 @@ class ParseSkills:
 
         # Advanced Features
         if re.search(
-            r"np\.broadcast", content
+                r"np\.broadcast", content
         ):  # Broadcasting, tricky to match precisely
             skills.append("numpy/broadcast")
         if re.search(
-            r"np\.(sort|argsort|searchsorted|where)\b", content
+                r"np\.(sort|argsort|searchsorted|where)\b", content
         ):  # Sort and search
             skills.append("numpy/sort_search")
         if re.search(
-            r"np\.ufunc", content
+                r"np\.ufunc", content
         ):  # Universal functions, tricky to match precisely
             skills.append("numpy/ufuncs")
 
@@ -3316,15 +3255,15 @@ class ParseSkills:
 
         # Data Definition and Integrity
         if re.search(
-            r"\b(INT|VARCHAR|CHAR|TEXT|DATE|TIME|DATETIME|TIMESTAMP|FLOAT|DOUBLE|DECIMAL|NUMERIC|BOOLEAN|BLOB|BINARY|VARBINARY|BIGINT|SMALLINT|TINYINT|GEOMETRY|JSON)\b",
-            content,
-            re.IGNORECASE,
+                r"\b(INT|VARCHAR|CHAR|TEXT|DATE|TIME|DATETIME|TIMESTAMP|FLOAT|DOUBLE|DECIMAL|NUMERIC|BOOLEAN|BLOB|BINARY|VARBINARY|BIGINT|SMALLINT|TINYINT|GEOMETRY|JSON)\b",
+                content,
+                re.IGNORECASE,
         ):
             skills.append("sql/data_types")
         if re.search(
-            r"\b(PRIMARY KEY|FOREIGN KEY|UNIQUE|CHECK|NOT NULL|DEFAULT|INDEX)\b",
-            content,
-            re.IGNORECASE,
+                r"\b(PRIMARY KEY|FOREIGN KEY|UNIQUE|CHECK|NOT NULL|DEFAULT|INDEX)\b",
+                content,
+                re.IGNORECASE,
         ):
             skills.append("sql/constraints")
         if re.search(r"\bNORMALIZATION\b", content, re.IGNORECASE):
@@ -3342,21 +3281,21 @@ class ParseSkills:
         if re.search(r"\bCONVERT\b", content, re.IGNORECASE):
             skills.append("sql/convert")
         if re.search(
-            r"\b(CONCAT|SUBSTRING|TRIM|LENGTH|LOWER|UPPER|REPLACE|LTRIM|RTRIM)\b",
-            content,
-            re.IGNORECASE,
+                r"\b(CONCAT|SUBSTRING|TRIM|LENGTH|LOWER|UPPER|REPLACE|LTRIM|RTRIM)\b",
+                content,
+                re.IGNORECASE,
         ):
             skills.append("sql/string_functions")
         if re.search(
-            r"\b(SUM|AVG|COUNT|MAX|MIN|ROUND|CEIL|CEILING|FLOOR|ABS|MOD|POWER|SQRT|SIGN|LOG|EXP|ACOS|ASIN|ATAN|ATAN2|COS|SIN|TAN)\b",
-            content,
-            re.IGNORECASE,
+                r"\b(SUM|AVG|COUNT|MAX|MIN|ROUND|CEIL|CEILING|FLOOR|ABS|MOD|POWER|SQRT|SIGN|LOG|EXP|ACOS|ASIN|ATAN|ATAN2|COS|SIN|TAN)\b",
+                content,
+                re.IGNORECASE,
         ):
             skills.append("sql/numeric_functions")
         if re.search(
-            r"\b(CURDATE|CURTIME|NOW|DATE_ADD|DATE_SUB|DATEDIFF|DAY|MONTH|YEAR|HOUR|MINUTE|SECOND)\b",
-            content,
-            re.IGNORECASE,
+                r"\b(CURDATE|CURTIME|NOW|DATE_ADD|DATE_SUB|DATEDIFF|DAY|MONTH|YEAR|HOUR|MINUTE|SECOND)\b",
+                content,
+                re.IGNORECASE,
         ):
             skills.append("sql/date_time_functions")
 
@@ -3369,9 +3308,9 @@ class ParseSkills:
             skills.append("sql/creating_indexes")
         # Detecting "using indexes" might be complex and context-dependent
         if re.search(
-            r"\bINFORMATION_SCHEMA\b|\bINFORMATION_SCHEMA\.COLUMNS\b",
-            content,
-            re.IGNORECASE,
+                r"\bINFORMATION_SCHEMA\b|\bINFORMATION_SCHEMA\.COLUMNS\b",
+                content,
+                re.IGNORECASE,
         ):
             skills.append("sql/information_schema")
         if re.search(r"\bEXPLAIN\b", content, re.IGNORECASE):
@@ -3384,18 +3323,19 @@ class ParseSkills:
 
     def parse(self, language: str, content: str):
         if language == "python":
-            return self.__parse_python_skill(content)
+            skills, method = self.__parse_python_skill(content)
+            return skills
         elif language == "linux":
             skills_a = self.__parse_linux_skill(content)
             skills_b = self.__parse_shell_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "tkinter":
             skills_a = self.__parse_tkinter_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "sklearn":
             skills_a = self.__parse_sklearn_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "shell":
             return self.__parse_shell_skill(content)
@@ -3403,17 +3343,17 @@ class ParseSkills:
             return self.__parse_rust_skill(content)
         elif language == "pygame":
             skills_a = self.__parse_pygame_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "django":
             skills_a = self.__parse_django_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "go":
             return self.__parse_go_skill(content)
         elif language == "flask":
             skills_a = self.__parse_flask_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "cpp":
             return self.__parse_cpp_skill(content)
@@ -3441,78 +3381,15 @@ class ParseSkills:
             return list(set(skills_a + skills_b))
         elif language == "pandas":
             skills_a = self.__parse_pandas_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "matplotlib":
             skills_a = self.__parse_matplotlib_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "numpy":
             skills_a = self.__parse_numpy_skill(content)
-            skills_b = self.__parse_python_skill(content)
+            skills_b, method = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "sql":
             return self.__parse_sql_skill(content)
-
-
-if __name__ == '__main__':
-    content = '''
-import re
-from collections import Counter
-from typing import Dict, List
-
-
-def parse_log_file(file_path: str) -> List[str]:
-    """
-    Read a log file and return a list of log entries as strings.
-
-    :param file_path: The path to the log file.
-    :return: A list of log entries as strings.
-    """
-
-    with open(file_path, "r") as log_file:
-        log_entries = log_file.readlines()
-
-    return log_entries
-
-
-def analyze_log_entries(log_entries: List[str]) -> Dict[str, Dict]:
-    """
-    Analyze log entries and return statistics as a dictionary.
-
-    :param log_entries: A list of log entries as strings.
-    :return: A dictionary containing the analysis results.
-    """
-
-    pattern = re.compile(
-        r"(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) .*"
-        r'\[(?P<timestamp>.*?)\] "(?P<method>\w+) (?P<url>.*?) .*?'
-        r' (?P<status>\d{3}) .* "(?P<user_agent>.*?)"'
-    )
-
-    parsed_entries = [pattern.match(entry).groupdict() for entry in log_entries]
-
-    unique_ips = len(set(entry["ip"] for entry in parsed_entries))
-    http_methods = Counter(entry["method"] for entry in parsed_entries)
-    requested_resources = Counter(entry["url"] for entry in parsed_entries)
-    status_codes = Counter(entry["status"] for entry in parsed_entries)
-    user_agents = Counter(entry["user_agent"] for entry in parsed_entries)
-
-    return {
-        "unique_ips": unique_ips,
-        "http_methods": dict(http_methods),
-        "requested_resources": dict(requested_resources),
-        "status_codes": dict(status_codes),
-        "user_agents": dict(user_agents),
-    }
-
-
-if __name__ == "__main__":
-    step1 = parse_log_file("sample_log.txt")
-    print(f"{step1=}")
-    step2 = analyze_log_entries(step1)
-    print(f"{step2=}")
-    '''
-    skill = ParseSkills()
-    skills = skill.parse('python', content)
-    print(skills)
