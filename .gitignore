@@ -134,9 +134,3 @@ labex/commands/utils/account.json
 .vscode/settings.json
 test.*
 test/*
-.idea/vcs.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/inspectionProfiles/Project_Default.xml
-.idea/labex-cli.iml
-.idea/misc.xml
-.idea/modules.xml
