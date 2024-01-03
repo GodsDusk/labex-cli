@@ -3,8 +3,8 @@ import os
 
 from rich import print
 
-from utils.feishu_api import Feishu
-from utils.skill_trees import ParseSkills
+from .utils.feishu_api import Feishu
+from .utils.skill_trees import ParseSkills
 
 
 class AddSkills:

@@ -1,6 +1,6 @@
 import re
 import ast
-from python_ast_skill_collector import PythonSkillCollector
+from .python_ast_skill_collector import PythonSkillCollector
 
 
 class ParseSkills:
