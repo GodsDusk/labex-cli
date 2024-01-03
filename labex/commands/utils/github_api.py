@@ -1,6 +1,7 @@
 import json
 import requests
 from retrying import retry
+from rich import print
 
 
 class GitHub:
