@@ -2,6 +2,7 @@ import re
 import ast
 from .python_ast_skill_collector import PythonSkillCollector
 from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector
+from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector, TkinterSkillCollector
 
 
 class ParseSkills:
@@ -539,6 +540,14 @@ class ParseSkills:
             "Style",
             "Font",
         ]
+        try:
+            tree = ast.parse(content)
+            collector = TkinterSkillCollector(build_in_functions)
+            collector.visit(tree)
+            return list(collector.skills)
+        except Exception as e:
+            pass
+
         skills = []
         for function in build_in_functions:
             if f".{function}" in content:
@@ -588,7 +597,6 @@ class ParseSkills:
         """
 
         clean_skills = []
-        for line in sklearn_skills.split("\n"):
         for line in sklearn_skills.strip().split("\n"):
             if len(line) > 0:
                 skill_id = line.split(": ")[0].strip()

@@ -243,12 +243,12 @@ class PythonSkillCollector(ast.NodeVisitor):
         if name in self.standard_libraries:
             self.skills.add("python/standard_libraries")
 
+
 class SklearnSkillCollector(ast.NodeVisitor):
 
     def __init__(self, clean_skills):
         self.clean_skills = clean_skills
         self.skills = set()
-
 
     def visit_Import(self, node):
         for alias in node.names:
@@ -269,3 +269,30 @@ class SklearnSkillCollector(ast.NodeVisitor):
         if skill in self.clean_skills:
             return f'sklearn/{skill}'
         return None
+
+
+class TkinterSkillCollector(ast.NodeVisitor):
+    def __init__(self, build_in_functions):
+        self.build_in_functions = build_in_functions
+        self.tkinter_aliases = {'tkinter'}
+        self.skills = set()
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            if 'tkinter' in alias.name:
+                if alias.asname:
+                    self.tkinter_aliases.add(alias.asname)
+                else:
+                    self.tkinter_aliases.add(alias.name)
+
+    def visit_ImportFrom(self, node):
+        if node.module and 'tkinter' in node.module:
+            self.tkinter_aliases.add(node.module.split('.')[0])
+            for alias in node.names:
+                if alias.name in self.build_in_functions:
+                    self.skills.add(f"tkinter/{alias.name.lower()}")
+
+    def visit_Call(self, node):
+        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+            if node.func.value.id in self.tkinter_aliases and node.func.attr in self.build_in_functions:
+                self.skills.add(f"tkinter/{node.func.attr.lower()}")
