@@ -296,3 +296,26 @@ class TkinterSkillCollector(ast.NodeVisitor):
         if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
             if node.func.value.id in self.tkinter_aliases and node.func.attr in self.build_in_functions:
                 self.skills.add(f"tkinter/{node.func.attr.lower()}")
+
+
+
+class PygameSkillCollector(ast.NodeVisitor):
+    def __init__(self, build_in_functions):
+        self.build_in_functions = build_in_functions
+        self.skills = set()
+
+    def visit_Attribute(self, node):
+        if isinstance(node.value, ast.Name) and node.value.id == 'pygame':
+            self.check_and_add_skill(node.attr)
+        self.generic_visit(node)
+
+    def visit_Call(self, node):
+        func = node.func
+        if isinstance(func, ast.Attribute):
+            if isinstance(func.value, ast.Name) and func.value.id == 'pygame':
+                self.check_and_add_skill(func.attr)
+        self.generic_visit(node)
+
+    def check_and_add_skill(self, attribute_name):
+        if attribute_name in self.build_in_functions:
+            self.skills.add(f"pygame/{attribute_name}")

@@ -1,8 +1,7 @@
 import re
 import ast
-from .python_ast_skill_collector import PythonSkillCollector
-from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector
-from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector, TkinterSkillCollector
+from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector, TkinterSkillCollector, \
+    PygameSkillCollector
 
 
 class ParseSkills:
@@ -821,6 +820,13 @@ class ParseSkills:
             "version",
         ]
 
+        try:
+            tree = ast.parse(content)
+            collector = PygameSkillCollector(build_in_functions)
+            collector.visit(tree)
+            return list(collector.skills)
+        except Exception as e:
+            pass
         skills = []
         for function in build_in_functions:
             if f"pygame.{function}." in content:
