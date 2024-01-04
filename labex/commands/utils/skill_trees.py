@@ -1,6 +1,7 @@
 import re
 import ast
 from .python_ast_skill_collector import PythonSkillCollector
+from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector
 
 
 class ParseSkills:
@@ -588,9 +589,17 @@ class ParseSkills:
 
         clean_skills = []
         for line in sklearn_skills.split("\n"):
+        for line in sklearn_skills.strip().split("\n"):
             if len(line) > 0:
                 skill_id = line.split(": ")[0].strip()
                 clean_skills.append(skill_id)
+        try:
+            tree = ast.parse(content)
+            collector = SklearnSkillCollector([s.split('.')[-1] for s in clean_skills])
+            collector.visit(tree)
+            return list(collector.skills)
+        except Exception as e:
+            pass
 
         add_skills = []
         for s in clean_skills:

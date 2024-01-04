@@ -242,3 +242,30 @@ class PythonSkillCollector(ast.NodeVisitor):
             self.skills.update(library_skill_mapping[name])
         if name in self.standard_libraries:
             self.skills.add("python/standard_libraries")
+
+class SklearnSkillCollector(ast.NodeVisitor):
+
+    def __init__(self, clean_skills):
+        self.clean_skills = clean_skills
+        self.skills = set()
+
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            skill_name = self.extract_skill_name(alias.name)
+            if skill_name:
+                self.skills.add(skill_name)
+
+    def visit_ImportFrom(self, node):
+        if node.module and 'sklearn' in node.module:
+            for alias in node.names:
+                submodule = alias.name if node.module == 'sklearn' else node.module.split('sklearn.')[1]
+                skill_name = self.extract_skill_name(submodule)
+                if skill_name:
+                    self.skills.add(skill_name)
+
+    def extract_skill_name(self, module_name):
+        skill = module_name.split('.')[0]
+        if skill in self.clean_skills:
+            return f'sklearn/{skill}'
+        return None
