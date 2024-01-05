@@ -504,3 +504,98 @@ class PandasSkillCollector(ast.NodeVisitor):
         # Checks for time series analysis methods
         elif method_name in ['resample', 'asfreq', 'rolling']:
             self.skills.add("pandas/time_series_analysis")
+
+class MatplotlibSkillCollector(ast.NodeVisitor):
+    def __init__(self):
+        self.skills = set()
+
+    def visit_Import(self, node):
+        # Check for 'import matplotlib'
+        for name in node.names:
+            if name.name == 'matplotlib':
+                self.skills.add('matplotlib/importing_matplotlib')
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node):
+        # Check for 'from matplotlib import'
+        if node.module and 'matplotlib' in node.module:
+            self.skills.add('matplotlib/importing_matplotlib')
+            # Further checks for submodules like 'figure', 'pyplot', 'axes'
+            if any(submod in node.module for submod in ['figure', 'pyplot', 'axes']):
+                self.skills.add('matplotlib/figures_axes')
+            if 'widgets' in node.module or 'backends' in node.module or 'animation' in node.module or 'rc' in node.module:
+                self.skills.add("matplotlib/interactive_backends")
+                self.skills.add("matplotlib/custom_backends")
+                self.skills.add("matplotlib/animation_creation")
+                self.skills.add("matplotlib/matplotlib_config")
+        self.generic_visit(node)
+
+    def visit_Call(self, node):
+        if isinstance(node.func, ast.Attribute):
+            method_name = node.func.attr
+            # Checking for different plotting methods
+            if method_name == 'plot':
+                self.skills.add('matplotlib/line_plots')
+            elif method_name == 'scatter':
+                self.skills.add('matplotlib/scatter_plots')
+            elif method_name == 'bar':
+                self.skills.add('matplotlib/bar_charts')
+            elif method_name == 'hist':
+                self.skills.add('matplotlib/histograms')
+            elif method_name == 'boxplot':
+                self.skills.add('matplotlib/box_plots')
+            elif method_name == 'imshow' or method_name == 'heatmap':
+                self.skills.add('matplotlib/heatmaps')
+            elif method_name == 'errorbar':
+                self.skills.add('matplotlib/error_bars')
+            elif method_name == 'stackplot':
+                self.skills.add('matplotlib/stacked_plots')
+            elif method_name == 'fill_between':
+                self.skills.add('matplotlib/fill_between')
+            # Advanced plotting
+            elif method_name == 'subplot':
+                self.skills.add('matplotlib/subplots')
+            elif method_name in ['twinx', 'twiny']:
+                self.skills.add('matplotlib/secondary_axis')
+            elif method_name == 'set_yscale' or method_name == 'set_xscale':
+                # Check for log scale
+                for arg in node.args:
+                    if isinstance(arg, ast.Str) and arg.s == 'log':
+                        self.skills.add('matplotlib/log_scale')
+                        break
+            elif method_name == 'polar':
+                self.skills.add('matplotlib/polar_charts')
+            elif method_name in ['plot_surface', 'plot_wireframe']:
+                self.skills.add('matplotlib/3d_plots')
+           # Plot Customization
+            elif method_name == 'setp':
+                self.skills.add('matplotlib/line_styles_colors')
+            elif any(attr in node.func.attr for attr in ['title', 'xlabel', 'ylabel']):
+                self.skills.add('matplotlib/titles_labels')
+            elif method_name == 'legend':
+                self.skills.append('matplotlib/legend_config')
+            elif any(attr in node.func.attr for attr in ['xticks', 'yticks']):
+                self.skills.add('matplotlib/axis_ticks')
+            elif method_name == 'grid':
+                self.skills.add('matplotlib/grid_config')
+            elif method_name == 'annotate':
+                self.skills.add('matplotlib/text_annotations')
+            elif method_name == 'table':
+                self.skills.add('matplotlib/adding_tables')
+            # Specialized Plots
+            elif method_name == 'pie':
+                self.skills.add('matplotlib/pie_charts')
+            elif method_name == 'bubble':
+                self.skills.add('matplotlib/bubble_charts')
+            elif method_name == 'violinplot':
+                self.skills.add('matplotlib/violin_plots')
+            elif method_name in ['contour', 'contourf']:
+                self.skills.add('matplotlib/contour_plots')
+            elif method_name == 'quiver':
+                self.skills.add('matplotlib/quiver_plots')
+            elif method_name == 'streamplot':
+                self.skills.add('matplotlib/stream_plots')
+            elif method_name in ['connect', 'slider']:
+                self.skills.add("matplotlib/event_handling")
+                self.skills.add("matplotlib/widgets_sliders")
+        self.generic_visit(node)

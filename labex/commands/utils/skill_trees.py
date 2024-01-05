@@ -1,7 +1,7 @@
 import re
 import ast
 from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector, TkinterSkillCollector, \
-    PygameSkillCollector, DjangoSkillCollector, PandasSkillCollector
+    PygameSkillCollector, DjangoSkillCollector, PandasSkillCollector, MatplotlibSkillCollector
 
 
 class ParseSkills:
@@ -3059,6 +3059,14 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_matplotlib_skill(self, content):
+        try:
+            tree = ast.parse(content)
+            collector = MatplotlibSkillCollector()
+            collector.visit(tree)
+            return list(collector.skills)
+        except Exception as e:
+            pass
+
         skills = []
 
         # Basic Concepts
