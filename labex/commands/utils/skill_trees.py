@@ -1,7 +1,8 @@
 import re
 import ast
 from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector, TkinterSkillCollector, \
-    PygameSkillCollector, DjangoSkillCollector, PandasSkillCollector, MatplotlibSkillCollector
+    PygameSkillCollector, DjangoSkillCollector, PandasSkillCollector, MatplotlibSkillCollector, NumpySkillCollector,\
+    FlaskSkillCollector
 
 
 class ParseSkills:
@@ -1644,7 +1645,7 @@ class ParseSkills:
 
         all_skills = {}
 
-        for line in flask_skills.split("\n"):
+        for line in flask_skills.strip().split("\n"):
             if len(line) > 0:
                 split_line = line.split(".")
                 if len(split_line) > 1:
@@ -1653,6 +1654,14 @@ class ParseSkills:
                     if skill_id not in all_skills:
                         all_skills[skill_id] = []
                     all_skills[skill_id].append(skill_function)
+
+        try:
+            tree = ast.parse(content)
+            collector = FlaskSkillCollector(all_skills)
+            collector.visit(tree)
+            return list(collector.skills)
+        except Exception as e:
+            pass
 
         add_skills = []
         for s_name in all_skills:
@@ -3172,6 +3181,15 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_numpy_skill(self, content):
+
+        try:
+            tree = ast.parse(content)
+            collector = NumpySkillCollector()
+            collector.visit(tree)
+            return list(collector.skills)
+        except Exception as e:
+            pass
+
         skills = []
 
         # Array Basics
