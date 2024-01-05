@@ -505,6 +505,7 @@ class PandasSkillCollector(ast.NodeVisitor):
         elif method_name in ['resample', 'asfreq', 'rolling']:
             self.skills.add("pandas/time_series_analysis")
 
+
 class MatplotlibSkillCollector(ast.NodeVisitor):
     def __init__(self):
         self.skills = set()
@@ -567,7 +568,7 @@ class MatplotlibSkillCollector(ast.NodeVisitor):
                 self.skills.add('matplotlib/polar_charts')
             elif method_name in ['plot_surface', 'plot_wireframe']:
                 self.skills.add('matplotlib/3d_plots')
-           # Plot Customization
+            # Plot Customization
             elif method_name == 'setp':
                 self.skills.add('matplotlib/line_styles_colors')
             elif any(attr in node.func.attr for attr in ['title', 'xlabel', 'ylabel']):
@@ -598,4 +599,165 @@ class MatplotlibSkillCollector(ast.NodeVisitor):
             elif method_name in ['connect', 'slider']:
                 self.skills.add("matplotlib/event_handling")
                 self.skills.add("matplotlib/widgets_sliders")
+        self.generic_visit(node)
+
+
+class NumpySkillCollector(ast.NodeVisitor):
+    def __init__(self):
+        self.skills = set()
+        self.numpy_aliases = {'np', 'numpy'}
+        self.numpy_objects = set()
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            if alias.name == 'numpy':
+                self.numpy_aliases.add(alias.asname or alias.name)
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node):
+        if node.module == 'numpy':
+            for alias in node.names:
+                self.numpy_aliases.add(alias.asname or alias.name)
+        self.generic_visit(node)
+
+    def visit_Assign(self, node):
+        # Track assignments to detect NumPy array objects
+        if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute):
+            if self._is_numpy_alias(node.value.func.value) and node.value.func.attr == 'array':
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        self.numpy_objects.add(target.id)
+        self.generic_visit(node)
+
+    def visit_Subscript(self, node):
+        if isinstance(node.value, ast.Name) and node.value.id in self.numpy_objects:
+            # Basic indexing
+            if isinstance(node.slice, ast.Index):
+                self.skills.add("numpy/basic_idx")
+            # Slicing
+            elif isinstance(node.slice, ast.Slice):
+                self.skills.add("numpy/slice")
+            # Boolean or fancy indexing
+            elif isinstance(node.slice, (ast.ExtSlice, ast.List)):
+                self.skills.add("numpy/bool_idx")
+                self.skills.add("numpy/fancy_idx")
+        self.generic_visit(node)
+
+    def visit_Call(self, node):
+
+        math_stats_funcs = {'sum', 'mean', 'median', 'max', 'min', 'std', 'var', 'add', 'subtract', 'multiply',
+                            'divide'}
+        stats_funcs = {'sum', 'mean', 'median', 'max', 'min', 'std', 'var'}
+
+        # Advanced features, sort and search, file I/O, special techniques
+        advanced_features = {'broadcast', 'ufunc'}
+        sort_search_funcs = {'sort', 'argsort', 'searchsorted', 'where'}
+        file_io_funcs = {'loadtxt', 'savetxt', 'load', 'save', 'savez'}
+        special_techniques = {'datetime64', 'timedelta64', 'ma', 'dtype'}
+
+        # Check for np.array() calls
+        if isinstance(node.func, ast.Attribute) and node.func.attr == 'array':
+            if self._is_numpy_alias(node.func.value):
+                if any(isinstance(e, ast.List) for e in node.args):
+                    self.skills.add("numpy/data_array")
+                    if any(isinstance(e, ast.List) for e in node.args[0].elts):
+                        self.skills.add("numpy/multi_array")
+                    else:
+                        self.skills.add("numpy/1d_array")
+
+        func_called = isinstance(node.func, ast.Attribute) and self._is_numpy_alias(node.func.value)
+        func_direct = isinstance(node.func, ast.Name) and node.func.id in self.numpy_aliases
+
+        if func_called or func_direct:
+            func_name = getattr(node.func, 'attr', getattr(node.func, 'id', ''))
+            if func_name in {'reshape', 'transpose', 'concatenate', 'stack', 'vstack', 'hstack', 'split', 'vsplit',
+                             'hsplit', 'tile', 'repeat'}:
+                self.skills.add(f"numpy/{self._map_func_to_skill(func_name)}")
+            if func_name in math_stats_funcs:
+                self.skills.add("numpy/math_ops")
+                if func_name in stats_funcs:
+                    self.skills.add("numpy/stats")
+            if func_name.startswith('linalg'):
+                self.skills.add("numpy/lin_alg")
+            if func_name.startswith('random'):
+                self.skills.add("numpy/rand_num")
+            if func_name in advanced_features:
+                self.skills.add("numpy/broadcast" if func_name == 'broadcast' else "numpy/ufuncs")
+            if func_name in sort_search_funcs:
+                self.skills.add("numpy/sort_search")
+            if func_name in file_io_funcs:
+                self.skills.add("numpy/text_io" if func_name in {'loadtxt', 'savetxt'} else "numpy/bin_io")
+            if func_name in special_techniques:
+                if func_name == 'ma':
+                    self.skills.add("numpy/mask_array")
+                elif func_name == 'dtype':
+                    self.skills.add("numpy/struct_array")
+                else:
+                    self.skills.add("numpy/datetime")
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node):
+        if self._is_numpy_alias(node.value):
+            if node.attr == 'shape':
+                skills.add("numpy/shape_dim")
+            elif node.attr == 'dtype':
+                self.skills.add(f"numpy/data_type")
+            elif node.attr in {'ndim', 'size', 'itemsize', 'nbytes'}:
+                self.skills.add(f"numpy/attr")
+        self.generic_visit(node)
+
+    def _is_numpy_alias(self, node):
+        return isinstance(node, ast.Name) and node.id in self.numpy_aliases
+
+    def _map_func_to_skill(self, func_name):
+        # Maps function names to skill tags
+        return {
+            'reshape': 'reshape',
+            'transpose': 'transpose',
+            'T': 'transpose',
+            'concatenate': 'merge',
+            'stack': 'merge',
+            'vstack': 'merge',
+            'hstack': 'merge',
+            'split': 'split',
+            'vsplit': 'split',
+            'hsplit': 'split',
+            'tile': 'expand',
+            'repeat': 'expand'
+        }.get(func_name, '')
+
+
+class FlaskSkillCollector(ast.NodeVisitor):
+    def __init__(self, all_skills):
+        self.skills = set()
+        self.flask_aliases = {'flask'}
+        self.all_skills = all_skills
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            if alias.name == 'flask':
+                self.flask_aliases.append(alias.asname or alias.name)
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node):
+        if 'flask' in node.module:
+            for alias in node.names:
+                self.flask_aliases.append(alias.asname or alias.name)
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node):
+        # Check for method/property usage in Flask classes
+        if isinstance(node.value, ast.Name) and node.value.id in self.flask_aliases:
+            for s_name, methods in self.all_skills.items():
+                if node.attr in methods:
+                    self.skills.append(f"flask/{s_name.lower()}")
+        self.generic_visit(node)
+
+    def visit_Call(self, node):
+        # Check for Flask class method calls
+        if isinstance(node.func, ast.Attribute):
+            if isinstance(node.func.value, ast.Name) and node.func.value.id in self.flask_aliases:
+                for s_name, methods in self.all_skills.items():
+                    if node.func.attr in methods:
+                        self.skills.append(f"flask/{s_name.lower()}")
         self.generic_visit(node)
