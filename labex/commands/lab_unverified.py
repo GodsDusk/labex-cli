@@ -9,7 +9,7 @@ from github import Github
 class LabForTesting:
     def __init__(self, repo_name: str) -> None:
         # for labex
-        self.__admin_data = AdminData()
+        self.labex_admin_data = AdminData()
         all_paths = UserData().get_all_path()
         self.path_alias = [p["alias"] for p in all_paths["paths"]]
         # for github
@@ -23,7 +23,7 @@ class LabForTesting:
         for namespace_id in namespace_ids:
             # filter params
             filters = f"%7B%22Hidden%22%3A%5B{hidden}%5D%2C%22NamespaceID%22%3A%22{namespace_id}%22%7D"
-            first_page = self.__admin_data.get_lab_objects(
+            first_page = self.labex_admin_data.get_lab_objects(
                 params=f"?pagination.current=1&pagination.size={page_size}&filters={filters}"
             )
             total_pages = first_page["pagination"]["total_pages"]
@@ -32,7 +32,7 @@ class LabForTesting:
                 range(2, total_pages + 1),
                 description=f"Namespace: {namespace_id}, Total Pages: {total_pages}",
             ):
-                page_data = self.__admin_data.get_lab_objects(
+                page_data = self.labex_admin_data.get_lab_objects(
                     params=f"?pagination.current={page}&pagination.size={page_size}&filters={filters}"
                 )
                 namespace_labs.extend(page_data["objects"])

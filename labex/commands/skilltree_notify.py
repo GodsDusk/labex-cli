@@ -6,8 +6,8 @@ from .utils.labex_api import UserData, AdminData
 
 class SkillTreeNotify:
     def __init__(self) -> None:
-        self.__user_data = UserData()
-        self.__admin_data = AdminData()
+        self.labex_user_data = UserData()
+        self.labex_admin_data = AdminData()
         self.page_size = 50
         self.lab_count = 3
         self.course_count = 2
@@ -19,7 +19,7 @@ class SkillTreeNotify:
         Returns:
             list: list of skilltree
         """
-        paths = self.__user_data.get_all_path()["paths"]
+        paths = self.labex_user_data.get_all_path()["paths"]
         print(f"→ Found {len(paths)} existed paths in LabEx")
         skill_trees = []
         for path in paths:
@@ -49,7 +49,7 @@ class SkillTreeNotify:
             list: list of labs
         """
         params = f"?pagination.current={page}&pagination.size={self.page_size}"
-        labs = self.__user_data.get_path_labs(path_alias, params)
+        labs = self.labex_user_data.get_path_labs(path_alias, params)
         return labs
 
     def __get_existed_labs(self) -> list:
@@ -58,7 +58,7 @@ class SkillTreeNotify:
         Returns:
             list: list of existed labs
         """
-        all_notify = self.__admin_data.get_skilltree_notify()
+        all_notify = self.labex_admin_data.get_skilltree_notify()
         objects = all_notify["objects"]
         existed_labs = []
         existed_courses = []
@@ -133,14 +133,14 @@ class SkillTreeNotify:
             st_name = st["name"]
             print(f"→ Process [bold]{st_name}[/bold] Skill Tree")
             # Get courses
-            all_courses = self.__user_data.get_skilltree_courses(tags=st_name)
+            all_courses = self.labex_user_data.get_skilltree_courses(tags=st_name)
             # Pick courses
             courses = [p for p in all_courses if p["type"] == 0]
             if len(courses) == 0:
                 print(
                     f"[bold yellow]→[/bold yellow] Not found courses, random pick one from all projects"
                 )
-                all_courses = self.__user_data.get_skilltree_courses(tags=None)
+                all_courses = self.labex_user_data.get_skilltree_courses(tags=None)
                 courses = [p for p in all_courses if p["type"] == 0]
             if len(courses) > self.course_count:
                 random_courses = random.sample(courses, self.course_count)
@@ -156,7 +156,7 @@ class SkillTreeNotify:
                 print(
                     f"[bold yellow]→[/bold yellow] Not found projects, random pick one from all projects"
                 )
-                all_courses = self.__user_data.get_skilltree_courses(tags=None)
+                all_courses = self.labex_user_data.get_skilltree_courses(tags=None)
                 projects = [p for p in all_courses if p["type"] == 3]
             if len(projects) > self.project_count:
                 random_projects = random.sample(projects, self.project_count)

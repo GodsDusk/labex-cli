@@ -644,11 +644,18 @@ feishu.add_command(pr)
     show_default=True,
     help="Directory path",
 )
-def lab(appid, appsecret, repo, skip, full, path):
+@click.option(
+    "--labid",
+    type=bool,
+    default=False,
+    show_default=True,
+    help="Is sync lab id",
+)
+def lab(appid, appsecret, repo, skip, full, path, labid):
     """Sync Repo labs to Feishu"""
-    SyncLabsToFeishu(app_id=appid, app_secret=appsecret, repo=repo).sync_labs(
-        skip=skip, full=full, dirpath=path
-    )
+    SyncLabsToFeishu(
+        app_id=appid, app_secret=appsecret, repo=repo, is_sync_lab_id=labid
+    ).sync_labs(skip=skip, full=full, dirpath=path)
 
 
 feishu.add_command(lab)

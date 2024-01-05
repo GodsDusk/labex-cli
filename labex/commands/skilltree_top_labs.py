@@ -5,12 +5,12 @@ from .utils.labex_api import UserData, AdminData
 
 class TopLabs:
     def __init__(self, app_id, app_secret) -> None:
-        self.__user_data = UserData()
-        self.__admin_data = AdminData()
+        self.labex_user_data = UserData()
+        self.labex_admin_data = AdminData()
         self.feishu = Feishu(app_id, app_secret)
 
     def __parse_skills_tree(self) -> dict:
-        skills_tree = self.__admin_data.get_show_normal_paths()
+        skills_tree = self.labex_admin_data.get_show_normal_paths()
         trees = []
         for tree in skills_tree:
             tree_id = tree["id"]
@@ -26,7 +26,7 @@ class TopLabs:
         return trees
 
     def __get_pro_labs(self, tree_alias: str, page_size: int) -> list:
-        pro_labs = self.__user_data.get_path_labs(
+        pro_labs = self.labex_user_data.get_path_labs(
             path_alias=tree_alias,
             params=f"?fee_types=2&pagination.current=1&pagination.size={page_size}",
         )
@@ -34,7 +34,7 @@ class TopLabs:
         return labs_path
 
     def __get_course_labs(self, course_alias: str) -> list:
-        course_labs = self.__user_data.get_course_labs(course_alias)
+        course_labs = self.labex_user_data.get_course_labs(course_alias)
         labs_path = [lab["path"] for lab in course_labs]
         return labs_path
 
@@ -78,4 +78,4 @@ class TopLabs:
             )
             if len(real_lab_path) > 0:
                 # update skill tree top labs
-                self.__user_data.set_top_labs(path_id=tree_id, labs=real_lab_path)
+                self.labex_user_data.set_top_labs(path_id=tree_id, labs=real_lab_path)

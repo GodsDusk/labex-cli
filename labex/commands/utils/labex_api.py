@@ -131,3 +131,7 @@ class AdminData:
     def get_show_normal_paths(self) -> list:
         url = f"{self.base_url}/path/objects?pagination.current=1&pagination.size=100&filters=%7B%22Type%22%3A%5B0%5D%2C%22IsShow%22%3A%5Btrue%5D%7D&sort.field=id&sort.desc=true"
         return HTTP(url).get_data()["objects"]
+
+    def get_namespaces(self) -> list:
+        url = f"{self.base_url}/namespace/objects?pagination.current=1&pagination.size=50&filters=%7B%22Purpose%22%3Anull%7D"
+        return HTTP(url).get_data()["objects"]

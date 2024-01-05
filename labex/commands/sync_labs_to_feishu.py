@@ -2,8 +2,10 @@ import re
 import os
 import json
 from rich import print
+from rich.progress import track
 from jsonschema import validate
 from .utils.feishu_api import Feishu
+from .utils.labex_api import AdminData
 
 
 class Schema:
@@ -27,13 +29,16 @@ class Schema:
 
 
 class SyncLabsToFeishu:
-    def __init__(self, app_id: str, app_secret: str, repo: str) -> None:
+    def __init__(
+        self, app_id: str, app_secret: str, repo: str, is_sync_lab_id: bool
+    ) -> None:
         """Sync labs to feishu
 
         Args:
             app_id (str): feishu app id
             app_secret (str): feishu app secret
             repo (str): github repo like "labex-dev/devops-labs"
+            is_sync_lab_id (bool): sync lab id from labex
         """
         self.feishu = Feishu(app_id, app_secret)
         lab_schema = os.path.join(os.path.dirname(__file__), "utils/lab_schema.json")
@@ -42,6 +47,9 @@ class SyncLabsToFeishu:
         self.lab_table_id = "tblW2umsCYJWzzUX"
         self.skills_table_id = "tblV5pGIsGZMxmE9"
         self.repo = repo
+        self.is_sync_lab_id = is_sync_lab_id
+        if self.is_sync_lab_id:
+            self.labex_admin_data = AdminData()
 
     def __parse_json(self, file_path: str, skills_dict: dict) -> dict:
         """Parse json file
@@ -137,6 +145,22 @@ class SyncLabsToFeishu:
         data["SOURCE"] = source
         return data
 
+    def __get_labs_from_namespace(self, namespace_id: str, page_size: int) -> list:
+        """Get labs from labex namespace"""
+        params = f'?pagination.current=1&pagination.size={page_size}&filters=%7B"NamespaceID"%3A"{namespace_id}"%7D'
+        first_page = self.labex_admin_data.get_lab_objects(params)
+        total_pages = first_page["pagination"]["total_pages"]
+        labs = first_page["objects"]
+        for page in track(
+            range(2, total_pages + 1),
+            description=f"Namespace: {namespace_id}, Total Pages: {total_pages}",
+        ):
+            page_data = self.labex_admin_data.get_lab_objects(
+                params=f'?pagination.current={page}&pagination.size={page_size}&filters=%7B"NamespaceID"%3A"{namespace_id}"%7D'
+            )
+            labs.extend(page_data["objects"])
+        return labs
+
     def sync_labs(self, skip: bool, full: bool, dirpath: str) -> None:
         """Sync labs from github to feishu
 
@@ -145,8 +169,11 @@ class SyncLabsToFeishu:
             full (bool): synchronize all labs without checking for changes in record fields.
             dirpath (str, optional): Defaults to ".".
         """
-        print(f"[yellow]➜ TASK[/yellow]: Syncing {self.repo} to Feishu...")
-        print(f"[yellow]➜ MODE[/yellow]: Skip: {skip}, Full: {full}")
+        is_sync_lab_id = self.is_sync_lab_id
+        print(f"[yellow]➜ TASK[/yellow]: Syncing {self.repo} to Feishu")
+        print(
+            f"[yellow]➜ MODE[/yellow]: Skip: {skip}, Full: {full}, Sync Lab ID: {is_sync_lab_id}"
+        )
         # Get all records from feishu
         records = self.feishu.get_bitable_records(
             self.app_token, self.lab_table_id, params=""
@@ -174,9 +201,30 @@ class SyncLabsToFeishu:
         skills_dicts = {
             r["fields"]["SKILL_ID"][0]["text"]: r["record_id"] for r in skills
         }
-        print(
-            f"[green]✔ Found[/green]: {len(skills_dicts)} skills in Feishu, start syncing..."
-        )
+        print(f"[green]✔ Found[/green]: {len(skills_dicts)} skills in Feishu.")
+        # Get all labs from labex admin
+        if is_sync_lab_id:
+            try:
+                # Get all namespaces
+                objects = self.labex_admin_data.get_namespaces()
+                namespaces = {f"{n['UserName']}/{n['Repo']}": n["id"] for n in objects}
+                print(f"[green]✔ Found[/green]: {len(namespaces)} namespaces in LabEx.")
+                # Get repo id
+                namespace_id = namespaces.get(self.repo)
+                if namespace_id == None:
+                    is_sync_lab_id = False
+                    print(
+                        f"[red]× Error[/red]: {self.repo} not found in LabEx, skip sync lab id"
+                    )
+                else:
+                    labs = self.__get_labs_from_namespace(namespace_id, 100)
+                    labs_id_dict = {l["Path"]: l["id"] for l in labs}
+                    print(
+                        f"[green]✔ Found[/green]: {len(labs)} labs in {self.repo} namespace"
+                    )
+            except:
+                is_sync_lab_id = False
+
         # Walk through all index.json files
         # If path in path_dicts, update record
         # If path not in path_dicts, add record
@@ -203,6 +251,11 @@ class SyncLabsToFeishu:
                         data["JSON_SCHEMA"] = "🟢 VALID"
                     else:
                         data["JSON_SCHEMA"] = "🔴 INVALID"
+                    # Add lab id
+                    if is_sync_lab_id:
+                        lab_id = labs_id_dict.get(data["PATH"])
+                        if lab_id != None:
+                            data["LAB_ID"] = lab_id
                     # Make payloads
                     payloads = {"fields": data}
                     # Get data path like "lab-hello-world"
@@ -249,20 +302,24 @@ class SyncLabsToFeishu:
                                 ]
                                 list_fields = ["SKILLS_ID", "CONTRIBUTORS"]
                                 num_fields = ["STEPS", "SCRIPTS", "DESC_WORDS", "TIME"]
+                                # Add LAB_ID field if is_sync_lab_id
+                                if is_sync_lab_id:
+                                    str_fields.append("LAB_ID")
                                 # Compare the fields, if any change, update
                                 if (
                                     any(
-                                        feishu_fields_data[field] != new_data[field]
+                                        feishu_fields_data.get(field)
+                                        != new_data.get(field)
                                         for field in str_fields
                                     )
                                     or any(
                                         sorted(feishu_fields_data.get(field, []))
-                                        != sorted(new_data[field])
+                                        != sorted(new_data.get(field))
                                         for field in list_fields
                                     )
                                     or any(
-                                        int(feishu_fields_data[field])
-                                        != int(new_data[field])
+                                        int(feishu_fields_data.get(field))
+                                        != int(new_data.get(field))
                                         for field in num_fields
                                     )
                                 ):
