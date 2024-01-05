@@ -429,6 +429,9 @@ class CreateProject:
             if "Numpy" in skills:
                 skills.remove("Numpy")
                 skills.append("NumPy")
+            if "Javascript" in skills:
+                skills.remove("Javascript")
+                skills.append("JavaScript")
             course_config = {
                 "name": title,
                 "description": description,
