@@ -132,7 +132,7 @@ class MDSplitter:
                         "file": checker_script_file,
                         "hint": checker_error.strip(),
                         "timeout": 0,
-                        "showstderr": False,
+                        "showstderr": true,
                     }
                     verifys.append(verify_json)
                 step_config = {
@@ -159,7 +159,7 @@ class MDSplitter:
                             "file": f"verify{step_index+1}.sh",
                             "hint": f"Please check the step {step_index+1} carefully.",
                             "timeout": 0,
-                            "showstderr": False,
+                            "showstderr": true,
                         }
                     ],
                     "skills": [],

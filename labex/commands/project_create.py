@@ -134,7 +134,7 @@ class CreateProject:
                         "file": f"verify{i+1}.sh",
                         "hint": f"You need to practice coding in LabEx VM.",
                         "timeout": 0,
-                        "showstderr": False,
+                        "showstderr": true,
                     }
                 ],
                 "skills": [],

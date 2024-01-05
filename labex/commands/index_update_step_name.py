@@ -69,7 +69,7 @@ class StandardName:
                         "file": new_v_file,
                         "hint": "Please follow the instructions to complete the step.",
                         "timeout": 0,
-                        "showstderr": False,
+                        "showstderr": true,
                     }
                     # create new verify file
                     with open(new_v_file_path, "w") as f:

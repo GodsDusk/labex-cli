@@ -58,7 +58,7 @@ class CreateLab:
                         "file": f"verify{step_index}.sh",
                         "hint": "Custom error message.",
                         "timeout": 0,
-                        "showstderr": False,
+                        "showstderr": true,
                     }
                 ],
                 "skills": ["Please copy the skill ID from the official skill tree"],
