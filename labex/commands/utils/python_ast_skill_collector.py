@@ -298,7 +298,6 @@ class TkinterSkillCollector(ast.NodeVisitor):
                 self.skills.add(f"tkinter/{node.func.attr.lower()}")
 
 
-
 class PygameSkillCollector(ast.NodeVisitor):
     def __init__(self, build_in_functions):
         self.build_in_functions = build_in_functions
@@ -364,3 +363,144 @@ class DjangoSkillCollector(ast.NodeVisitor):
         for key, value in django_skill_map.items():
             if key in module_name:
                 self.skills.add(value)
+
+
+class PandasSkillCollector(ast.NodeVisitor):
+    def __init__(self):
+        self.skills = set()
+        self.pandas_objects = set()  # Track names of pandas DataFrames/Series
+        self.pandas_aliases = {'pandas'}
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            if alias.name == 'pandas':
+                self.pandas_aliases.add(alias.asname if alias.asname else alias.name)
+        self.generic_visit(node)
+
+    def visit_ImportFrom(self, node):
+        if node.module == 'pandas':
+            for alias in node.names:
+                self.pandas_aliases.add(alias.asname if alias.asname else alias.name)
+        self.generic_visit(node)
+
+    def visit_Assign(self, node):
+        pandas_creation_methods = ['read_csv', 'read_excel', 'read_sql', 'DataFrame', 'Series', 'read_table',
+                                   'read_json', 'read_html', 'read_clipboard', 'read_pickle', 'read_msgpack',
+                                   'read_hdf', 'read_feather', 'read_parquet', 'read_orc', 'read_sas', 'read_spss',
+                                   'read_stata', 'read_sas7bdat', 'read_sas7bcat']
+
+        if isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute):
+            if node.value.func.attr in pandas_creation_methods:
+                if isinstance(node.targets[0], ast.Name):
+                    self.pandas_objects.add(node.targets[0].id)
+
+        # Check for Adding New Columns to a pandas DataFrame/Series
+        if isinstance(node.targets[0], ast.Subscript):
+            if isinstance(node.targets[0].value, ast.Name) and node.targets[0].value.id in self.pandas_objects:
+                if isinstance(node.targets[0].slice, ast.Index) and isinstance(node.targets[0].slice.value, ast.Str):
+                    self.skills.add("pandas/add_new_columns")
+
+        self.generic_visit(node)
+
+    def visit_Subscript(self, node):
+        # Ensure the operation is on a pandas DataFrame/Series
+        if isinstance(node.value, ast.Name) and node.value.id in self.pandas_objects:
+            if isinstance(node.slice.value, ast.Str):
+                self.skills.add("pandas/select_columns")
+            if any(isinstance(op, (ast.Eq, ast.NotEq, ast.Lt, ast.Gt, ast.LtE, ast.GtE, ast.In, ast.NotIn)) for op in
+                   ast.walk(node)):
+                self.skills.add("pandas/conditional_selection")
+        self.generic_visit(node)
+
+    def visit_Call(self, node):
+
+        if isinstance(node.func, ast.Attribute):
+            if isinstance(node.func.value, ast.Name):
+                obj_id = node.func.value.id
+                method_name = node.func.attr
+
+                if obj_id in self.pandas_objects or obj_id in self.pandas_aliases:
+                    self.check_pandas_method(method_name, node)
+        self.generic_visit(node)
+
+    def check_pandas_method(self, method_name, node):
+        if method_name == 'read_csv':
+            self.skills.add("pandas/read_csv")
+        elif method_name == 'read_excel':
+            self.skills.add("pandas/read_excel")
+        elif method_name == 'read_sql':
+            self.skills.add("pandas/read_sql")
+        elif method_name == 'write_csv':
+            self.skills.add("pandas/write_csv")
+        elif method_name == 'write_sql':
+            self.skills.add("pandas/write_sql")
+        elif method_name == 'write_excel':
+            self.skills.add("pandas/write_excel")
+        elif method_name in ['loc', 'iloc']:
+            if any(isinstance(arg, ast.Slice) for arg in ast.walk(node)):
+                self.skills.add("pandas/slicing")
+            else:
+                self.skills.add("pandas/select_rows")
+        elif method_name == 'drop':
+            self.skills.add("pandas/drop_columns_rows")
+        elif method_name == 'astype':
+            self.skills.add("pandas/change_data_types")
+        elif method_name in ['sort_values', 'sort_index']:
+            self.skills.add("pandas/sort_data")
+        elif method_name in ['fillna', 'dropna']:
+            self.skills.add("pandas/handle_missing_values")
+        elif method_name == 'drop_duplicates':
+            self.skills.add("pandas/remove_duplicates")
+        elif method_name in ['map', 'apply']:
+            self.skills.add("pandas/data_mapping")
+        elif method_name in ['mean', 'median', 'sum', 'count']:
+            self.skills.add("pandas/basic_statistics")
+        elif method_name == 'groupby':
+            self.skills.add("pandas/groupby_operations")
+        elif method_name in ['agg', 'aggregate']:
+            self.skills.add("pandas/data_aggregation")
+        elif method_name == 'pivot_table':
+            self.skills.add("pandas/pivot_tables")
+        # Check for MultiIndex Indexing
+        elif method_name == 'MultiIndex':
+            self.skills.append("pandas/multiindex_indexing")
+        # Checks for merging data
+        elif method_name in ['merge', 'join']:
+            self.skills.append("pandas/merge_data")
+        # Checks for reshaping data
+        elif method_name in ['melt', 'pivot', 'stack', 'unstack']:
+            self.skills.append("pandas/reshape_data")
+
+        # Data Normalization requires a combination of checks
+        elif method_name == 'apply':
+            for arg in ast.walk(node):
+                if isinstance(arg, ast.Call) and isinstance(arg.func, ast.Attribute):
+                    if arg.func.attr in ['min', 'max', 'mean']:
+                        self.skills.add("pandas/data_normalization")
+                        break
+        # Checks for plotting methods
+        elif method_name == 'plot':
+            # Check for kind argument in .plot() calls
+            for keyword in node.keywords:
+                if keyword.arg == 'kind':
+                    if isinstance(keyword.value, ast.Str):
+                        plot_type = keyword.value.s
+                        if plot_type == 'bar':
+                            self.skills.add("pandas/bar_plots")
+                        elif plot_type == 'hist':
+                            self.skills.add("pandas/histograms")
+                        elif plot_type == 'scatter':
+                            self.skills.add("pandas/scatter_plots")
+                        elif plot_type == 'line':
+                            self.skills.add("pandas/line_plots")
+        elif method_name == 'bar':
+            self.skills.add("pandas/bar_plots")
+        elif method_name == 'hist':
+            self.skills.add("pandas/histograms")
+        elif method_name == 'scatter':
+            self.skills.add("pandas/scatter_plots")
+        elif method_name == 'line':
+            self.skills.add("pandas/line_plots")
+        # Checks for time series analysis methods
+        elif method_name in ['resample', 'asfreq', 'rolling']:
+            self.skills.add("pandas/time_series_analysis")

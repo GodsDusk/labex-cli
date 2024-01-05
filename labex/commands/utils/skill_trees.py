@@ -1,7 +1,7 @@
 import re
 import ast
 from .python_ast_skill_collector import PythonSkillCollector, SklearnSkillCollector, TkinterSkillCollector, \
-    PygameSkillCollector, DjangoSkillCollector
+    PygameSkillCollector, DjangoSkillCollector, PandasSkillCollector
 
 
 class ParseSkills:
@@ -819,7 +819,6 @@ class ParseSkills:
             "touch",
             "version",
         ]
-
         try:
             tree = ast.parse(content)
             collector = PygameSkillCollector(build_in_functions)
@@ -2889,6 +2888,15 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_pandas_skill(self, content):
+
+        try:
+            tree = ast.parse(content)
+            collector = PandasSkillCollector()
+            collector.visit(tree)
+            return list(collector.skills)
+        except Exception as e:
+            pass
+
         skills = []
 
         # Read CSV
