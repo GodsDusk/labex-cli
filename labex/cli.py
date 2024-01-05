@@ -187,19 +187,21 @@ idx.add_command(check)
 @click.option(
     "--instance",
     type=str,
-    required=True,
     help="index.json file path",
     metavar="<path>",
 )
-def schema(instance):
-    """Check index.json based on schema.json
-
-    - instance: index.json file path
-    """
-    if instance is None:
-        CheckIndexValidation().validate_all_json("./")
-    else:
+@click.option(
+    "--dir",
+    type=str,
+    help="search directory",
+    metavar="<path>",
+)
+def schema(instance, dir):
+    """Check index.json based on schema.json"""
+    if instance:
         CheckIndexValidation().validate_json(instance)
+    elif dir:
+        CheckIndexValidation().validate_all_json(dir)
 
 
 check.add_command(schema)

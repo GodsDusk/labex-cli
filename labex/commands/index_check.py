@@ -44,7 +44,7 @@ class CheckIndexValidation:
         error_counts = 0
         i = 0
         for path in Path(base_dir).rglob("index.json"):
-            count = self.validate_json(self.lab_schema, path)
+            count = self.validate_json(path)
             error_counts += count
             i += 1
         print(
@@ -80,6 +80,7 @@ class CheckIndexNoSkills:
                         print(f"[red]No {skilltree} in[/red]: {path}")
                         i += 1
         print(f"Total files: {i}")
+
 
 class CheckLabDictinary:
     def __init__(self) -> None:
