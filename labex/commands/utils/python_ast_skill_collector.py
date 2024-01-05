@@ -319,3 +319,48 @@ class PygameSkillCollector(ast.NodeVisitor):
     def check_and_add_skill(self, attribute_name):
         if attribute_name in self.build_in_functions:
             self.skills.add(f"pygame/{attribute_name}")
+
+
+class DjangoSkillCollector(ast.NodeVisitor):
+    def __init__(self):
+        self.skills = set()
+
+    def visit_Import(self, node):
+        for alias in node.names:
+            self.check_django_skill(alias.name)
+
+    def visit_ImportFrom(self, node):
+        if node.module and 'django' in node.module:
+            self.check_django_skill(node.module)
+
+    def check_django_skill(self, module_name):
+        django_skill_map = {
+            "django.apps": "django/applications",
+            "django.views.generic": "django/built_in_views",
+            "django.views.View": "django/built_in_views",
+            "django.views.TemplateView": "django/built_in_views",
+            "django.middleware.clickjacking": "django/clickjacking_protection",
+            "django.contrib": "django/contrib_packages",
+            "django.db": "django/databases",
+            "django.contrib.admin": "django/django_admin",
+            "django.core.exceptions": "django/django_exceptions",
+            "django.core.files": "django/file_handling",
+            "django.forms": "django/forms",
+            "django.utils.log": "django/logging",
+            "django.middleware": "django/middleware",
+            "django.db.migrations": "django/migration_operations",
+            "django.db.models": "django/models",
+            "django.core.paginator": "django/paginator",
+            "django.http": "django/request_and_response",
+            "django.conf.settings": "django/settings",
+            "django.dispatch": "django/signals",
+            "django.template": "django/templates",
+            "django.template.response": "django/simpletemplateresponse",
+            "django.utils.encoding": "django/unicode_data",
+            "django.urls": "django/django_urls",
+            "django.core.validators": "django/validators"
+        }
+
+        for key, value in django_skill_map.items():
+            if key in module_name:
+                self.skills.add(value)
