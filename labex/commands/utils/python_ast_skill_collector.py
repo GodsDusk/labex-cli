@@ -405,7 +405,7 @@ class PandasSkillCollector(ast.NodeVisitor):
     def visit_Subscript(self, node):
         # Ensure the operation is on a pandas DataFrame/Series
         if isinstance(node.value, ast.Name) and node.value.id in self.pandas_objects:
-            if isinstance(node.slice.value, ast.Str):
+            if isinstance(node.slice, ast.Index) and isinstance(node.slice.value, ast.Str):
                 self.skills.add("pandas/select_columns")
             if any(isinstance(op, (ast.Eq, ast.NotEq, ast.Lt, ast.Gt, ast.LtE, ast.GtE, ast.In, ast.NotIn)) for op in
                    ast.walk(node)):
@@ -463,13 +463,13 @@ class PandasSkillCollector(ast.NodeVisitor):
             self.skills.add("pandas/pivot_tables")
         # Check for MultiIndex Indexing
         elif method_name == 'MultiIndex':
-            self.skills.append("pandas/multiindex_indexing")
+            self.skills.add("pandas/multiindex_indexing")
         # Checks for merging data
         elif method_name in ['merge', 'join']:
-            self.skills.append("pandas/merge_data")
+            self.skills.add("pandas/merge_data")
         # Checks for reshaping data
         elif method_name in ['melt', 'pivot', 'stack', 'unstack']:
-            self.skills.append("pandas/reshape_data")
+            self.skills.add("pandas/reshape_data")
 
         # Data Normalization requires a combination of checks
         elif method_name == 'apply':
@@ -574,7 +574,7 @@ class MatplotlibSkillCollector(ast.NodeVisitor):
             elif any(attr in node.func.attr for attr in ['title', 'xlabel', 'ylabel']):
                 self.skills.add('matplotlib/titles_labels')
             elif method_name == 'legend':
-                self.skills.append('matplotlib/legend_config')
+                self.skills.add('matplotlib/legend_config')
             elif any(attr in node.func.attr for attr in ['xticks', 'yticks']):
                 self.skills.add('matplotlib/axis_ticks')
             elif method_name == 'grid':
@@ -699,7 +699,7 @@ class NumpySkillCollector(ast.NodeVisitor):
     def visit_Attribute(self, node):
         if self._is_numpy_alias(node.value):
             if node.attr == 'shape':
-                skills.add("numpy/shape_dim")
+                self.skills.add("numpy/shape_dim")
             elif node.attr == 'dtype':
                 self.skills.add(f"numpy/data_type")
             elif node.attr in {'ndim', 'size', 'itemsize', 'nbytes'}:
@@ -736,13 +736,13 @@ class FlaskSkillCollector(ast.NodeVisitor):
     def visit_Import(self, node):
         for alias in node.names:
             if alias.name == 'flask':
-                self.flask_aliases.append(alias.asname or alias.name)
+                self.flask_aliases.add(alias.asname or alias.name)
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
         if 'flask' in node.module:
             for alias in node.names:
-                self.flask_aliases.append(alias.asname or alias.name)
+                self.flask_aliases.add(alias.asname or alias.name)
         self.generic_visit(node)
 
     def visit_Attribute(self, node):
@@ -750,7 +750,7 @@ class FlaskSkillCollector(ast.NodeVisitor):
         if isinstance(node.value, ast.Name) and node.value.id in self.flask_aliases:
             for s_name, methods in self.all_skills.items():
                 if node.attr in methods:
-                    self.skills.append(f"flask/{s_name.lower()}")
+                    self.skills.add(f"flask/{s_name.lower()}")
         self.generic_visit(node)
 
     def visit_Call(self, node):
@@ -759,5 +759,5 @@ class FlaskSkillCollector(ast.NodeVisitor):
             if isinstance(node.func.value, ast.Name) and node.func.value.id in self.flask_aliases:
                 for s_name, methods in self.all_skills.items():
                     if node.func.attr in methods:
-                        self.skills.append(f"flask/{s_name.lower()}")
+                        self.skills.add(f"flask/{s_name.lower()}")
         self.generic_visit(node)

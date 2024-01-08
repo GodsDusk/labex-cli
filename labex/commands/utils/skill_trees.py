@@ -364,7 +364,7 @@ class ParseSkills:
         ):
             skills.append("python/build_in_functions")
 
-        return list(skills), "re"
+        return list(skills)
 
     def __parse_linux_skill(self, content):
         skills = []
@@ -3444,3 +3444,4 @@ class ParseSkills:
             return list(set(skills_a + skills_b))
         elif language == "sql":
             return self.__parse_sql_skill(content)
+        return []
