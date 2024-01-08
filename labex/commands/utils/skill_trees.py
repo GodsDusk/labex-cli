@@ -172,18 +172,15 @@ class ParseSkills:
             "zip",
             "__import__",
         ]
+        self.py_ast_tree = None
 
     def __parse_python_skill(self, content):
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
             collector = PythonSkillCollector(
                 self.py_standard_libraries, self.py_built_in_functions
             )
-            collector.visit(tree)
-            return list(collector.skills), "ast"
-        except Exception as e:
-            pass
-
+            collector.visit(self.py_ast_tree)
+            return list(collector.skills)
         skills = []
 
         # Data types and variables
@@ -540,13 +537,10 @@ class ParseSkills:
             "Style",
             "Font",
         ]
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
             collector = TkinterSkillCollector(build_in_functions)
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
 
         skills = []
         for function in build_in_functions:
@@ -601,13 +595,11 @@ class ParseSkills:
             if len(line) > 0:
                 skill_id = line.split(": ")[0].strip()
                 clean_skills.append(skill_id)
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
+
             collector = SklearnSkillCollector([s.split('.')[-1] for s in clean_skills])
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
 
         add_skills = []
         for s in clean_skills:
@@ -820,13 +812,11 @@ class ParseSkills:
             "touch",
             "version",
         ]
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
             collector = PygameSkillCollector(build_in_functions)
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
+
         skills = []
         for function in build_in_functions:
             if f"pygame.{function}." in content:
@@ -834,13 +824,10 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_django_skill(self, content):
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
             collector = DjangoSkillCollector()
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
 
         skills = []
         # django/applications
@@ -1655,13 +1642,11 @@ class ParseSkills:
                         all_skills[skill_id] = []
                     all_skills[skill_id].append(skill_function)
 
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
+
             collector = FlaskSkillCollector(all_skills)
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
 
         add_skills = []
         for s_name in all_skills:
@@ -2898,13 +2883,10 @@ class ParseSkills:
 
     def __parse_pandas_skill(self, content):
 
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
             collector = PandasSkillCollector()
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
 
         skills = []
 
@@ -3068,14 +3050,10 @@ class ParseSkills:
         return list(set(skills))
 
     def __parse_matplotlib_skill(self, content):
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
             collector = MatplotlibSkillCollector()
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
-
         skills = []
 
         # Basic Concepts
@@ -3182,13 +3160,10 @@ class ParseSkills:
 
     def __parse_numpy_skill(self, content):
 
-        try:
-            tree = ast.parse(content)
+        if self.py_ast_tree:
             collector = NumpySkillCollector()
-            collector.visit(tree)
+            collector.visit(self.py_ast_tree)
             return list(collector.skills)
-        except Exception as e:
-            pass
 
         skills = []
 
@@ -3390,8 +3365,16 @@ class ParseSkills:
         return list(set(skills))
 
     def parse(self, language: str, content: str):
+        if language in ['python', 'tkinter', 'sklearn', 'pygame', 'django', 'flask', 'pandas', 'matplotlib', 'numpy']:
+            try:
+                py_ast_tree = ast.parse(content)
+                self.py_ast_tree = py_ast_tree
+            except SyntaxError:
+                print('can not parse to ast tree, use re mode')
+                pass
+
         if language == "python":
-            skills, method = self.__parse_python_skill(content)
+            skills = self.__parse_python_skill(content)
             return skills
         elif language == "linux":
             skills_a = self.__parse_linux_skill(content)
@@ -3399,11 +3382,11 @@ class ParseSkills:
             return list(set(skills_a + skills_b))
         elif language == "tkinter":
             skills_a = self.__parse_tkinter_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "sklearn":
             skills_a = self.__parse_sklearn_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "shell":
             return self.__parse_shell_skill(content)
@@ -3411,17 +3394,17 @@ class ParseSkills:
             return self.__parse_rust_skill(content)
         elif language == "pygame":
             skills_a = self.__parse_pygame_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "django":
             skills_a = self.__parse_django_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "go":
             return self.__parse_go_skill(content)
         elif language == "flask":
             skills_a = self.__parse_flask_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "cpp":
             return self.__parse_cpp_skill(content)
@@ -3449,15 +3432,15 @@ class ParseSkills:
             return list(set(skills_a + skills_b))
         elif language == "pandas":
             skills_a = self.__parse_pandas_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "matplotlib":
             skills_a = self.__parse_matplotlib_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "numpy":
             skills_a = self.__parse_numpy_skill(content)
-            skills_b, method = self.__parse_python_skill(content)
+            skills_b = self.__parse_python_skill(content)
             return list(set(skills_a + skills_b))
         elif language == "sql":
             return self.__parse_sql_skill(content)

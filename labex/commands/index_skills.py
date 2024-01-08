@@ -20,6 +20,7 @@ class AddSkills:
             "django": ["py", "python"],
             "pygame": ["py", "python"],
             "tkinter": ["py", "python"],
+            "flask": ["py", "python"],
             "linux": ["bash", "shell"],
             "shell": ["bash", "shell"],
             "kubernetes": ["bash", "shell"],
@@ -57,8 +58,8 @@ class AddSkills:
         steps = data["details"]["steps"]
         task_type = "ADD"
         for step in steps:
-            # step_skills = set(step.get("skills", []))
-            step_skills = set()
+            step_skills = set(step.get("skills", []))
+            # step_skills = set()
             if skilltree is None:
                 task_type = "SORT"
                 continue
